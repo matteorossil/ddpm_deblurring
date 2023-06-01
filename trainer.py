@@ -105,6 +105,9 @@ class Trainer():
         print("inn")
         for batch_idx, (sharp, blur) in enumerate(self.data_loader):
             print(batch_idx)
+            print(sharp.size)
+            print(blur.size)
+            print()
             # Increment global step
             self.step += 1
             # Move data to device
@@ -125,14 +128,12 @@ class Trainer():
         """
         ### Training loop
         """
-        print("in")
         for epoch in range(self.epochs):
             #if epoch % 10 == 0:
                 # Sample some images
                 #self.sample(self.n_samples)
             # Train the model
             self.train()
-            print("out")
             if (epoch+1) % 10 == 0:
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
