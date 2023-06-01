@@ -105,8 +105,8 @@ class Trainer():
         print("inn")
         for batch_idx, (sharp, blur) in enumerate(self.data_loader):
             print(batch_idx)
-            print(sharp.size)
-            print(blur.size)
+            print(sharp.shape)
+            print(blur.shape)
             print()
             # Increment global step
             self.step += 1
@@ -137,14 +137,6 @@ class Trainer():
             if (epoch+1) % 10 == 0:
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
-
-dataloader = DataLoader(
-            dataset=Data(mode="train", size=(256,256)),
-            batch_size=1,
-            shuffle=False,
-            num_workers=0,
-            drop_last=True
-            )
 
 t = Trainer()
 t.init()
