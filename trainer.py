@@ -145,8 +145,11 @@ class Trainer():
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
 
-def __main__():
+def main():
     wandb.init()
     train = Trainer()
     train.init() # initialize trainer class
     train.run() # perform training
+
+if __name__ == "__main__":
+    main()
