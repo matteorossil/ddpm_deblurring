@@ -14,14 +14,15 @@ import torch.nn.functional as F
 
 from dataset import Data
 from torch.utils.data import DataLoader
+from torchvision.utils import save_image
 
-'''
-def get_exp_path(name=''):
-    exp_path = os.environ.get('EXP') or os.path.join('/home/yy2694/continual-ddpm/', 'checkpoints')
-    exp_path = os.path.join(exp_path, datetime.now().strftime("%m%d%Y_%H%M%S") + name)
+
+def get_exp_path(path=''):
+    exp_path = os.environ.get('EXP') or os.path.join(path, 'checkpoints')
+    exp_path = os.path.join(exp_path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
-'''
+
 
 class Trainer():
     """
@@ -43,16 +44,24 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 1_000
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 16
     # Learning rate
     learning_rate: float = 2e-5
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 2
+    n_samples: int = 4
     # Use wandb
     wandb: bool = False
-    wandb_name: str = ''
+    # where to store the checkpoints
+    ckp_path: str = '/home/mr6744/'
+    #ckp_path: str = '/Users/m.rossi/Desktop/research/'
+    # where to training and validation data is stored
+    dataset = '/home/mr6744/gopro/'
+    #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
+    # where to store image samples
+    samples = '/home/mr6744/ddpm_deblurring/samples'
+    #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples/'
 
     def init(self):
         # Create $\epsilon_\theta(x_t, t)$ model
@@ -69,12 +78,12 @@ class Trainer():
             device=self.device,
         )
         # Create dataloader
-        self.data_loader = DataLoader(dataset=Data(mode="train", size=(self.image_size,self.image_size)), batch_size=self.batch_size, num_workers=0, drop_last=True, shuffle=True, pin_memory=True)
+        self.data_loader = DataLoader(dataset=Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size)), batch_size=self.batch_size, num_workers=0, drop_last=True, shuffle=True, pin_memory=True)
 
         # Create optimizer
         self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
         self.step = 0
-        #self.exp_path = get_exp_path(name=self.wandb_name)
+        self.exp_path = get_exp_path(path=self.ckp_path)
 
     def sample(self, n_samples=64):
         """
@@ -89,7 +98,6 @@ class Trainer():
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
-                print(t)
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
@@ -112,6 +120,7 @@ class Trainer():
             self.optimizer.zero_grad()
             # Calculate loss
             loss = self.diffusion.loss(sharp)
+            print(loss)
             # Compute gradients
             loss.backward()
             # Take an optimization step
@@ -119,7 +128,6 @@ class Trainer():
             # Track the loss
             print('loss:', loss, 'step:', self.step)
             #wandb.log({'loss': loss}, step=self.step)
-            
 
     def run(self):
         """
@@ -129,16 +137,14 @@ class Trainer():
             if epoch % 10 == 0:
                 # Sample some images
                 s = self.sample(self.n_samples)
-                print(s)
+                save_image(s, os.path.join(self.samples, f'epoch_{epoch}.png'))
             # Train the model
             self.train()
             if (epoch+1) % 10 == 0:
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
+#wandb.init()
 t = Trainer()
 t.init()
-
-#wandb.init()
-
 t.run()

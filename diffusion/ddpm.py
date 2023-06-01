@@ -122,7 +122,6 @@ class DenoiseDiffusion:
         batch_size = x0.shape[0]
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=x0.device, dtype=torch.long)
-        t = torch.randint(0, 4, (batch_size,), device=x0.device, dtype=torch.long)
 
         # $\epsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
         if noise is None:

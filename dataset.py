@@ -12,11 +12,11 @@ import random
 
 class Data(Dataset):
 
-    def __init__(self, mode='train', size=(128,128)):
+    def __init__(self, path, mode='train', size=(128,128)):
 
         self.dataset_name = {
-            'train': "./dataset/train/",
-            'val': "./dataset/val/",
+            'train': path + "train",
+            'val': path + "val",
         }
 
         #size of the crop
