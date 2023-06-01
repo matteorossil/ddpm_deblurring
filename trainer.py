@@ -126,8 +126,8 @@ class Trainer():
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
-            print('loss:', loss, 'step:', self.step)
-            #wandb.log({'loss': loss}, step=self.step)
+            #print('loss:', loss, 'step:', self.step)
+            wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
         """
@@ -144,7 +144,9 @@ class Trainer():
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
-#wandb.init()
-t = Trainer()
-t.init()
-t.run()
+
+def __main__():
+    wandb.init()
+    train = Trainer()
+    train.init() # initialize trainer class
+    train.run() # perform training
