@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/trainer.py", line 140, in <module>
+    t.run()
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/trainer.py", line 131, in run
+    self.train()
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/trainer.py", line 113, in train
+    loss = self.diffusion.loss(sharp)
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/diffusion/ddpm.py", line 127, in loss
+    eps_theta = self.eps_model(xt, t)
+  File "/Users/m.rossi/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/eps_models/unet.py", line 381, in forward
+    return self.unet_forward(x, t)
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/eps_models/unet.py", line 366, in unet_forward
+    x = m(x, t)
+  File "/Users/m.rossi/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/eps_models/unet.py", line 211, in forward
+    x = self.res(x, t)
+  File "/Users/m.rossi/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/Users/m.rossi/Desktop/research/ddpm_deblurring/eps_models/unet.py", line 98, in forward
+    h = self.conv2(self.act2(self.norm2(h)))
+  File "/Users/m.rossi/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/module.py", line 1130, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/Users/m.rossi/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/conv.py", line 457, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/Users/m.rossi/opt/anaconda3/lib/python3.9/site-packages/torch/nn/modules/conv.py", line 453, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+KeyboardInterrupt

@@ -1,0 +1,42 @@
+{
+    "os": "macOS-10.16-x86_64-i386-64bit",
+    "python": "3.9.7",
+    "heartbeatAt": "2023-06-01T21:05:12.274421",
+    "startedAt": "2023-06-01T21:05:11.575018",
+    "docker": null,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "program": "/Users/m.rossi/Desktop/research/ddpm_deblurring/trainer.py",
+    "codePath": "trainer.py",
+    "git": {
+        "remote": "git@github.com:mrossigrad/ddpm_deblurring.git",
+        "commit": "12e9ddcf90a4a38cf42de41680ebda2663de1fa0"
+    },
+    "email": "mrossi.grad@gmail.com",
+    "root": "/Users/m.rossi/Desktop/research/ddpm_deblurring",
+    "host": "10-19-189-50.dynapool.wireless.nyu.edu",
+    "username": "m.rossi",
+    "executable": "/Users/m.rossi/opt/anaconda3/bin/python",
+    "cpu_count": 2,
+    "cpu_count_logical": 4,
+    "cpu_freq": {
+        "current": 1600,
+        "min": 1600,
+        "max": 1600
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 1600,
+            "min": 1600,
+            "max": 1600
+        }
+    ],
+    "disk": {
+        "total": 233.46913528442383,
+        "used": 194.7002296447754
+    },
+    "memory": {
+        "total": 16.0
+    }
+}

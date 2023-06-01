@@ -9,6 +9,9 @@ from copy import deepcopy
 from utils import gather # Used for Image Data
 # from utils import gather2d as gather # Used for Gaussian 2D Data
 
+import torchvision.transforms as T
+
+
 
 class DenoiseDiffusion:
     """
@@ -48,6 +51,7 @@ class DenoiseDiffusion:
 
         # $\alpha_t$ and compute $\sqrt{\bar\alpha_t} x_0$
         mean = gather(self.alpha_bar, t) ** 0.5 * x0
+
         # $(1-\bar\alpha_t) \mathbf{I}$
         var = 1 - gather(self.alpha_bar, t)
         return mean, var
@@ -68,6 +72,7 @@ class DenoiseDiffusion:
         # get $q(x_t|x_0)$
         mean, var = self.q_xt_x0(x0, t)
         # Sample from $q(x_t|x_0)$
+
         return mean + (var ** 0.5) * eps
 
     def p_sample(self, xt: torch.Tensor, t: torch.Tensor):
@@ -101,6 +106,7 @@ class DenoiseDiffusion:
         eps = torch.randn(xt.shape, device=xt.device)
         # Sample
         # import pdb; pdb.set_trace()
+
         return mean + (var ** .5) * eps
 
     def loss(self, x0: torch.Tensor, noise: Optional[torch.Tensor] = None):
@@ -111,10 +117,12 @@ class DenoiseDiffusion:
         \epsilon - \textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)
         \bigg\Vert^2 \Bigg]$$
         """
+
         # Get batch size
         batch_size = x0.shape[0]
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=x0.device, dtype=torch.long)
+        t = torch.randint(0, 4, (batch_size,), device=x0.device, dtype=torch.long)
 
         # $\epsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
         if noise is None:
@@ -122,6 +130,7 @@ class DenoiseDiffusion:
 
         # Sample $x_t$ for $q(x_t|x_0)$
         xt = self.q_sample(x0, t, eps=noise)
+
         # Get $\textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)$
         eps_theta = self.eps_model(xt, t)
         # MSE loss
@@ -143,3 +152,7 @@ class DenoiseDiffusion:
         eps_theta = self.eps_model(self.aux_data, self.aux_t)
         return F.l1_loss(self.aux_noise, eps_theta)
 
+def show_image(tensor):
+    transform = T.ToPILImage()
+    img = transform(tensor.squeeze())
+    img.show()

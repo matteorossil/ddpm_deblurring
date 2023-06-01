@@ -49,7 +49,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 100
+    n_samples: int = 2
     # Use wandb
     wandb: bool = False
     wandb_name: str = ''
@@ -89,6 +89,7 @@ class Trainer():
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
+                print(t)
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
@@ -102,12 +103,7 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        print("inn")
         for batch_idx, (sharp, blur) in enumerate(self.data_loader):
-            print(batch_idx)
-            print(sharp.shape)
-            print(blur.shape)
-            print()
             # Increment global step
             self.step += 1
             # Move data to device
@@ -121,7 +117,8 @@ class Trainer():
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
-            wandb.log({'loss': loss}, step=self.step)
+            print('loss:', loss, 'step:', self.step)
+            #wandb.log({'loss': loss}, step=self.step)
             
 
     def run(self):
@@ -129,9 +126,10 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            #if epoch % 10 == 0:
+            if epoch % 10 == 0:
                 # Sample some images
-                #self.sample(self.n_samples)
+                s = self.sample(self.n_samples)
+                print(s)
             # Train the model
             self.train()
             if (epoch+1) % 10 == 0:
@@ -140,4 +138,7 @@ class Trainer():
 
 t = Trainer()
 t.init()
+
+#wandb.init()
+
 t.run()

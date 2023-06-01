@@ -1,0 +1,319 @@
+2023-06-01 17:05:11,592 INFO    StreamThr :69860 [internal.py:wandb_internal():86] W&B internal server running at pid: 69860, started at: 2023-06-01 17:05:11.591591
+2023-06-01 17:05:11,597 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status
+2023-06-01 17:05:11,598 INFO    WriterThread:69860 [datastore.py:open_for_write():85] open: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/run-0uuwsztc.wandb
+2023-06-01 17:05:11,599 DEBUG   SenderThread:69860 [sender.py:send():375] send: header
+2023-06-01 17:05:11,639 DEBUG   SenderThread:69860 [sender.py:send():375] send: run
+2023-06-01 17:05:12,096 INFO    SenderThread:69860 [dir_watcher.py:__init__():219] watching files in: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files
+2023-06-01 17:05:12,096 INFO    SenderThread:69860 [sender.py:_start_run_threads():1124] run started: 0uuwsztc with start time 1685653511.591221
+2023-06-01 17:05:12,097 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:05:12,097 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:05:12,104 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: check_version
+2023-06-01 17:05:12,105 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: check_version
+2023-06-01 17:05:12,255 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: run_start
+2023-06-01 17:05:12,268 DEBUG   HandlerThread:69860 [system_info.py:__init__():31] System info init
+2023-06-01 17:05:12,269 DEBUG   HandlerThread:69860 [system_info.py:__init__():46] System info init done
+2023-06-01 17:05:12,269 INFO    HandlerThread:69860 [system_monitor.py:start():181] Starting system monitor
+2023-06-01 17:05:12,270 INFO    SystemMonitor:69860 [system_monitor.py:_start():145] Starting system asset monitoring threads
+2023-06-01 17:05:12,270 INFO    HandlerThread:69860 [system_monitor.py:probe():201] Collecting system info
+2023-06-01 17:05:12,273 INFO    SystemMonitor:69860 [interfaces.py:start():190] Started cpu monitoring
+2023-06-01 17:05:12,273 DEBUG   HandlerThread:69860 [system_info.py:probe():195] Probing system
+2023-06-01 17:05:12,274 INFO    SystemMonitor:69860 [interfaces.py:start():190] Started disk monitoring
+2023-06-01 17:05:12,275 INFO    SystemMonitor:69860 [interfaces.py:start():190] Started memory monitoring
+2023-06-01 17:05:12,276 INFO    SystemMonitor:69860 [interfaces.py:start():190] Started network monitoring
+2023-06-01 17:05:12,278 DEBUG   HandlerThread:69860 [system_info.py:_probe_git():180] Probing git
+2023-06-01 17:05:12,314 DEBUG   HandlerThread:69860 [system_info.py:_probe_git():188] Probing git done
+2023-06-01 17:05:12,315 DEBUG   HandlerThread:69860 [system_info.py:probe():240] Probing system done
+2023-06-01 17:05:12,315 DEBUG   HandlerThread:69860 [system_monitor.py:probe():210] {'os': 'macOS-10.16-x86_64-i386-64bit', 'python': '3.9.7', 'heartbeatAt': '2023-06-01T21:05:12.274421', 'startedAt': '2023-06-01T21:05:11.575018', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/Users/m.rossi/Desktop/research/ddpm_deblurring/trainer.py', 'codePath': 'trainer.py', 'git': {'remote': 'git@github.com:mrossigrad/ddpm_deblurring.git', 'commit': '12e9ddcf90a4a38cf42de41680ebda2663de1fa0'}, 'email': 'mrossi.grad@gmail.com', 'root': '/Users/m.rossi/Desktop/research/ddpm_deblurring', 'host': '10-19-189-50.dynapool.wireless.nyu.edu', 'username': 'm.rossi', 'executable': '/Users/m.rossi/opt/anaconda3/bin/python', 'cpu_count': 2, 'cpu_count_logical': 4, 'cpu_freq': {'current': 1600, 'min': 1600, 'max': 1600}, 'cpu_freq_per_core': [{'current': 1600, 'min': 1600, 'max': 1600}], 'disk': {'total': 233.46913528442383, 'used': 194.7002296447754}, 'memory': {'total': 16.0}}
+2023-06-01 17:05:12,316 INFO    HandlerThread:69860 [system_monitor.py:probe():211] Finished collecting system info
+2023-06-01 17:05:12,316 INFO    HandlerThread:69860 [system_monitor.py:probe():214] Publishing system info
+2023-06-01 17:05:12,316 DEBUG   HandlerThread:69860 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-06-01 17:05:12,318 DEBUG   HandlerThread:69860 [system_info.py:_save_pip():67] Saving pip packages done
+2023-06-01 17:05:12,318 DEBUG   HandlerThread:69860 [system_info.py:_save_conda():74] Saving list of conda packages installed into the current environment
+2023-06-01 17:05:13,107 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/conda-environment.yaml
+2023-06-01 17:05:13,108 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:05:13,108 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/requirements.txt
+2023-06-01 17:05:33,042 DEBUG   HandlerThread:69860 [system_info.py:_save_conda():86] Saving conda packages done
+2023-06-01 17:05:33,043 INFO    HandlerThread:69860 [system_monitor.py:probe():216] Finished publishing system info
+2023-06-01 17:05:33,063 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:33,063 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: keepalive
+2023-06-01 17:05:33,063 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:33,064 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: keepalive
+2023-06-01 17:05:33,064 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:33,065 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: keepalive
+2023-06-01 17:05:33,065 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:33,065 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: keepalive
+2023-06-01 17:05:33,066 DEBUG   SenderThread:69860 [sender.py:send():375] send: files
+2023-06-01 17:05:33,066 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-metadata.json with policy now
+2023-06-01 17:05:33,081 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:05:33,083 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:05:33,183 DEBUG   SenderThread:69860 [sender.py:send():375] send: telemetry
+2023-06-01 17:05:33,197 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/conda-environment.yaml
+2023-06-01 17:05:33,197 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-metadata.json
+2023-06-01 17:05:33,581 INFO    wandb-upload_0:69860 [upload_job.py:push():137] Uploaded file /var/folders/7z/nd77b4fx5n7dt15g2f3msch40000gn/T/tmpjl5_3npawandb/x813ff7k-wandb-metadata.json
+2023-06-01 17:05:38,206 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:43,230 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:44,256 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/config.yaml
+2023-06-01 17:05:48,085 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:05:48,087 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:05:49,165 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:54,179 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:05:59,189 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:03,088 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:06:03,089 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:06:05,155 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:09,302 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:06:10,166 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:12,279 DEBUG   SystemMonitor:69860 [system_monitor.py:_start():159] Starting system metrics aggregation loop
+2023-06-01 17:06:12,280 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:06:15,294 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:18,095 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:06:18,101 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:06:21,218 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:26,228 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:31,257 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:33,095 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:06:33,096 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:06:37,244 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:42,267 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:42,284 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:06:42,933 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:06:42,935 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:06:42,935 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:06:42,936 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:06:43,478 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:06:47,949 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:48,101 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:06:48,102 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:06:53,199 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:06:58,221 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:03,102 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:07:03,103 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:07:03,500 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:08,513 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:12,290 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:07:14,294 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:15,074 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:07:15,074 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:07:15,075 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:07:15,075 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:07:15,591 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:07:18,107 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:07:18,108 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:07:20,179 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:25,187 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:30,216 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:33,109 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:07:33,110 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:07:36,193 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:41,211 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:42,115 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:07:42,116 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:07:42,116 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:07:42,118 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:07:42,293 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:07:42,696 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:07:46,305 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:48,110 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:07:48,111 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:07:52,195 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:07:57,209 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:02,223 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:03,112 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:08:03,114 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:08:04,617 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:08:04,618 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:08:04,618 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:08:04,620 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:08:04,786 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:08:07,631 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:12,295 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:08:13,300 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:18,117 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:08:18,118 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:08:19,193 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:24,209 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:29,219 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:32,742 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:08:32,743 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:08:32,743 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:08:32,745 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:08:32,880 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:08:33,118 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:08:33,119 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:08:35,133 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:40,163 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:42,298 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:08:45,310 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:48,120 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:08:48,121 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:08:51,206 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:56,225 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:08:59,902 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:08:59,903 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:08:59,904 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:08:59,904 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:08:59,995 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:09:01,907 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:03,124 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:09:03,126 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:09:07,190 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:12,203 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:12,304 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:09:17,320 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:18,130 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:09:18,130 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:09:23,210 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:24,893 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:09:24,894 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:09:24,894 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:09:24,895 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:09:25,079 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:09:28,908 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:33,129 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:09:33,130 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:09:34,194 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:39,210 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:42,308 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:09:44,316 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:46,620 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: partial_history
+2023-06-01 17:09:46,621 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:09:46,622 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:09:46,623 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:09:47,174 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:09:48,136 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: stop_status
+2023-06-01 17:09:48,137 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: stop_status
+2023-06-01 17:09:50,197 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:54,062 DEBUG   SenderThread:69860 [sender.py:send():375] send: exit
+2023-06-01 17:09:54,062 INFO    SenderThread:69860 [sender.py:send_exit():598] handling exit code: 255
+2023-06-01 17:09:54,063 INFO    SenderThread:69860 [sender.py:send_exit():600] handling runtime: 281
+2023-06-01 17:09:54,064 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:09:54,064 INFO    SenderThread:69860 [sender.py:send_exit():606] send defer
+2023-06-01 17:09:54,064 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,064 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 0
+2023-06-01 17:09:54,065 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,065 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 0
+2023-06-01 17:09:54,065 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 1
+2023-06-01 17:09:54,065 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,065 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 1
+2023-06-01 17:09:54,066 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,066 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 1
+2023-06-01 17:09:54,066 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 2
+2023-06-01 17:09:54,066 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,066 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 2
+2023-06-01 17:09:54,067 INFO    HandlerThread:69860 [system_monitor.py:finish():190] Stopping system monitor
+2023-06-01 17:09:54,067 DEBUG   SystemMonitor:69860 [system_monitor.py:_start():166] Finished system metrics aggregation loop
+2023-06-01 17:09:54,067 INFO    HandlerThread:69860 [interfaces.py:finish():202] Joined cpu monitor
+2023-06-01 17:09:54,068 DEBUG   SystemMonitor:69860 [system_monitor.py:_start():170] Publishing last batch of metrics
+2023-06-01 17:09:54,068 INFO    HandlerThread:69860 [interfaces.py:finish():202] Joined disk monitor
+2023-06-01 17:09:54,068 INFO    HandlerThread:69860 [interfaces.py:finish():202] Joined memory monitor
+2023-06-01 17:09:54,069 INFO    HandlerThread:69860 [interfaces.py:finish():202] Joined network monitor
+2023-06-01 17:09:54,069 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,069 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 2
+2023-06-01 17:09:54,069 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 3
+2023-06-01 17:09:54,069 DEBUG   SenderThread:69860 [sender.py:send():375] send: stats
+2023-06-01 17:09:54,070 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,070 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 3
+2023-06-01 17:09:54,071 DEBUG   SenderThread:69860 [sender.py:send():375] send: history
+2023-06-01 17:09:54,071 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: summary_record
+2023-06-01 17:09:54,071 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:09:54,072 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,072 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 3
+2023-06-01 17:09:54,072 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 4
+2023-06-01 17:09:54,072 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,072 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 4
+2023-06-01 17:09:54,073 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,073 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 4
+2023-06-01 17:09:54,073 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 5
+2023-06-01 17:09:54,073 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,073 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 5
+2023-06-01 17:09:54,074 DEBUG   SenderThread:69860 [sender.py:send():375] send: summary
+2023-06-01 17:09:54,075 INFO    SenderThread:69860 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-06-01 17:09:54,076 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,076 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 5
+2023-06-01 17:09:54,076 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 6
+2023-06-01 17:09:54,076 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,076 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 6
+2023-06-01 17:09:54,077 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,077 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 6
+2023-06-01 17:09:54,077 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 7
+2023-06-01 17:09:54,077 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: status_report
+2023-06-01 17:09:54,077 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:54,078 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 7
+2023-06-01 17:09:54,078 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:54,078 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 7
+2023-06-01 17:09:54,204 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:09:54,204 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_created():278] file/dir created: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/output.log
+2023-06-01 17:09:55,068 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: poll_exit
+2023-06-01 17:09:56,073 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 8
+2023-06-01 17:09:56,073 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: poll_exit
+2023-06-01 17:09:56,074 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:56,074 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 8
+2023-06-01 17:09:56,074 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:56,074 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 8
+2023-06-01 17:09:56,091 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 9
+2023-06-01 17:09:56,091 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:56,091 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 9
+2023-06-01 17:09:56,092 DEBUG   SenderThread:69860 [sender.py:send():375] send: artifact
+2023-06-01 17:09:56,209 INFO    Thread-12 :69860 [dir_watcher.py:_on_file_modified():295] file/dir modified: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/output.log
+2023-06-01 17:09:57,125 INFO    wandb-upload_1:69860 [upload_job.py:push():95] Uploaded file /Users/m.rossi/Library/Application Support/wandb/artifacts/staging/tmp4kq57t0f
+2023-06-01 17:09:57,147 INFO    wandb-upload_0:69860 [upload_job.py:push():95] Uploaded file /Users/m.rossi/Library/Application Support/wandb/artifacts/staging/tmpll_ccvq6
+2023-06-01 17:09:58,191 INFO    SenderThread:69860 [sender.py:send_artifact():1474] sent artifact job-git_github.com_mrossigrad_ddpm_deblurring.git_trainer.py - {'id': 'QXJ0aWZhY3Q6NDc0MzY1Njcx', 'digest': '90d5e76308940348cd67b58444dcd324', 'state': 'PENDING', 'aliases': [], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjczNTY1NjQ4', 'latestArtifact': None}, 'version': 'latest'}
+2023-06-01 17:09:58,191 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:58,191 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 9
+2023-06-01 17:09:58,192 INFO    SenderThread:69860 [dir_watcher.py:finish():365] shutting down directory watcher
+2023-06-01 17:09:58,219 INFO    SenderThread:69860 [dir_watcher.py:finish():395] scan: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files
+2023-06-01 17:09:58,219 INFO    SenderThread:69860 [dir_watcher.py:finish():409] scan save: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/requirements.txt requirements.txt
+2023-06-01 17:09:58,220 INFO    SenderThread:69860 [dir_watcher.py:finish():409] scan save: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/output.log output.log
+2023-06-01 17:09:58,226 INFO    SenderThread:69860 [dir_watcher.py:finish():409] scan save: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/config.yaml config.yaml
+2023-06-01 17:09:58,230 INFO    SenderThread:69860 [dir_watcher.py:finish():409] scan save: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json wandb-summary.json
+2023-06-01 17:09:58,236 INFO    SenderThread:69860 [dir_watcher.py:finish():409] scan save: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/conda-environment.yaml conda-environment.yaml
+2023-06-01 17:09:58,241 INFO    SenderThread:69860 [dir_watcher.py:finish():409] scan save: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-metadata.json wandb-metadata.json
+2023-06-01 17:09:58,242 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 10
+2023-06-01 17:09:58,248 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:58,249 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 10
+2023-06-01 17:09:58,252 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:58,253 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 10
+2023-06-01 17:09:58,254 INFO    SenderThread:69860 [file_pusher.py:finish():167] shutting down file pusher
+2023-06-01 17:09:58,499 INFO    wandb-upload_1:69860 [upload_job.py:push():137] Uploaded file /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/requirements.txt
+2023-06-01 17:09:58,581 INFO    wandb-upload_0:69860 [upload_job.py:push():137] Uploaded file /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/output.log
+2023-06-01 17:09:58,598 INFO    wandb-upload_2:69860 [upload_job.py:push():137] Uploaded file /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/config.yaml
+2023-06-01 17:09:58,604 INFO    wandb-upload_3:69860 [upload_job.py:push():137] Uploaded file /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/wandb-summary.json
+2023-06-01 17:09:58,632 INFO    wandb-upload_4:69860 [upload_job.py:push():137] Uploaded file /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/files/conda-environment.yaml
+2023-06-01 17:09:58,845 INFO    Thread-11 :69860 [sender.py:transition_state():626] send defer: 11
+2023-06-01 17:09:58,845 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:58,846 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 11
+2023-06-01 17:09:58,846 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:58,846 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 11
+2023-06-01 17:09:58,847 INFO    SenderThread:69860 [file_pusher.py:join():172] waiting for file pusher
+2023-06-01 17:09:58,847 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 12
+2023-06-01 17:09:58,847 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:58,847 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 12
+2023-06-01 17:09:58,848 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:58,849 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 12
+2023-06-01 17:09:58,986 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 13
+2023-06-01 17:09:58,988 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:58,988 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 13
+2023-06-01 17:09:58,990 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:58,991 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 13
+2023-06-01 17:09:58,991 INFO    SenderThread:69860 [sender.py:transition_state():626] send defer: 14
+2023-06-01 17:09:58,992 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: defer
+2023-06-01 17:09:58,992 INFO    HandlerThread:69860 [handler.py:handle_request_defer():170] handle defer: 14
+2023-06-01 17:09:58,994 DEBUG   SenderThread:69860 [sender.py:send():375] send: final
+2023-06-01 17:09:58,994 DEBUG   SenderThread:69860 [sender.py:send():375] send: footer
+2023-06-01 17:09:58,994 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: defer
+2023-06-01 17:09:58,994 INFO    SenderThread:69860 [sender.py:send_request_defer():622] handle sender defer: 14
+2023-06-01 17:09:58,996 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: poll_exit
+2023-06-01 17:09:58,996 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: server_info
+2023-06-01 17:09:58,996 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: get_summary
+2023-06-01 17:09:58,997 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: sampled_history
+2023-06-01 17:09:58,999 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: poll_exit
+2023-06-01 17:09:59,000 DEBUG   SenderThread:69860 [sender.py:send_request():402] send_request: server_info
+2023-06-01 17:09:59,074 INFO    MainThread:69860 [wandb_run.py:_footer_history_summary_info():3469] rendering history
+2023-06-01 17:09:59,075 INFO    MainThread:69860 [wandb_run.py:_footer_history_summary_info():3501] rendering summary
+2023-06-01 17:09:59,076 INFO    MainThread:69860 [wandb_run.py:_footer_sync_info():3428] logging synced files
+2023-06-01 17:09:59,077 DEBUG   HandlerThread:69860 [handler.py:handle_request():144] handle_request: shutdown
+2023-06-01 17:09:59,077 INFO    HandlerThread:69860 [handler.py:finish():842] shutting down handler
+2023-06-01 17:10:00,002 INFO    WriterThread:69860 [datastore.py:close():298] close: /Users/m.rossi/Desktop/research/ddpm_deblurring/wandb/run-20230601_170511-0uuwsztc/run-0uuwsztc.wandb
+2023-06-01 17:10:00,079 INFO    SenderThread:69860 [sender.py:finish():1550] shutting down sender
+2023-06-01 17:10:00,080 INFO    SenderThread:69860 [file_pusher.py:finish():167] shutting down file pusher
+2023-06-01 17:10:00,080 INFO    SenderThread:69860 [file_pusher.py:join():172] waiting for file pusher
