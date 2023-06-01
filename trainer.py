@@ -127,9 +127,9 @@ class Trainer():
         """
         print("in")
         for epoch in range(self.epochs):
-            if epoch % 10 == 0:
+            #if epoch % 10 == 0:
                 # Sample some images
-                self.sample(self.n_samples)
+                #self.sample(self.n_samples)
             # Train the model
             self.train()
             print("out")
