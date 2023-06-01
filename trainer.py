@@ -44,7 +44,7 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 1_000
     # Batch size
-    batch_size: int = 16
+    batch_size: int = 4
     # Learning rate
     learning_rate: float = 2e-5
     # Number of training epochs
@@ -134,7 +134,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 10 == 0:
+            if epoch != 0 and epoch % 10 == 0:
                 # Sample some images
                 s = self.sample(self.n_samples)
                 save_image(s, os.path.join(self.samples, f'epoch_{epoch}.png'))
