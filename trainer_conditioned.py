@@ -60,7 +60,7 @@ class Trainer():
     dataset = '/home/mr6744/gopro/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # where to store image samples
-    samples = '/home/mr6744/ddpm_deblurring/samples'
+    samples = '/home/mr6744/ddpm_deblurring/samples_conditioned/'
     #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples_conditioned/'
 
     def init(self):
