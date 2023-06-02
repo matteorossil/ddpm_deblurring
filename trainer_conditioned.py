@@ -6,7 +6,7 @@ import os
 import torch
 import torch.utils.data
 from diffusion.ddpm_conditioned import DenoiseDiffusion
-from eps_models.unet import UNet
+from eps_models.unet_conditioned import UNet
 from pathlib import Path
 from datetime import datetime
 import wandb
