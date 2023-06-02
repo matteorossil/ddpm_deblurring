@@ -75,8 +75,10 @@ class Trainer():
             is_attn=self.is_attention,
         ).to(self.device)
 
-        checkpoint = torch.load(self.ckp)
-        self.eps_model.load_state_dict(checkpoint)
+        # only load checpoint if model is trained
+        if self.epoch_ckp != 0:
+            checkpoint = torch.load(self.ckp)
+            self.eps_model.load_state_dict(checkpoint)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
