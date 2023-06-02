@@ -57,7 +57,7 @@ class Trainer():
     ckp_path_store: str = '/home/mr6744/'
     #ckp_path_store: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    dataset = '/home/mr6744/gopro2/'
+    dataset = '/home/mr6744/gopro/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # where to store image samples
     samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_/'
