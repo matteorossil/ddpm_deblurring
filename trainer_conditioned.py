@@ -44,7 +44,7 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 1_000
     # Batch size
-    batch_size: int = 2
+    batch_size: int = 4
     # Learning rate
     learning_rate: float = 2e-5
     # Number of training epochs
