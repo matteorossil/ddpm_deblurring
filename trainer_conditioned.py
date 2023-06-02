@@ -41,7 +41,7 @@ class Trainer():
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, True]
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # Batch size
     batch_size: int = 4
     # Learning rate
@@ -162,7 +162,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 10 == 0:
+            if epoch % 1 == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
@@ -172,7 +172,7 @@ class Trainer():
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
 def main():
-    wandb.init("deblurring_conditioned_02")
+    wandb.init()
     trainer = Trainer()
     trainer.init() # initialize trainer class
     #trainer.sample(trainer.n_samples, trainer.epoch_ckp)
