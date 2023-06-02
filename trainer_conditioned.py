@@ -18,8 +18,7 @@ from torchvision.utils import save_image
 
 
 def get_exp_path(path=''):
-    exp_path = os.environ.get('EXP') or os.path.join(path, 'checkpoints_conditioned')
-    exp_path = os.path.join(exp_path, datetime.now().strftime("%m%d%Y_%H%M%S"))
+    exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
@@ -42,11 +41,11 @@ class Trainer():
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, True]
     # Number of time steps $T$
-    n_steps: int = 1_000
+    n_steps: int = 2_000
     # Batch size
     batch_size: int = 4
     # Learning rate
-    learning_rate: float = 2e-5
+    learning_rate: float = 1e-5
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
@@ -54,17 +53,14 @@ class Trainer():
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
-    ckp_path_store: str = '/home/mr6744/'
+    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned'
     #ckp_path_store: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
     dataset = '/home/mr6744/gopro/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
-    # where to store image samples
-    samples = '/home/mr6744/ddpm_deblurring/samples_conditioned/'
-    #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples_conditioned/'
-    # load a checkpoint
-    epoch_ckp = 50
-    ckp = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{epoch_ckp}.pt'
+    # load from a checkpoint
+    checkpoint_epoch = 0
+    checkpoint = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self):
         # Create $\epsilon_\theta(x_t, t)$ model
@@ -76,9 +72,9 @@ class Trainer():
         ).to(self.device)
 
         # only load checpoint if model is trained
-        if self.epoch_ckp != 0:
-            checkpoint = torch.load(self.ckp)
-            self.eps_model.load_state_dict(checkpoint)
+        if self.checkpoint_epoch != 0:
+            checkpoint_ = torch.load(self.checkpoint)
+            self.eps_model.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
@@ -93,7 +89,7 @@ class Trainer():
         # Create optimizer
         self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
         self.step = 0
-        self.exp_path = get_exp_path(path=self.ckp_path_store)
+        self.exp_path = get_exp_path(path=self.store_checkpoints)
 
     def sample(self, n_samples, epoch):
         """
@@ -122,19 +118,19 @@ class Trainer():
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sharp images
-            #save_image(sharp, os.path.join(self.samples, f'epoch_{epoch}_sharp.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
 
             # save blur images
-            #save_image(blur, os.path.join(self.samples, f'epoch_{epoch}_blur.png'))
-
-            # save result (no summation)
-            save_image(x, os.path.join(self.samples, f'epoch_{epoch}_sampled_Z.png'))
-
-            # save result (with summation)
-            save_image(blur + x, os.path.join(self.samples, f'epoch_{epoch}_sampled_X.png'))
+            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
 
             # save true z0
-            #save_image(sharp - blur, os.path.join(self.samples, f'epoch_{epoch}_true_Z.png'))
+            save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
+
+            # save result (no summation)
+            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_Z.png'))
+
+            # save result (with summation)
+            save_image(blur + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
 
             return x
 
@@ -176,7 +172,7 @@ class Trainer():
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
 def main():
-    wandb.init("conditioned_02")
+    wandb.init("deblurring_conditioned_02")
     trainer = Trainer()
     trainer.init() # initialize trainer class
     #trainer.sample(trainer.n_samples, trainer.epoch_ckp)
