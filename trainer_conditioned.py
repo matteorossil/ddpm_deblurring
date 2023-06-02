@@ -60,8 +60,11 @@ class Trainer():
     dataset = '/home/mr6744/gopro/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # where to store image samples
-    samples = '/home/mr6744/ddpm_deblurring/samples_conditioned/'
+    samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_epoch30/'
     #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples_conditioned/'
+    # load a checkpoint
+    epoch_ckp = 30
+    ckp = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{epoch_ckp}.pt'
 
     def init(self):
         # Create $\epsilon_\theta(x_t, t)$ model
@@ -71,6 +74,10 @@ class Trainer():
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention,
         ).to(self.device)
+
+        checkpoint = torch.load(self.ckp)
+        self.eps_model.load_state_dict(checkpoint)
+
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
             eps_model=self.eps_model,
@@ -113,6 +120,9 @@ class Trainer():
 
             # save sharp images
             save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
+
+            # save blur images
+            save_image(sharp, os.path.join(self.samples, f'blur_epoch_{epoch}.png'))
 
             return x
 
@@ -158,7 +168,11 @@ def main():
     wandb.init()
     trainer = Trainer()
     trainer.init() # initialize trainer class
-    trainer.run() # perform training
+    
+    s = trainer.sample(trainer.n_samples, trainer.epoch_ckp)
+    save_image(s, os.path.join(trainer.samples, f'epoch_{trainer.epoch_ckp}.png'))
+    
+    #trainer.run() # perform training
 
 if __name__ == "__main__":
     main()
