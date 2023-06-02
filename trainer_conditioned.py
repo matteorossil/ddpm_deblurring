@@ -86,7 +86,7 @@ class Trainer():
         self.step = 0
         self.exp_path = get_exp_path(path=self.ckp_path)
 
-    def sample(self, n_samples=64, epoch):
+    def sample(self, n_samples, epoch):
         """
         ### Sample images
         """
@@ -114,7 +114,7 @@ class Trainer():
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sharp images
-            save_image(sharp, os.path.join(self.samples, f'epoch_{epoch}_sharp.png'))
+            save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
 
             return x
 
