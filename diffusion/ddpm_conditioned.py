@@ -73,7 +73,7 @@ class DenoiseDiffusion:
 
         return mean + (var ** 0.5) * eps
 
-    def p_sample(self, xt: torch.Tensor, t: torch.Tensor):
+    def p_sample(self, xt: torch.Tensor, blur: torch.Tensor, t: torch.Tensor):
         """
         #### Sample from $\textcolor{lightgreen}{p_\theta}(x_{t-1}|x_t)$
 
@@ -87,7 +87,8 @@ class DenoiseDiffusion:
         """
 
         # $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$
-        eps_theta = self.eps_model(xt, t)
+        xt_y = torch.cat((xt, blur), 1)
+        eps_theta = self.eps_model(xt_y, t)
         # [gather](utils.html) $\bar\alpha_t$
         alpha_bar = gather(self.alpha_bar, t)
         # $\alpha_t$
@@ -96,10 +97,6 @@ class DenoiseDiffusion:
         eps_coef = (1 - alpha) / (1 - alpha_bar) ** .5
         # $$\frac{1}{\sqrt{\alpha_t}} \Big(x_t -
         #      \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\textcolor{lightgreen}{\epsilon_\theta}(x_t, t) \Big)$$
-
-        print(eps_coef.shape)
-        print(eps_theta.shape)
-        print(alpha.shape)
 
         mean = 1 / (alpha ** 0.5) * (xt - eps_coef * eps_theta)
         # $\sigma^2$

@@ -106,9 +106,7 @@ class Trainer():
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
-                xt = torch.cat((x, blur), 1)
-                xt.to(self.device)
-                x = self.diffusion.p_sample(xt, t_vec)
+                x = self.diffusion.p_sample(x, blur, t_vec)
             # Log samples
             if self.wandb:
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
