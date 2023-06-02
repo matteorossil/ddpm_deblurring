@@ -122,19 +122,19 @@ class Trainer():
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sharp images
-            save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
+            save_image(sharp, os.path.join(self.samples, f'epoch_{epoch}_sharp.png'))
 
             # save blur images
-            save_image(blur, os.path.join(self.samples, f'blur_epoch_{epoch}.png'))
+            save_image(blur, os.path.join(self.samples, f'epoch_{epoch}_blur.png'))
 
             # save result (no summation)
-            save_image(x, os.path.join(self.samples, f'epoch_{epoch}.png'))
+            save_image(x, os.path.join(self.samples, f'epoch_{epoch}_sampled_Z.png'))
 
             # save result (with summation)
-            save_image(blur + x, os.path.join(self.samples, f'sum_epoch_{epoch}.png'))
+            save_image(blur + x, os.path.join(self.samples, f'epoch_{epoch}_sampled_X.png'))
 
             # save true z0
-            save_image(sharp - blur, os.path.join(self.samples, f'true_epoch_{epoch}.png'))
+            save_image(sharp - blur, os.path.join(self.samples, f'epoch_{epoch}_true_Z.png'))
 
             return x
 
