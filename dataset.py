@@ -14,6 +14,7 @@ class Data(Dataset):
 
     def __init__(self, path, mode='train', size=(128,128)):
 
+        # only for validation
         torch.manual_seed(1)
         torch.cuda.manual_seed_all(1)
         random.seed(1)
@@ -83,6 +84,7 @@ class Data(Dataset):
     
     def transform_val(self, sharp, blur):
 
+        # only for validation, so crop is the same
         random.seed(1)
         torch.manual_seed(1)
 
