@@ -54,10 +54,10 @@ class Trainer():
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
-    ckp_path: str = '/home/mr6744/'
-    #ckp_path: str = '/Users/m.rossi/Desktop/research/'
+    ckp_path_store: str = '/home/mr6744/'
+    #ckp_path_store: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    dataset = '/home/mr6744/gopro/'
+    dataset = '/home/mr6744/gopro2/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # where to store image samples
     samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_/'
@@ -93,7 +93,7 @@ class Trainer():
         # Create optimizer
         self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
         self.step = 0
-        self.exp_path = get_exp_path(path=self.ckp_path)
+        self.exp_path = get_exp_path(path=self.ckp_path_store)
 
     def sample(self, n_samples, epoch):
         """
@@ -121,7 +121,7 @@ class Trainer():
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sharp images
-            #save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
+            save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
 
             # save blur images
             save_image(blur, os.path.join(self.samples, f'blur_epoch_{epoch}.png'))
@@ -131,6 +131,9 @@ class Trainer():
 
             # save result (with summation)
             save_image(blur + x, os.path.join(self.samples, f'sum_epoch_{epoch}.png'))
+
+            # save true z0
+            save_image(sharp - blur, os.path.join(self.samples, f'true_epoch_{epoch}.png'))
 
             return x
 
