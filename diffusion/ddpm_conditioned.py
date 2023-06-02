@@ -99,6 +99,7 @@ class DenoiseDiffusion:
 
         print(eps_coef.shape)
         print(eps_theta.shape)
+        print(alpha.shape)
 
         mean = 1 / (alpha ** 0.5) * (xt - eps_coef * eps_theta)
         # $\sigma^2$
