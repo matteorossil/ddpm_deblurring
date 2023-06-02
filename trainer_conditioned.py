@@ -35,7 +35,7 @@ class Trainer():
     # Image size
     image_size: int = 256
     # Number of channels in the initial feature map
-    n_channels: int = 128
+    n_channels: int = 64
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 2, 4]
