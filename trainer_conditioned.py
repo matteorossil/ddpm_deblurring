@@ -60,10 +60,10 @@ class Trainer():
     dataset = '/home/mr6744/gopro/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # where to store image samples
-    samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_epoch30/'
+    samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_/'
     #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples_conditioned/'
     # load a checkpoint
-    epoch_ckp = 30
+    epoch_ckp = 0
     ckp = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{epoch_ckp}.pt'
 
     def init(self):
@@ -126,9 +126,6 @@ class Trainer():
 
             # save result (no summation)
             save_image(x, os.path.join(self.samples, f'epoch_{epoch}.png'))
-
-            print(x.shape)
-            print(blur.shape)
 
             # save result (with summation)
             save_image(blur + x, os.path.join(self.samples, f'sum_epoch_{epoch}.png'))
