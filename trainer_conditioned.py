@@ -32,20 +32,20 @@ class Trainer():
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
-    image_size: int = 256
+    image_size: int = 128
     # Number of channels in the initial feature map
-    n_channels: int = 64
+    n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 2, 4]
+    channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, True]
     # Number of time steps $T$
     n_steps: int = 1_000
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 32
     # Learning rate
-    learning_rate: float = 1e-5
+    learning_rate: float = 2e-5
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
@@ -84,7 +84,7 @@ class Trainer():
         )
         # Create dataloader (shuffle False for validation)
         self.data_loader_train = DataLoader(dataset=Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size)), batch_size=self.batch_size, num_workers=2, drop_last=True, shuffle=True, pin_memory=True)
-        self.data_loader_val = DataLoader(dataset=Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size)), batch_size=self.n_samples, num_workers=2, drop_last=True, shuffle=True, pin_memory=True)
+        #self.data_loader_val = DataLoader(dataset=Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size)), batch_size=self.n_samples, num_workers=2, drop_last=True, shuffle=True, pin_memory=True)
 
         # Create optimizer
         self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
@@ -98,6 +98,7 @@ class Trainer():
         with torch.no_grad():
 
             # get a single batch
+            self.data_loader_val = DataLoader(dataset=Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size)), batch_size=self.n_samples, num_workers=2, drop_last=True, shuffle=True, pin_memory=True)
             sharp, blur = next(iter(self.data_loader_val))
             # push to device
             sharp = sharp.to(self.device)
