@@ -147,6 +147,7 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if epoch != 0 and epoch % 10 == 0:
+            #if epoch % 10 == 0:
                 # Sample some images
                 s = self.sample(self.n_samples, epoch)
                 save_image(s, os.path.join(self.samples, f'epoch_{epoch}.png'))
@@ -159,9 +160,10 @@ class Trainer():
 
 def main():
     wandb.init()
-    train = Trainer()
-    train.init() # initialize trainer class
-    train.run() # perform training
+    trainer = Trainer()
+    print(trainer.eps_model)
+    trainer.init() # initialize trainer class
+    trainer.run() # perform training
 
 if __name__ == "__main__":
     main()
