@@ -122,7 +122,16 @@ class Trainer():
             save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
 
             # save blur images
-            save_image(sharp, os.path.join(self.samples, f'blur_epoch_{epoch}.png'))
+            save_image(blur, os.path.join(self.samples, f'blur_epoch_{epoch}.png'))
+
+            # save result (no summation)
+            save_image(x, os.path.join(self.samples, f'epoch_{epoch}.png'))
+
+            print(x.shape)
+            print(blur.shape)
+
+            # save result (with summation)
+            save_image(blur + x, os.path.join(self.samples, f'sum_epoch_{epoch}.png'))
 
             return x
 
@@ -156,8 +165,7 @@ class Trainer():
         for epoch in range(self.epochs):
             if epoch % 10 == 0:
                 # Sample some images
-                s = self.sample(self.n_samples, epoch)
-                save_image(s, os.path.join(self.samples, f'epoch_{epoch}.png'))
+                self.sample(self.n_samples, epoch)
             # Train the model
             self.train()
             if (epoch+1) % 10 == 0:
@@ -168,10 +176,7 @@ def main():
     wandb.init()
     trainer = Trainer()
     trainer.init() # initialize trainer class
-    
-    s = trainer.sample(trainer.n_samples, trainer.epoch_ckp)
-    save_image(s, os.path.join(trainer.samples, f'epoch_{trainer.epoch_ckp}.png'))
-    
+    trainer.sample(trainer.n_samples, trainer.epoch_ckp)
     #trainer.run() # perform training
 
 if __name__ == "__main__":
