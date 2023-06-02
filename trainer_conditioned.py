@@ -163,7 +163,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 10 == 0:
+            if epoch % 1 == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
