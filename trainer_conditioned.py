@@ -161,8 +161,8 @@ class Trainer():
 def main():
     wandb.init()
     trainer = Trainer()
-    print(trainer.eps_model)
     trainer.init() # initialize trainer class
+    print(trainer.eps_model)
     trainer.run() # perform training
 
 if __name__ == "__main__":
