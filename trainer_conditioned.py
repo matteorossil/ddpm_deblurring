@@ -87,8 +87,8 @@ class Trainer():
             device=self.device,
         )
         # Create dataloader (shuffle False for validation)
-        self.data_loader_train = DataLoader(dataset=Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size)), batch_size=self.batch_size, num_workers=0, drop_last=True, shuffle=True, pin_memory=True)
-        self.data_loader_val = DataLoader(dataset=Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size)), batch_size=self.n_samples, num_workers=0, drop_last=True, shuffle=False, pin_memory=True)
+        self.data_loader_train = DataLoader(dataset=Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size)), batch_size=self.batch_size, num_workers=2, drop_last=True, shuffle=True, pin_memory=True)
+        self.data_loader_val = DataLoader(dataset=Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size)), batch_size=self.n_samples, num_workers=2, drop_last=True, shuffle=False, pin_memory=True)
 
         # Create optimizer
         self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
