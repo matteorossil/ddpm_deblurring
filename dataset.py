@@ -19,7 +19,7 @@ class Data(Dataset):
             torch.manual_seed(1)
             torch.cuda.manual_seed_all(1)
             random.seed(1)
-            torch.backends.cudnn.deterministic=True
+            #torch.backends.cudnn.deterministic=True
 
         self.dataset_name = {
             'train': path + "train",
