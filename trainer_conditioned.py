@@ -104,6 +104,7 @@ class Trainer():
             # get a single batch
             sharp, blur = next(iter(self.data_loader_val))
             # push to device
+            sharp = sharp.to(self.device)
             blur = blur.to(self.device)
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
