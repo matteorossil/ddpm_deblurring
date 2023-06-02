@@ -18,7 +18,7 @@ from torchvision.utils import save_image
 
 
 def get_exp_path(path=''):
-    exp_path = os.environ.get('EXP') or os.path.join(path, 'checkpoints')
+    exp_path = os.environ.get('EXP') or os.path.join(path, 'checkpoints_conditioned')
     exp_path = os.path.join(exp_path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
@@ -146,8 +146,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch != 0 and epoch % 10 == 0:
-            #if epoch % 10 == 0:
+            if epoch % 10 == 0:
                 # Sample some images
                 s = self.sample(self.n_samples, epoch)
                 save_image(s, os.path.join(self.samples, f'epoch_{epoch}.png'))
@@ -157,12 +156,10 @@ class Trainer():
                 # Save the eps model
                 torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
-
 def main():
     wandb.init()
     trainer = Trainer()
     trainer.init() # initialize trainer class
-    print(trainer.eps_model)
     trainer.run() # perform training
 
 if __name__ == "__main__":
