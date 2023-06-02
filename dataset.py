@@ -22,6 +22,9 @@ class Data(Dataset):
         #size of the crop
         self.size = size
 
+        #store mode
+        self.mode = mode
+
         # stores paths
         self.sharp = os.path.join(self.dataset_name[mode], "sharp")
         self.blur = os.path.join(self.dataset_name[mode], "blur")
@@ -44,8 +47,11 @@ class Data(Dataset):
 
         with open(os.path.join(self.blur, self.blur_imgs[idx]), "rb") as f:
             blur = Image.open(f).convert("RGB")
-
-        return self.transform(sharp, blur)
+        
+        if self.mode == 'train':
+            return self.transform(sharp, blur)
+        else: # do not apply trainsfomation to validation set
+            return sharp, blur
 
     def transform(self, sharp, blur):
 
