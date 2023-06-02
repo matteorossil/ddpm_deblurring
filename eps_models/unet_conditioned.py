@@ -339,7 +339,7 @@ class UNet(nn.Module):
         # Final normalization and convolution layer
         self.norm = nn.GroupNorm(8, n_channels)
         self.act = Swish()
-        self.final = nn.Conv2d(in_channels, image_channels/2, kernel_size=(3, 3), padding=(1, 1)) # /2 for same dim as noise
+        self.final = nn.Conv2d(in_channels, image_channels//2, kernel_size=(3, 3), padding=(1, 1)) # /2 for same dim as noise
 
     def unet_forward(self, x: torch.Tensor, t: torch.Tensor):
         # Get image projection
