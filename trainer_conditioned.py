@@ -50,7 +50,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 2
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -107,7 +107,7 @@ class Trainer():
             blur = blur.to(self.device)
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([n_samples, self.image_channels, sharp.shape[2], sharp.shape[3]],
+            x = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.device)
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
