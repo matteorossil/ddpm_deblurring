@@ -63,7 +63,7 @@ class Trainer():
     samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_/'
     #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples_conditioned/'
     # load a checkpoint
-    epoch_ckp = 20
+    epoch_ckp = 30
     ckp = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{epoch_ckp}.pt'
 
     def init(self):
