@@ -76,7 +76,6 @@ class Data(Dataset):
 
         return sharp, blur
     
-
     def transform_val(self, sharp, blur):
 
         # convert to tensors

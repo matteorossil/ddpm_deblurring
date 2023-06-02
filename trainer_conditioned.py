@@ -107,7 +107,7 @@ class Trainer():
             blur = blur.to(self.device)
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
+            x = torch.randn([n_samples, self.image_channels, sharp.shape[2], sharp.shape[3]],
                             device=self.device)
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
