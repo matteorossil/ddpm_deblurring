@@ -63,7 +63,7 @@ class Trainer():
     samples = '/home/mr6744/ddpm_deblurring/samples_conditioned_/'
     #samples = '/Users/m.rossi/Desktop/research/ddpm_deblurring/samples_conditioned/'
     # load a checkpoint
-    epoch_ckp = 20
+    epoch_ckp = 10
     ckp = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{epoch_ckp}.pt'
 
     def init(self):
@@ -121,7 +121,7 @@ class Trainer():
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sharp images
-            save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
+            #save_image(sharp, os.path.join(self.samples, f'sharp_epoch_{epoch}.png'))
 
             # save blur images
             save_image(blur, os.path.join(self.samples, f'blur_epoch_{epoch}.png'))
