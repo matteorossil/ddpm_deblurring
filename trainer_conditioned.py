@@ -32,18 +32,18 @@ class Trainer():
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
-    image_size: int = 128
+    image_size: int = 256
     # Number of channels in the initial feature map
-    n_channels: int = 32
+    n_channels: int = 64
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 3, 4]
+    channel_multipliers: List[int] = [1, 2, 2, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, True]
     # Number of time steps $T$
     n_steps: int = 1_000
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 4
     # Learning rate
     learning_rate: float = 2e-5
     # Number of training epochs
@@ -163,7 +163,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 1 == 0:
+            if epoch % 10 == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
