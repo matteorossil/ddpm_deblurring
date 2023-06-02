@@ -19,7 +19,6 @@ class Data(Dataset):
             torch.manual_seed(1)
             torch.cuda.manual_seed_all(1)
             random.seed(1)
-            #torch.backends.cudnn.deterministic=True
 
         self.dataset_name = {
             'train': path + "train",
@@ -84,10 +83,6 @@ class Data(Dataset):
         return sharp, blur
     
     def transform_val(self, sharp, blur):
-
-        # only for validation, so crop is the same
-        #random.seed(1)
-        #torch.manual_seed(1)
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
