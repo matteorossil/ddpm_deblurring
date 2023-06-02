@@ -47,9 +47,6 @@ class Data(Dataset):
 
         with open(os.path.join(self.blur, self.blur_imgs[idx]), "rb") as f:
             blur = Image.open(f).convert("RGB")
-
-        print(self.sharp_imgs[idx])
-        print(self.blur_imgs[idx])
         
         if self.mode == 'train':
             return self.transform_train(sharp, blur)
