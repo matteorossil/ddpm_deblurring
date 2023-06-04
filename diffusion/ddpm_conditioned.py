@@ -16,7 +16,7 @@ class DenoiseDiffusion:
     ## Denoise Diffusion
     """
 
-    def __init__(self, eps_model: nn.Module, n_steps: int, device: torch.device):
+    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device):
         """
         * `eps_model` is $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$ model
         * `n_steps` is $t$
@@ -24,6 +24,8 @@ class DenoiseDiffusion:
         """
         super().__init__()
         self.eps_model = eps_model
+
+        self.predictor = predictor
 
         # Create $\beta_1, \dots, \beta_T$ linearly increasing variance schedule
         self.beta = torch.linspace(0.0001, 0.02, n_steps).to(device)

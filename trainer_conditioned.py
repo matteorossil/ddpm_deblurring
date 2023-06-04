@@ -89,6 +89,7 @@ class Trainer():
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
             eps_model=self.eps_model,
+            predictor=self.predictor,
             n_steps=self.n_steps,
             device=self.device,
         )
@@ -134,14 +135,17 @@ class Trainer():
             # save blur images
             save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
 
+            # save x_init
+            save_image(self.diffusion.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_X_init.png'))
+
             # save true z0
-            save_image(sharp - self.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
+            save_image(sharp - self.diffusion.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
 
             # save result (no summation)
             save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_Z.png'))
 
             # save result (with summation)
-            save_image(self.predictor(blur) + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
+            save_image(self.diffusion.predictor(blur) + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
 
             return x
 
