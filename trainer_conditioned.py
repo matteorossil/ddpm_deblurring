@@ -6,7 +6,9 @@ import os
 import torch
 import torch.utils.data
 from diffusion.ddpm_conditioned import DenoiseDiffusion
-from eps_models.unet_conditioned import UNet
+from eps_models.unet_conditioned import UNet as UNet_C # conditioned
+from eps_models.unet_simple import UNet as UNet_S # simple Unet (doesn't take t)
+from eps_models.unet import UNet as UNet # original UNet
 from pathlib import Path
 from datetime import datetime
 import wandb
@@ -64,8 +66,16 @@ class Trainer():
 
     def init(self):
         # Create $\epsilon_\theta(x_t, t)$ model
-        self.eps_model = UNet(
-            image_channels=self.image_channels*2, # *2 because we concatenate y
+        self.eps_model = UNet_C(
+            image_channels=self.image_channels*2, # *2 because we concatenate xt with y
+            n_channels=self.n_channels,
+            ch_mults=self.channel_multipliers,
+            is_attn=self.is_attention,
+        ).to(self.device)
+
+        # initial prediction x_init
+        self.predictor = UNet_S(
+            image_channels=self.image_channels, # *2 because we concatenate y
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention,
@@ -125,13 +135,13 @@ class Trainer():
             save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
 
             # save true z0
-            save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
+            save_image(sharp - self.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
 
             # save result (no summation)
             save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_Z.png'))
 
             # save result (with summation)
-            save_image(blur + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
+            save_image(self.predictor(blur) + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
 
             return x
 
@@ -163,7 +173,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 5 == 0:
+            if epoch % 10 == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
