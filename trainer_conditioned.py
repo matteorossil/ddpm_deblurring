@@ -55,11 +55,11 @@ class Trainer():
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
-    #store_checkpoints: str = '/home/mr6744/checkpoints_conditioned'
-    store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
+    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned'
+    #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    #dataset = '/home/mr6744/gopro/'
-    dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
+    dataset = '/home/mr6744/gopro/'
+    #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
     checkpoint_epoch = 0
     checkpoint = f'/home/mr6744//checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
