@@ -104,9 +104,7 @@ class Trainer():
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
 
         # Create optimizer
-        #self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
-        params = list(self.eps_model.module.parameters())
-        self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.eps_model.module.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
@@ -187,7 +185,7 @@ def ddp_setup(rank, world_size):
 
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
-    wandb.init()
+    #wandb.init()
     trainer = Trainer()
     trainer.init(rank) # initialize trainer class
     trainer.run() # perform training
