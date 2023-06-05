@@ -131,7 +131,7 @@ class Trainer():
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sampled images
-            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}.png'))
+            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_gpu{self.gpu_id}.png'))
 
             return x
 
