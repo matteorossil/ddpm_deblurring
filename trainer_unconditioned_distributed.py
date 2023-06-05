@@ -80,6 +80,7 @@ class Trainer():
         )
 
         # Distributed Data Parallel DDP
+        self.eps_model = self.eps_model.to(self.gpu_id)
         self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # only load checpoint if model is trained
