@@ -117,6 +117,7 @@ class Trainer():
         with torch.no_grad():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
+            torch.manual_seed(1)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
@@ -162,7 +163,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 10 == 0:
+            if (epoch+1) % 10 == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
