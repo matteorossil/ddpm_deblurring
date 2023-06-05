@@ -221,15 +221,18 @@ class MiddleBlock(nn.Module):
     This block is applied at the lowest resolution of the U-Net.
     """
 
-    def __init__(self, n_channels: int, time_channels: int):
+    def __init__(self, n_channels: int, time_channels: int, has_attn: bool):
         super().__init__()
         self.res1 = ResidualBlock(n_channels, n_channels, time_channels)
-        self.attn = AttentionBlock(n_channels)
+        if has_attn:
+            self.attn = AttentionBlock(n_channels)
+        else:
+            self.attn = nn.Identity()
         self.res2 = ResidualBlock(n_channels, n_channels, time_channels)
 
     def forward(self, x: torch.Tensor, t: torch.Tensor):
         x = self.res1(x, t)
-        #x = self.attn(x)
+        x = self.attn(x)
         x = self.res2(x, t)
         return x
 
@@ -313,7 +316,7 @@ class UNet(nn.Module):
         self.down = nn.ModuleList(down)
 
         # Middle block
-        self.middle = MiddleBlock(out_channels, n_channels * 4, )
+        self.middle = MiddleBlock(out_channels, n_channels * 4, False) # false for middle block not having attention
 
         # #### Second half of U-Net - increasing resolution
         up = []
