@@ -80,7 +80,6 @@ class Trainer():
         )
 
         # Distributed Data Parallel DDP
-        self.eps_model.to(self.gpu_id)
         self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # only load checpoint if model is trained
@@ -104,7 +103,7 @@ class Trainer():
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
 
         # Create optimizer
-        self.optimizer = torch.optim.AdamW(self.eps_model.module.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.eps_model.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
