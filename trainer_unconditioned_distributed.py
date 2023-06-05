@@ -144,7 +144,7 @@ class Trainer():
             # Increment global step
             self.step += 1
             # Move data to device
-            sharp = sharp.to(self.device)
+            sharp = sharp.to(self.gpu_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
             # Calculate loss
