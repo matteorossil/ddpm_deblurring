@@ -44,13 +44,13 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 2_000
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 16
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
-    betas = (0.9999, 0.9999)
+    betas = (0.9, 0.999)
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
@@ -105,7 +105,7 @@ class Trainer():
 
         # Create optimizer
         #self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
-        params = list(self.eps_model.parameters())
+        params = list(self.eps_model.module.parameters())
         self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
