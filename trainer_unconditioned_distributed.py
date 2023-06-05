@@ -194,4 +194,4 @@ def main(rank: int, world_size:int):
 
 if __name__ == "__main__":
     world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    mp.spawn(main, args=(world_size), nprocs=world_size) 
+    mp.spawn(main, args=(world_size,), nprocs=world_size)
