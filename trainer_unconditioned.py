@@ -5,8 +5,8 @@ from typing import List
 import os
 import torch
 import torch.utils.data
-from diffusion.ddpm import DenoiseDiffusion
-from eps_models.unet import UNet
+from diffusion.ddpm_unconditioned import DenoiseDiffusion
+from eps_models.unet_unconditioned import UNet
 from pathlib import Path
 from datetime import datetime
 import wandb

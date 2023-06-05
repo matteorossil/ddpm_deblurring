@@ -7,8 +7,7 @@ import torch
 import torch.utils.data
 from diffusion.ddpm_conditioned import DenoiseDiffusion
 from eps_models.unet_conditioned import UNet as UNet_C # conditioned
-from eps_models.unet_simple import UNet as UNet_S # simple Unet (doesn't take t)
-from eps_models.unet import UNet as UNet # original UNet
+from eps_models.unet_predictor import UNet as UNet_S # simple Unet (doesn't take t as param)
 from pathlib import Path
 from datetime import datetime
 import wandb
