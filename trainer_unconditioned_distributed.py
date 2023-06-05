@@ -41,6 +41,7 @@ class Trainer():
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, False]
+    attention_middle: List[int] = [False]
     # Number of time steps $T$
     n_steps: int = 2_000
     # Batch size
@@ -56,7 +57,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 4
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # where to store the checkpoints
     store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
     #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
@@ -77,6 +78,7 @@ class Trainer():
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention,
+            attn_middle=self.attention_middle
         )
 
         # Distributed Data Parallel DDP
