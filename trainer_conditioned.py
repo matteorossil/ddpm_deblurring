@@ -30,7 +30,7 @@ class Trainer():
     ## Configurations
     """
     # Device to train the model on.
-    device: torch.device = 'cpu' # change to 'cuda'
+    device: torch.device = 'cuda' # change to 'cuda'
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
