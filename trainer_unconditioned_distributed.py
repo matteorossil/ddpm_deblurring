@@ -99,7 +99,8 @@ class Trainer():
         # Create dataloader
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset, 
-                                    batch_size=self.batch_size, num_workers=0, 
+                                    batch_size=self.batch_size, 
+                                    num_workers=8,
                                     drop_last=True,
                                     shuffle=False , 
                                     pin_memory=True,
@@ -164,7 +165,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if (epoch+1) % 10 == 0:
+            if epoch % 10 == 0 and self.gpu_id == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
