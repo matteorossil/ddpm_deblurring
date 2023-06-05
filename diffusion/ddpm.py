@@ -28,7 +28,7 @@ class DenoiseDiffusion:
         self.eps_model = eps_model
 
         # Create $\beta_1, \dots, \beta_T$ linearly increasing variance schedule
-        self.beta = torch.linspace(0.0001, 0.02, n_steps).to(device)
+        self.beta = torch.linspace(10**(-6), 0.01, n_steps).to(device)
 
         # $\alpha_t = 1 - \beta_t$
         self.alpha = 1. - self.beta
@@ -133,7 +133,8 @@ class DenoiseDiffusion:
         # Get $\textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)$
         eps_theta = self.eps_model(xt, t)
         # MSE loss
-        return F.mse_loss(noise, eps_theta)
+        #return F.mse_loss(noise, eps_theta)
+        return F.l1_loss(noise, eps_theta)
 
     def save_model_copy(self):
         with torch.no_grad():
