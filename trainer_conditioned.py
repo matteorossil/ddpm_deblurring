@@ -98,7 +98,8 @@ class Trainer():
         #self.data_loader_val = DataLoader(dataset=Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size)), batch_size=self.n_samples, num_workers=2, drop_last=True, shuffle=True, pin_memory=True)
 
         # Create optimizer
-        self.optimizer = torch.optim.Adam(self.eps_model.parameters(), lr=self.learning_rate)
+        params = list(self.eps_model.parameters()) + list(self.predictor.parameters())
+        self.optimizer = torch.optim.Adam(params, lr=self.learning_rate)
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
