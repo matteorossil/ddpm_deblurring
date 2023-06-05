@@ -229,7 +229,7 @@ class MiddleBlock(nn.Module):
 
     def forward(self, x: torch.Tensor, t: torch.Tensor):
         x = self.res1(x, t)
-        x = self.attn(x)
+        #x = self.attn(x)
         x = self.res2(x, t)
         return x
 
