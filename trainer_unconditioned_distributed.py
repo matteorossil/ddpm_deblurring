@@ -126,8 +126,8 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
             # Log samples
-            if self.wandb:
-                wandb.log({'samples': wandb.Image(x)}, step=self.step)
+            #if self.wandb:
+                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sampled images
             save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_gpu{self.gpu_id}.png'))
@@ -154,7 +154,8 @@ class Trainer():
             self.optimizer.step()
             # Track the loss
             #print('loss:', loss, 'step:', self.step)
-            wandb.log({'loss': loss}, step=self.step)
+            if self.wandb:
+                wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
         """
@@ -185,8 +186,9 @@ def ddp_setup(rank, world_size):
 
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
-    #wandb.init()
     trainer = Trainer()
+    if trainer.wandb:
+        wandb.init()
     trainer.init(rank) # initialize trainer class
     trainer.run() # perform training
     destroy_process_group()
