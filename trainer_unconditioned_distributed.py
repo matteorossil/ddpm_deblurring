@@ -92,7 +92,7 @@ class Trainer():
         self.diffusion = DenoiseDiffusion(
             eps_model=self.eps_model,
             n_steps=self.n_steps,
-            device=self.device,
+            device=self.gpu_id,
         )
         # Create dataloader
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
@@ -118,7 +118,7 @@ class Trainer():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
-                            device=self.device)
+                            device=self.gpu_id)
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
                 # $t$
