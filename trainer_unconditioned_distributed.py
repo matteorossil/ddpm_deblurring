@@ -134,7 +134,7 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t+1) % 1000 == 0):
+                if ((t_+1) % 1000 == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
 
