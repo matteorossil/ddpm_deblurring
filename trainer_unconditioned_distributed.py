@@ -134,13 +134,13 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t+1) != self.n_steps) and ((t+1) % 500 == 0):
+                if ((t+1) % 1000 == 0):
                     # save sampled images
-                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_}.png'))
+                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
 
             # Log samples
-            if self.wandb:
-                wandb.log({'samples': wandb.Image(x)}, step=self.step)
+            #if self.wandb:
+                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             return x
 
