@@ -11,14 +11,12 @@ from utils import gather # Used for Image Data
 
 import torchvision.transforms as T
 
-
-
 class DenoiseDiffusion:
     """
     ## Denoise Diffusion
     """
 
-    def __init__(self, eps_model: nn.Module, n_steps: int, device: torch.device):
+    def __init__(self, eps_model: nn.Module, n_steps: int, device: torch.device, beta_0: float, beta_T: float):
         """
         * `eps_model` is $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$ model
         * `n_steps` is $t$
@@ -28,7 +26,7 @@ class DenoiseDiffusion:
         self.eps_model = eps_model
 
         # Create $\beta_1, \dots, \beta_T$ linearly increasing variance schedule
-        self.beta = torch.linspace(10**(-6), 0.01, n_steps).to(device)
+        self.beta = torch.linspace(beta_0, beta_T, n_steps).to(device)
 
         # $\alpha_t = 1 - \beta_t$
         self.alpha = 1. - self.beta

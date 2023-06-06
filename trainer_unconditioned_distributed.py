@@ -43,7 +43,10 @@ class Trainer():
     is_attention: List[int] = [False, False, False, False]
     attention_middle: List[int] = [False]
     # Number of time steps $T$
-    n_steps: int = 1_000
+    n_steps: int = 2_000
+    # noise scheduler
+    beta_0 = 1e-6 # 0.000001
+    beta_T = 1e-2 # 0.01
     # Batch size
     batch_size: int = 32
     # Learning rate
@@ -95,14 +98,16 @@ class Trainer():
             eps_model=self.eps_model,
             n_steps=self.n_steps,
             device=self.gpu_id,
+            beta_0=self.beta_0,
+            beta_T=self.beta_T
         )
         # Create dataloader
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset, 
                                     batch_size=self.batch_size, 
-                                    num_workers=16,
+                                    num_workers=os.cpu_count(),
                                     drop_last=True,
-                                    shuffle=False, 
+                                    shuffle=False,
                                     pin_memory=True,
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
 
@@ -128,12 +133,14 @@ class Trainer():
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
+
+                if ((t+1) != self.n_steps) and ((t+1) % 500 == 0):
+                    # save sampled images
+                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_}.png'))
+
             # Log samples
             if self.wandb:
                 wandb.log({'samples': wandb.Image(x)}, step=self.step)
-
-            # save sampled images
-            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_gpu{self.gpu_id}.png'))
 
             return x
 

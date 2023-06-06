@@ -48,11 +48,8 @@ class Data(Dataset):
     
     def __getitem__(self, idx):
 
-        with open(os.path.join(self.sharp, self.sharp_imgs[idx]), "rb") as f:
-            sharp = Image.open(f).convert("RGB")
-
-        with open(os.path.join(self.blur, self.blur_imgs[idx]), "rb") as f:
-            blur = Image.open(f).convert("RGB")
+        sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert('RGB')
+        blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
         if self.mode == 'train':
             return self.transform_train(sharp, blur)
