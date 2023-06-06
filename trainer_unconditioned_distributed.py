@@ -100,9 +100,9 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset, 
                                     batch_size=self.batch_size, 
-                                    num_workers=8,
+                                    num_workers=16,
                                     drop_last=True,
-                                    shuffle=False , 
+                                    shuffle=False, 
                                     pin_memory=True,
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
 
@@ -165,7 +165,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 10 == 0 and self.gpu_id == 0:
+            if epoch % 5 == 0 and self.gpu_id == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
