@@ -43,11 +43,11 @@ class Trainer():
     is_attention: List[int] = [False, False, False, False]
     attention_middle: List[int] = [False]
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # Batch size
-    batch_size: int = 16
+    batch_size: int = 32
     # Learning rate
-    learning_rate: float = 1e-4
+    learning_rate: float = 2e-5
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -129,8 +129,8 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
             # Log samples
-            #if self.wandb:
-                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
+            if self.wandb:
+                wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             # save sampled images
             save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_gpu{self.gpu_id}.png'))
@@ -197,5 +197,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)
