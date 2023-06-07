@@ -48,9 +48,9 @@ class Trainer():
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 64
     # Learning rate
-    learning_rate: float = 1e-5
+    learning_rate: float = 5e-6
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -58,7 +58,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 2
+    n_samples: int = 4
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
@@ -135,7 +135,7 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 250 == 0):
+                if ((t_+1) % 900 == 0) or ((t_+1) % 1000 == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
                     torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
@@ -174,12 +174,12 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 10 == 0 and self.gpu_id == 0:
+            if epoch % 20 == 0 and self.gpu_id == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
             self.train()
-            if (epoch+1) % 10 == 0 and self.gpu_id == 0:
+            if (epoch+1) % 20 == 0 and self.gpu_id == 0:
                 # Save the eps model
                     torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
