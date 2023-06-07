@@ -58,7 +58,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 4
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
@@ -106,7 +106,7 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=2,
+                                    num_workers=os.cpu_count() // 4,
                                     drop_last=True,
                                     shuffle=False,
                                     pin_memory=False,
@@ -124,7 +124,7 @@ class Trainer():
         with torch.no_grad():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            torch.cuda.manual_seed(1)
+            torch.cuda.manual_seed(0)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
