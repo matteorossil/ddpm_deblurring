@@ -89,9 +89,10 @@ class Trainer():
 
         # only load checpoint if model is trained
         if self.checkpoint_epoch != 0:
-            map_location = {'cuda:%d' % 0: 'cuda:%d' % self.gpu_id}
-            checkpoint_ = torch.load(self.checkpoint, map_location=map_location)
-            self.eps_model.load_state_dict(checkpoint_)
+            #map_location = {'cuda:%d' % 0: 'cuda:%d' % self.gpu_id}
+            #checkpoint_ = torch.load(self.checkpoint, map_location=map_location)
+            checkpoint_ = torch.load(self.checkpoint)
+            self.eps_model.module.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
