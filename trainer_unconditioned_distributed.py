@@ -50,7 +50,7 @@ class Trainer():
     # Batch size
     batch_size: int = 32
     # Learning rate
-    learning_rate: float = 5e-6
+    learning_rate: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -128,14 +128,15 @@ class Trainer():
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
+            #for t_ in range(self.n_steps):
+            for t_ in range(1500):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 900 == 0) or ((t_+1) % 1000 == 0):
+                if ((t_+1) % 1000 == 0) or ((t_+1) % 1250 == 0) or ((t_+1) % 1500 == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
                     torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
