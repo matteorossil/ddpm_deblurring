@@ -106,7 +106,7 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=8,
+                                    num_workers=os.cpu_count(),
                                     drop_last=True,
                                     shuffle=False,
                                     pin_memory=False,
