@@ -33,15 +33,9 @@ class Data(Dataset):
 
         # stores paths
         self.sharp = os.path.join(self.dataset_name[mode], "sharp")
-        self.blur = os.path.join(self.dataset_name[mode], "blur")
 
         self.sharp_imgs = os.listdir(self.sharp)
         self.sharp_imgs.sort()
-
-        self.blur_imgs = os.listdir(self.blur)
-        self.blur_imgs.sort()
-
-        assert len(self.sharp_imgs) == len(self.blur_imgs)
 
     def __len__(self):
         return len(self.sharp_imgs)
@@ -49,7 +43,6 @@ class Data(Dataset):
     def __getitem__(self, idx):
 
         sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert('RGB')
-        blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
         '''
         if self.mode == 'train':
@@ -58,40 +51,34 @@ class Data(Dataset):
             return self.transform_val(sharp, blur)
         '''
 
-        return TF.to_tensor(sharp), TF.to_tensor(blur)
+        return TF.to_tensor(sharp)
 
     def transform_train(self, sharp, blur):
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
-        blur = TF.crop(blur, i, j, h, w)
 
         # random horizontal flip
         if random.random() > 0.5:
             sharp = TF.hflip(sharp)
-            blur = TF.hflip(blur)
 
         # Random vertical flip
         if random.random() > 0.5:
             sharp = TF.vflip(sharp)
-            blur = TF.vflip(blur)
 
         # convert to tensors
         sharp = TF.to_tensor(sharp)
-        blur = TF.to_tensor(blur)
 
-        return sharp, blur
+        return sharp
     
     def transform_val(self, sharp, blur):
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
-        blur = TF.crop(blur, i, j, h, w)
 
         # convert to tensors
         sharp = TF.to_tensor(sharp)
-        blur = TF.to_tensor(blur)
 
-        return sharp, blur
+        return sharp

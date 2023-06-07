@@ -12,7 +12,7 @@ from datetime import datetime
 import wandb
 import torch.nn.functional as F
 
-from dataset import Data
+from dataset_unconditioned import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
@@ -48,9 +48,9 @@ class Trainer():
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 48
     # Learning rate
-    learning_rate: float = 1e-4
+    learning_rate: float = 1e-5
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -152,7 +152,7 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        for batch_idx, (sharp, blur) in enumerate(self.data_loader):
+        for batch_idx, sharp in enumerate(self.data_loader):
             # Increment global step
             self.step += 1
             # Move data to device
