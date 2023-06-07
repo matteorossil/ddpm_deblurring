@@ -48,7 +48,7 @@ class Trainer():
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 48
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-5
     # Weight decay rate
@@ -138,8 +138,8 @@ class Trainer():
 
                 if ((t_+1) % 800 == 0) or ((t_+1) % 900 == 0) or ((t_+1) % 1000 == 0):
                     # save sampled images
-                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
-                    torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
+                    save_image(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
+                    torch.save(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             # Log samples
             #if self.wandb:
@@ -180,7 +180,7 @@ class Trainer():
                 self.sample(self.n_samples, epoch)
             # Train the model
             self.train()
-            if (epoch+1) % 20 == 0 and self.gpu_id == 0:
+            if (epoch+1) % 50 == 0 and self.gpu_id == 0:
                 # Save the eps model
                     torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
