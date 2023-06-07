@@ -40,10 +40,10 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
+    is_attention: List[int] = [False, False, False, True]
+    attention_middle: List[int] = [True]
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # noise scheduler
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
@@ -69,7 +69,7 @@ class Trainer():
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
     checkpoint_epoch = 670
-    checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_150704/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_150704s/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
@@ -103,8 +103,8 @@ class Trainer():
         )
         # Create dataloader
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        self.data_loader = DataLoader(dataset=dataset, 
-                                    batch_size=self.batch_size, 
+        self.data_loader = DataLoader(dataset=dataset,
+                                    batch_size=self.batch_size,
                                     num_workers=os.cpu_count(),
                                     drop_last=True,
                                     shuffle=False,
