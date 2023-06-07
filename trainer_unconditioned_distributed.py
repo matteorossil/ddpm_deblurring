@@ -129,14 +129,14 @@ class Trainer():
                             device=self.gpu_id)
             # Remove noise for $T$ steps
             #for t_ in range(self.n_steps):
-            for t_ in range(1500):
+            for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 1000 == 0) or ((t_+1) % 1250 == 0) or ((t_+1) % 1500 == 0):
+                if ((t_+1) % 700 == 0) or ((t_+1) % 850 == 0) or ((t_+1) % 1000 == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
                     torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
