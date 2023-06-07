@@ -68,8 +68,8 @@ class Trainer():
     dataset = '/home/mr6744/gopro/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch = 0
-    checkpoint = f'/home/mr6744//checkpoints/06012023_194937/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch = 670
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_150704/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
@@ -134,7 +134,7 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 1000 == 0):
+                if ((t_+1) % self.n_steps == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
 
@@ -172,7 +172,7 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 5 == 0 and self.gpu_id == 0:
+            if epoch % 10 == 0 and self.gpu_id == 0:
                 # Sample some images
                 self.sample(self.n_samples, epoch)
             # Train the model
