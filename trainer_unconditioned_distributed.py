@@ -58,7 +58,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 8
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
