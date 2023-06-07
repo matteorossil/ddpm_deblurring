@@ -40,8 +40,8 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, True]
-    attention_middle: List[int] = [True]
+    is_attention: List[int] = [False, False, False, False]
+    attention_middle: List[int] = [False]
     # Number of time steps $T$
     n_steps: int = 1_000
     # noise scheduler
@@ -84,7 +84,7 @@ class Trainer():
             attn_middle=self.attention_middle
         )
 
-        self.eps_model = self.eps_model.to(self.gpu_id)
+        #self.eps_model = self.eps_model.to(self.gpu_id)
         self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # only load checpoint if model is trained
