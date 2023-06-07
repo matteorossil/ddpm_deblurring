@@ -84,14 +84,17 @@ class Trainer():
             attn_middle=self.attention_middle
         )
 
-        # only load checpoint if model is trained
-        if self.checkpoint_epoch != 0:
-            checkpoint_ = torch.load(self.checkpoint)
-            self.eps_model.load_state_dict(checkpoint_)
+        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # Distributed Data Parallel DDP
-        self.eps_model = self.eps_model.to(self.gpu_id)
-        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
+        #self.eps_model = self.eps_model.to(self.gpu_id)
+        #self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
+
+        # only load checpoint if model is trained
+        if self.checkpoint_epoch != 0:
+            map_location = {'cuda:%d' % 0: 'cuda:%d' % rank}
+            checkpoint_ = torch.load(self.checkpoint, map_location=map_location)
+            self.eps_model.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
