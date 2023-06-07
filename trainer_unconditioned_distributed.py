@@ -106,7 +106,7 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=os.cpu_count(),
+                                    num_workers=2,
                                     drop_last=True,
                                     shuffle=False,
                                     pin_memory=False,
@@ -124,7 +124,7 @@ class Trainer():
         with torch.no_grad():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            torch.manual_seed(1)
+            torch.cuda.manual_seed(1)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
@@ -136,7 +136,7 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 700 == 0) or ((t_+1) % 850 == 0) or ((t_+1) % 1000 == 0):
+                if ((t_+1) % 800 == 0) or ((t_+1) % 900 == 0) or ((t_+1) % 1000 == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
                     torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
