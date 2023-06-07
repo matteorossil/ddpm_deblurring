@@ -106,10 +106,10 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.data_loader = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=os.cpu_count(),
+                                    num_workers=8,
                                     drop_last=True,
                                     shuffle=False,
-                                    pin_memory=True,
+                                    pin_memory=False,
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
 
         # Create optimizer
