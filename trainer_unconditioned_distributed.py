@@ -90,7 +90,7 @@ class Trainer():
             self.eps_model.load_state_dict(checkpoint_)
 
         # Distributed Data Parallel DDP
-        #self.eps_model = self.eps_model.to(self.gpu_id)
+        self.eps_model = self.eps_model.to(self.gpu_id)
         self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # Create DDPM class
