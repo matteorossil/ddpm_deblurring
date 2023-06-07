@@ -50,7 +50,7 @@ class Trainer():
     # Batch size
     batch_size: int = 32
     # Learning rate
-    learning_rate: float = 2e-5
+    learning_rate: float = 1e-5
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -58,18 +58,18 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 2
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
     store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
     #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    dataset = '/home/mr6744/gopro/'
+    dataset = '/home/mr6744/gopro2/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch = 670
-    checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_150704s/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch = 1000
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_233030/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
@@ -84,14 +84,14 @@ class Trainer():
             attn_middle=self.attention_middle
         )
 
-        # Distributed Data Parallel DDP
-        self.eps_model = self.eps_model.to(self.gpu_id)
-        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
-
         # only load checpoint if model is trained
         if self.checkpoint_epoch != 0:
             checkpoint_ = torch.load(self.checkpoint)
-            self.eps_model.module.load_state_dict(checkpoint_)
+            self.eps_model.load_state_dict(checkpoint_)
+
+        # Distributed Data Parallel DDP
+        #self.eps_model = self.eps_model.to(self.gpu_id)
+        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
@@ -134,9 +134,10 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % self.n_steps == 0):
+                if ((t_+1) % 250 == 0):
                     # save sampled images
                     save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
+                    torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             # Log samples
             #if self.wandb:

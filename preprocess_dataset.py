@@ -17,10 +17,10 @@ class Data(Dataset):
     def __init__(self, path, mode='train', size=(128,128)):
 
         # only for validation
-        if mode == 'val':
-            torch.manual_seed(1)
-            torch.cuda.manual_seed_all(1)
-            random.seed(1)
+        #if mode == 'val':
+            #torch.manual_seed(1)
+            #torch.cuda.manual_seed_all(1)
+            #random.seed(1)
 
         self.dataset_name = {
             'train': path + "train",
