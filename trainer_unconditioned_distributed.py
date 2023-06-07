@@ -48,7 +48,7 @@ class Trainer():
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 64
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 5e-6
     # Weight decay rate
