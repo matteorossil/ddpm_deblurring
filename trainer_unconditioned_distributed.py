@@ -58,7 +58,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 2_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 16
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
@@ -68,8 +68,10 @@ class Trainer():
     dataset = '/home/mr6744/gopro_ALL_128/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch = 0
-    checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_233030/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch = 1500
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{checkpoint_epoch}.pt'
+    # track best loss
+    loss: float = 1.
 
     def init(self, rank: int):
         # gpu id
@@ -117,7 +119,7 @@ class Trainer():
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-    def sample(self, n_samples, epoch):
+    def sample(self, n_samples, epoch, loss):
         """
         ### Sample images
         """
@@ -136,10 +138,15 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 1800 == 0) or ((t_+1) % 1900 == 0) or ((t_+1) % 2000 == 0):
+                #if ((t_+1) % 2000 == 0):
                     # save sampled images
-                    save_image(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
-                    torch.save(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
+
+            min_val = x.min(-1)[0].min(-1)[0]
+            max_val = x.max(-1)[0].max(-1)[0]
+            x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
+            
+            save_image(x, os.path.join(self.exp_path, f'epoch{self.checkpoint_epoch+epoch}_t{t_+1}_l{loss}.png'))
+            save_image(x_norm, os.path.join(self.exp_path, f"epoch{self.checkpoint_epoch+epoch}_t{t_+1}_l{loss}_norm.png"))
 
             # Log samples
             #if self.wandb:
@@ -170,19 +177,24 @@ class Trainer():
             if self.wandb:
                 wandb.log({'loss': loss}, step=self.step)
 
+            return loss
+
     def run(self):
         """
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 20 == 0 and self.gpu_id == 0:
-                # Sample some images
-                self.sample(self.n_samples, epoch)
+
             # Train the model
-            self.train()
-            if (epoch+1) % 20 == 0 and self.gpu_id == 0:
-                # Save the eps model
-                    torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
+            loss = self.train()
+            loss = loss.item()
+
+            if (loss < self.loss) and (self.gpu_id == 0) and (epoch % 10 == 0):
+                self.loss = loss
+                self.sample(self.n_samples, epoch, loss)
+                torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch}.pt'))
+
+
 
 def ddp_setup(rank, world_size):
     """

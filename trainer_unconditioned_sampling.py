@@ -100,15 +100,15 @@ class Trainer():
                 x = self.diffusion.p_sample(x, t_vec)
 
                 # Normalize img
-                min_val = x.min(-1)[0].min(-1)[0]
-                max_val = x.max(-1)[0].max(-1)[0]
-                x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
+            min_val = x.min(-1)[0].min(-1)[0]
+            max_val = x.max(-1)[0].max(-1)[0]
+            x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
-                # save sampled images
-                if ((t_+1) % 2000 == 0):
-                    save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
-                    save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
-                    #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
+            # save sampled images
+            #if ((t_+1) % 2000 == 0):
+            save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+            save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
+            #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             return x
 
