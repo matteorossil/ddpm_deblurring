@@ -56,19 +56,19 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 1_000
+    epochs: int = 2_000
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 8
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
     store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
     #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    dataset = '/home/mr6744/gopro2/'
+    dataset = '/home/mr6744/gopro_ALL_128/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch = 1000
+    checkpoint_epoch = 0
     checkpoint = f'/home/mr6744/checkpoints_distributed/06062023_233030/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
