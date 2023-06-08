@@ -91,7 +91,7 @@ class Trainer():
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
 
-                print(t_)
+                #print(t_)
 
                 t = self.n_steps - t_ - 1
 
@@ -105,8 +105,8 @@ class Trainer():
                 x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
                 # Normalize noise per channel
-                min_val2 = x.min(-1)[0].min(-1)[0]
-                max_val2 = x.max(-1)[0].max(-1)[0]
+                min_val2 = x.min(-1)[0]
+                max_val2 = x.max(-1)[0]
                 x_norm2 = (x-min_val2[:,:,:,None])/(max_val2[:,:,:,None]-min_val2[:,:,:,None])
 
                 # save sampled images
