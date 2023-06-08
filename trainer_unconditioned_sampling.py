@@ -48,7 +48,8 @@ class Trainer():
     # Number of sample images
     n_samples: int = 1
     # checkpoint path
-    checkpoint = '/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_1250.pt'
+    epoch = 1250
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{epoch}.pt'
     # store sample
     sample = '/home/mr6744/checkpoints_distributed/06082023_001509/sampling/'
 
@@ -100,9 +101,9 @@ class Trainer():
                 t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                #if ((t_+1) % 1800 == 0) or ((t_+1) % 1900 == 0) or ((t_+1) % 2000 == 0):
-                    # save sampled images
-                    #save_image(x, self.sample + )
+                # save sampled images
+                if ((t_+1) % 100 == 0):
+                    save_image(x, self.sample + f"{t_+1}.png")
                     #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             return x
