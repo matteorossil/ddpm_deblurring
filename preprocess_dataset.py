@@ -60,8 +60,8 @@ class Data(Dataset):
             #save_image(s, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/train/sharp/'+str(idx)+'.png')
             #save_image(b, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/train/blur/'+str(idx)+'.png')
 
-            save_image(s, '/home/mr6744/gopro2/train/sharp/'+str(idx)+'.png')
-            save_image(b, '/home/mr6744/gopro2/train/blur/'+str(idx)+'.png')
+            save_image(s, '/home/mr6744/goproALL/train/sharp2/'+str(idx)+'.png')
+            save_image(b, '/home/mr6744/goproALL/train/blur2/'+str(idx)+'.png')
 
             return s, b
         
@@ -72,8 +72,8 @@ class Data(Dataset):
             #save_image(s, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/val/sharp/'+str(idx)+'.png')
             #save_image(b, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/val/blur/'+str(idx)+'.png')
 
-            save_image(s, '/home/mr6744/gopro2/val/sharp/'+str(idx)+'.png')
-            save_image(b, '/home/mr6744/gopro2/val/blur/'+str(idx)+'.png')
+            save_image(s, '/home/mr6744/goproALL/val/sharp/'+str(idx)+'.png')
+            save_image(b, '/home/mr6744/goproALL/val/blur/'+str(idx)+'.png')
 
             return s, b
 
