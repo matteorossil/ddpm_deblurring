@@ -99,21 +99,15 @@ class Trainer():
                 t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                # Normalize noise acrosss channels
+                # Normalize img
                 min_val = x.min(-1)[0].min(-1)[0]
                 max_val = x.max(-1)[0].max(-1)[0]
                 x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
-                # Normalize noise per channel
-                min_val2 = x.min(-1)[0]
-                max_val2 = x.max(-1)[0]
-                x_norm2 = (x-min_val2[:,:,:,None])/(max_val2[:,:,:,None]-min_val2[:,:,:,None])
-
                 # save sampled images
-                if ((t_+1) % 100 == 0):
+                if ((t_+1) % 2000 == 0):
                     save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
                     save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
-                    save_image(x_norm2, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm2.png"))
                     #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             return x
