@@ -48,11 +48,13 @@ class Trainer():
     # Number of sample images
     n_samples: int = 1
     # checkpoint path
-    checkpoint = f'/Users/m.rossi/Desktop/research/results/unconditioned/checkpoint_1150.pt'
+    checkpoint = '/Users/m.rossi/Desktop/research/results/unconditioned/checkpoint_1150.pt'
+    # store sample
+    sample = '/Users/m.rossi/Desktop/research/results/unconditioned/'
 
     def init(self):
         # device
-        self.device: torch.device = 'cpu' # change to 'cuda'
+        self.device: torch.device = 'cuda' # change to 'cuda'
 
         # Create $\epsilon_\theta(x_t, t)$ model
         self.eps_model = UNet(
@@ -64,7 +66,7 @@ class Trainer():
         ).to(self.device)
         
         #load cfrom checkpoint
-        checkpoint_ = torch.load(self.checkpoint)
+        checkpoint_ = torch.load(self.checkpoint, map_location=torch.device(self.device))
         self.eps_model.load_state_dict(checkpoint_)
 
         # Create DDPM class
@@ -90,6 +92,8 @@ class Trainer():
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
 
+                print(t_)
+
                 t = self.n_steps - t_ - 1
 
                 # Sample
@@ -98,7 +102,7 @@ class Trainer():
 
                 #if ((t_+1) % 1800 == 0) or ((t_+1) % 1900 == 0) or ((t_+1) % 2000 == 0):
                     # save sampled images
-                    #save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
+                    #save_image(x, self.sample + )
                     #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             return x
