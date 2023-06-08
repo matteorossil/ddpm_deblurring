@@ -7,19 +7,14 @@ import torch
 import torch.utils.data
 from diffusion.ddpm_unconditioned import DenoiseDiffusion
 from eps_models.unet_unconditioned import UNet
-from pathlib import Path
-from datetime import datetime
-import wandb
 import torch.nn.functional as F
 
 from dataset_unconditioned import Data
-from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
 import torch.multiprocessing as mp
-from torch.utils.data.distributed import DistributedSampler
-from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.distributed import init_process_group, destroy_process_group
+
+import sys
 
 class Trainer():
     """
@@ -48,7 +43,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 4
     # checkpoint path
-    epoch = 1350
+    epoch = int(sys.argv[1])
     checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{epoch}.pt'
     # store sample
     sampling_path = '/home/mr6744/checkpoints_distributed/06082023_001509/sampling/'
