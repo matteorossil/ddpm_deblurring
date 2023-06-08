@@ -124,6 +124,7 @@ class Trainer():
         with torch.no_grad():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
+            torch.cuda.manual_seed(0)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps

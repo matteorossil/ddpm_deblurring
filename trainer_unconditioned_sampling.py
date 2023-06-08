@@ -86,6 +86,7 @@ class Trainer():
         with torch.no_grad():
 
             # Sample Initial Image (Random Gaussian Noise)
+            torch.cuda.manual_seed(0)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
             print(x)
