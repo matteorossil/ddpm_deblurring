@@ -46,7 +46,7 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 2_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 2
     # checkpoint path
     epoch = 250
     checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{epoch}.pt'
@@ -85,9 +85,16 @@ class Trainer():
         """
         with torch.no_grad():
 
-            # Sample Initial Image (Random Gaussian Noise)
+            # Set seed for replicability
             torch.cuda.manual_seed(0)
+
+            # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
+
+            # Normalize noise
+            min_val = x.min(-1)[0].min(-1)[0]
+            max_val = x.max(-1)[0].max(-1)[0]
+            x = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
             print(x)
             
