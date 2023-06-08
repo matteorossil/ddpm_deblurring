@@ -48,9 +48,9 @@ class Trainer():
     # Number of sample images
     n_samples: int = 1
     # checkpoint path
-    checkpoint = '/Users/m.rossi/Desktop/research/results/unconditioned/checkpoint_1150.pt'
+    checkpoint = '/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_1250.pt'
     # store sample
-    sample = '/Users/m.rossi/Desktop/research/results/unconditioned/'
+    sample = '/home/mr6744/checkpoints_distributed/06082023_001509/sampling/'
 
     def init(self):
         # device
