@@ -67,7 +67,7 @@ class Trainer():
         ).to(self.device)
         
         #load cfrom checkpoint
-        checkpoint_ = torch.load(self.checkpoint, map_location=torch.device(self.device))
+        checkpoint_ = torch.load(self.checkpoint)
         self.eps_model.load_state_dict(checkpoint_)
 
         # Create DDPM class
