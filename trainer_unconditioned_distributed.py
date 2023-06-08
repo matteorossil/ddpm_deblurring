@@ -43,14 +43,14 @@ class Trainer():
     is_attention: List[int] = [False, False, False, False]
     attention_middle: List[int] = [False]
     # Number of time steps $T$
-    n_steps: int = 1_000
+    n_steps: int = 2_000
     # noise scheduler
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
     # Batch size
     batch_size: int = 32
     # Learning rate
-    learning_rate: float = 1e-3
+    learning_rate: float = 1e-5
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -136,7 +136,7 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 800 == 0) or ((t_+1) % 900 == 0) or ((t_+1) % 1000 == 0):
+                if ((t_+1) % 1800 == 0) or ((t_+1) % 1900 == 0) or ((t_+1) % 2000 == 0):
                     # save sampled images
                     save_image(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.png'))
                     torch.save(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
