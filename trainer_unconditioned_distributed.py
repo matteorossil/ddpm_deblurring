@@ -40,8 +40,8 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
+    is_attention: List[int] = [False, False, False, True]
+    attention_middle: List[int] = [True]
     # Number of time steps $T$
     n_steps: int = 2_000
     # noise scheduler
@@ -124,7 +124,6 @@ class Trainer():
         with torch.no_grad():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            torch.cuda.manual_seed(0)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
@@ -180,7 +179,7 @@ class Trainer():
                 self.sample(self.n_samples, epoch)
             # Train the model
             self.train()
-            if (epoch+1) % 50 == 0 and self.gpu_id == 0:
+            if (epoch+1) % 20 == 0 and self.gpu_id == 0:
                 # Save the eps model
                     torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
 
@@ -208,5 +207,5 @@ def main(rank: int, world_size:int):
 
 if __name__ == "__main__":
     #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 2
+    world_size = 1
     mp.spawn(main, args=(world_size,), nprocs=world_size)
