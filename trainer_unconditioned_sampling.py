@@ -41,9 +41,9 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 2_000
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = int(sys.argv[1])
     # checkpoint path
-    epoch = int(sys.argv[1])
+    epoch = int(sys.argv[2])
     checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{epoch}.pt'
     # store sample
     sampling_path = '/home/mr6744/checkpoints_distributed/06082023_001509/sampling/'
