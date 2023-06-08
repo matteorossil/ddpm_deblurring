@@ -91,11 +91,6 @@ class Trainer():
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
-            # Normalize noise
-            min_val = x.min(-1)[0].min(-1)[0]
-            max_val = x.max(-1)[0].max(-1)[0]
-            x = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
-
             print(x)
             
             # Remove noise for $T$ steps
@@ -109,9 +104,15 @@ class Trainer():
                 t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
+                # Normalize noise
+                min_val = x.min(-1)[0].min(-1)[0]
+                max_val = x.max(-1)[0].max(-1)[0]
+                x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
+
                 # save sampled images
                 if ((t_+1) % 100 == 0):
                     save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+                    save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
                     #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             return x
