@@ -86,12 +86,12 @@ class Trainer():
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
-            print(x)
+            #print(x)
             
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
 
-                #print(t_)
+                print(t_)
 
                 t = self.n_steps - t_ - 1
 
