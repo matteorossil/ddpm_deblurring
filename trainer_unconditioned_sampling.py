@@ -44,9 +44,9 @@ class Trainer():
     n_samples: int = int(sys.argv[1])
     # checkpoint path
     epoch = int(sys.argv[2])
-    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_154141/checkpoint_{epoch}.pt'
     # store sample
-    sampling_path = '/home/mr6744/checkpoints_distributed/06082023_001509/sampling/'
+    sampling_path = '/home/mr6744/checkpoints_distributed/06082023_154141/sampling/'
 
     def init(self):
         # device
@@ -108,7 +108,6 @@ class Trainer():
             #if ((t_+1) % 2000 == 0):
             save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
             save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
-            #torch.save(x, os.path.join(self.exp_path, f'epoch{epoch}_gpu{self.gpu_id}_t{t_+1}.pt'))
 
             return x
 
