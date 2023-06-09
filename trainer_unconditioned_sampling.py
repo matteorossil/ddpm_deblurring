@@ -87,6 +87,7 @@ class Trainer():
             #x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
             x = torch.load('xt.pt')
+            x = x.to(self.device)
 
             #print(x)
             
