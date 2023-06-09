@@ -68,8 +68,8 @@ class Trainer():
     dataset = '/home/mr6744/gopro_ALL_128/'
     #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch = 1500
-    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_001509/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch = 3500
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_154141/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
