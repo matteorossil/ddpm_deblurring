@@ -39,7 +39,7 @@ class Trainer():
     # Define sampling
 
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # Number of sample images
     n_samples: int = int(sys.argv[1])
     # checkpoint path
