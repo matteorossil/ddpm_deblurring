@@ -138,13 +138,13 @@ class Trainer():
 
                 if ((t_+1) % 2000 == 0):
                     # save sampled images
-                    save_image(x.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}.png'))
+                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}.png'))
 
                     min_val = x.min(-1)[0].min(-1)[0]
                     max_val = x.max(-1)[0].max(-1)[0]
                     x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
-                    save_image(x_norm.to("cpu"), os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}_norm.png'))
+                    save_image(x_norm, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}_norm.png'))
 
             # Log samples
             #if self.wandb:

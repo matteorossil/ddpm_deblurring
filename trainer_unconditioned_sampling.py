@@ -84,7 +84,9 @@ class Trainer():
             torch.cuda.manual_seed(0)
 
             # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
+            #x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
+
+            x = torch.load('xt.pt')
 
             #print(x)
             
@@ -100,14 +102,14 @@ class Trainer():
                 x = self.diffusion.p_sample(x, t_vec)
 
             # Normalize img
-            min_val = x.min(-1)[0].min(-1)[0]
-            max_val = x.max(-1)[0].max(-1)[0]
-            x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
+            #min_val = x.min(-1)[0].min(-1)[0]
+            #max_val = x.max(-1)[0].max(-1)[0]
+            #x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
             # save sampled images
-            #if ((t_+1) % 2000 == 0):
-            save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
-            save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
+            if ((t_+1) % 1000 == 0):
+                save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+            #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
 
             return x
 
