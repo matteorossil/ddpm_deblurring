@@ -44,9 +44,9 @@ class Trainer():
     n_samples: int = int(sys.argv[1])
     # checkpoint path
     epoch = int(sys.argv[2])
-    checkpoint = f'/home/mr6744/checkpoints_distributed/06082023_154141/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{epoch}.pt'
     # store sample
-    sampling_path = '/home/mr6744/checkpoints_distributed/06082023_154141/sampling/'
+    sampling_path = '/home/mr6744/checkpoints_distributed/06092023_132041/sampling/'
 
     def init(self):
         # device
