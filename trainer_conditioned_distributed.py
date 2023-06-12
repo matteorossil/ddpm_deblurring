@@ -64,15 +64,15 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
-    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
+    #store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
     # where to training and validation data is stored
-    #dataset: str = '/scratch/mr6744/pytorch/gopro_128'
-    dataset: str = '/home/mr6744/gopro_128/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_128'
+    #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_epoch: int = 0
-    #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
-    checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
@@ -86,8 +86,8 @@ class Trainer():
             is_attn=self.is_attention,
         ).to(self.gpu_id)
 
-        # initial prediction x_init
         '''
+        # initial prediction x_init
         self.predictor = UNet_S(
             image_channels=self.image_channels, # *2 because we concatenate y
             n_channels=self.n_channels,
@@ -244,6 +244,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 1
+    world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    #world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)
