@@ -4,10 +4,10 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
 #SBATCH --time=1:00:00
-#SBATCH --mem=20GB
+#SBATCH --mem=40GB
 #SBATCH --gres=gpu:1
-#SBATCH --job-name=deblur_sample
-#SBATCH --output=output_slurm/%j.out
+#SBATCH --job-name=sampling
+#SBATCH --output=/scratch/mr6744/pytorch/outputs_slurm/%j.out
 
 module purge
 
