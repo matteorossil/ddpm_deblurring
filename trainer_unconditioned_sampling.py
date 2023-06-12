@@ -108,7 +108,7 @@ class Trainer():
                 #x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
                 # save sampled images
-                if ((t_+1) % 10 == 0):
+                if ((t_+1) % self.n_steps == 0):
                     save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
                     #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
 
