@@ -70,7 +70,7 @@ class Trainer():
     #dataset: str = '/home/mr6744/gopro_ALL_128/'
     #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch: int = 7500
+    checkpoint_epoch: int = 9620
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
