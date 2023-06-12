@@ -7,11 +7,11 @@
 #SBATCH --mem=20GB
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=deblur_sample
-#SBATCH --output=slurm_%j.out
+#SBATCH --output=output_slurm/%j.out
 
 module purge
 
 singularity exec --nv \
 	    --overlay /scratch/mr6744/pytorch/overlay-25GB-500K.ext3:ro \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
-	    /bin/bash -c "source /ext3/env.sh; python trainer_unconditional_sampling.py 2000 64 9480"
+	    /bin/bash -c "source /ext3/env.sh; python trainer_unconditioned_sampling.py 2000 64 9480"
