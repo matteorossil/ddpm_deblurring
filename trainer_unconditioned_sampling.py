@@ -81,13 +81,13 @@ class Trainer():
         with torch.no_grad():
 
             # Set seed for replicability
-            torch.cuda.manual_seed(0)
+            torch.cuda.manual_seed_all(0)
 
             # Sample Initial Image (Random Gaussian Noise)
-            #x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
+            x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
-            x = torch.load('xt.pt')
-            x = x.to(self.device)
+            #x = torch.load('xt.pt')
+            #x = x.to(self.device)
 
             #print(x)
             
