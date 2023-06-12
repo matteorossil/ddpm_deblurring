@@ -5,14 +5,15 @@ from typing import List
 import os
 import torch
 import torch.utils.data
-from diffusion.ddpm_unconditioned import DenoiseDiffusion
-from eps_models.unet_unconditioned import UNet
+from diffusion.ddpm_conditioned import DenoiseDiffusion
+from eps_models.unet_conditioned import UNet as UNet_C # conditioned
+from eps_models.unet_predictor import UNet as UNet_S # simple Unet (doesn't take t as param)
 from pathlib import Path
 from datetime import datetime
 import wandb
 import torch.nn.functional as F
 
-from dataset_unconditioned import Data
+from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
@@ -20,11 +21,12 @@ import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
- 
+
 def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
+
 
 class Trainer():
     """
@@ -40,12 +42,12 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
+    is_attention: List[int] = [False, False, False, True]
     # Number of time steps $T$
     n_steps: int = 2_000
-    # noise scheduler
+    # noise scheduler Beta_0
     beta_0 = 1e-6 # 0.000001
+    # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
     batch_size: int = 64
@@ -58,64 +60,82 @@ class Trainer():
     # Number of training epochs
     epochs: int = 10_000
     # Number of sample images
-    n_samples: int = 64
+    n_samples: int = 8
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_distributed/'
-    #store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
-    #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned'
+    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_ALL_128/'
-    #dataset: str = '/home/mr6744/gopro_ALL_128/'
-    #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
+    dataset: str = '/home/mr6744/gopro_128/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_128'
+    #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch: int = 9740
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
-    #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 0
+    checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
         self.gpu_id = rank
 
         # Create $\epsilon_\theta(x_t, t)$ model
-        self.eps_model = UNet(
-            image_channels=self.image_channels,
+        self.eps_model = UNet_C(
+            image_channels=self.image_channels*2, # *2 because we concatenate xt with y
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention,
-            attn_middle=self.attention_middle
-        )
+        ).to(self.gpu_id)
+
+        # initial prediction x_init
+        '''
+        self.predictor = UNet_S(
+            image_channels=self.image_channels, # *2 because we concatenate y
+            n_channels=self.n_channels,
+            ch_mults=self.channel_multipliers,
+            is_attn=self.is_attention,
+        ).to(self.gpu_id)
+        '''
 
         self.eps_model = self.eps_model.to(self.gpu_id)
         self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
-        # only load checpoint if model is trained
+        # only loads checkpoint if model is trained
         if self.checkpoint_epoch != 0:
-            #map_location = {'cuda:%d' % 0: 'cuda:%d' % self.gpu_id}
-            #checkpoint_ = torch.load(self.checkpoint, map_location=map_location)
             checkpoint_ = torch.load(self.checkpoint)
             self.eps_model.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
             eps_model=self.eps_model,
+            predictor=self.predictor,
             n_steps=self.n_steps,
             device=self.gpu_id,
             beta_0=self.beta_0,
             beta_T=self.beta_T
         )
-        # Create dataloader
-        dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        self.data_loader = DataLoader(dataset=dataset,
-                                    batch_size=self.batch_size,
-                                    num_workers=os.cpu_count() // 4,
-                                    drop_last=True,
-                                    shuffle=False,
-                                    pin_memory=False,
-                                    sampler=DistributedSampler(dataset)) # assures no overlapping samples
+        # Create dataloader (shuffle False for validation)
+        dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+
+        self.data_loader_train = DataLoader(dataset=dataset_train,
+                                            batch_size=self.batch_size, 
+                                            num_workers=os.cpu_count() // 4,
+                                            drop_last=True, 
+                                            shuffle=False, 
+                                            pin_memory=False,
+                                            sampler=DistributedSampler(dataset_train))
+        
+        self.data_loader_val = DataLoader(dataset=dataset_val, 
+                                          batch_size=self.n_samples, 
+                                          num_workers=os.cpu_count() // 4, 
+                                          drop_last=True, 
+                                          shuffle=False, 
+                                          pin_memory=False,
+                                          sampler=DistributedSampler(dataset_val))
 
         # Create optimizer
+        #params = list(self.eps_model.parameters()) + list(self.predictor.parameters())
         self.optimizer = torch.optim.AdamW(self.eps_model.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
@@ -125,33 +145,43 @@ class Trainer():
         ### Sample images
         """
         with torch.no_grad():
+
+            sharp, blur = next(iter(self.data_loader_val))
+            # push to device
+            sharp = sharp.to(self.gpu_id)
+            blur = blur.to(self.gpu_id)
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            torch.cuda.manual_seed(0)
-            x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
+            x = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
-            #for t_ in range(self.n_steps):
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
-
-                if ((t_+1) % 2000 == 0):
-                    # save sampled images
-                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}.png'))
-
-                    min_val = x.min(-1)[0].min(-1)[0]
-                    max_val = x.max(-1)[0].max(-1)[0]
-                    x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
-
-                    save_image(x_norm, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}_norm.png'))
-
+                x = self.diffusion.p_sample(x, blur, t_vec)
             # Log samples
-            #if self.wandb:
-                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
+            if self.wandb:
+                wandb.log({'samples': wandb.Image(x)}, step=self.step)
+
+            # save sharp images
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
+
+            # save blur images
+            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
+
+            # save x_init
+            save_image(self.diffusion.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_X_init.png'))
+
+            # save true z0
+            save_image(sharp - self.diffusion.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
+
+            # save result (no summation)
+            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_Z.png'))
+
+            # save result (with summation)
+            save_image(self.diffusion.predictor(blur) + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
 
             return x
 
@@ -160,21 +190,21 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        for batch_idx, sharp in enumerate(self.data_loader):
+        for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
             # Increment global step
             self.step += 1
             # Move data to device
             sharp = sharp.to(self.gpu_id)
+            blur = blur.to(self.gpu_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
             # Calculate loss
-            loss = self.diffusion.loss(sharp)
+            loss = self.diffusion.loss(sharp, blur)
             # Compute gradients
             loss.backward()
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
-            #print('loss:', loss, 'step:', self.step)
             if self.wandb:
                 wandb.log({'loss': loss}, step=self.step)
 
@@ -183,12 +213,23 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
+            if epoch % 5 == 0:
+                # Sample some images
+                self.sample(self.n_samples, epoch)
+            # Train the model
+            self.train()
+            if (epoch+1) % 10 == 0:
+                # Save the eps model
+                torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
+
+        for epoch in range(self.epochs):
             # Train the model
             self.train()
             if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
                 torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
+                # save also for initial predictor later
 
 def ddp_setup(rank, world_size):
     """

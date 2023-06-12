@@ -16,7 +16,7 @@ class DenoiseDiffusion:
     ## Denoise Diffusion
     """
 
-    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device):
+    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device, beta_0: float, beta_T: float):
         """
         * `eps_model` is $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$ model
         * `n_steps` is $t$
@@ -28,7 +28,7 @@ class DenoiseDiffusion:
         self.predictor = predictor
 
         # Create $\beta_1, \dots, \beta_T$ linearly increasing variance schedule
-        self.beta = torch.linspace(0.0001, 0.02, n_steps).to(device)
+        self.beta = torch.linspace(beta_0, beta_T, n_steps).to(device)
 
         # $\alpha_t = 1 - \beta_t$
         self.alpha = 1. - self.beta
@@ -130,8 +130,9 @@ class DenoiseDiffusion:
             noise = torch.randn_like(sharp)
 
         # Sample $x_t$ for $q(x_t|x_0)$
-        x_init = self.predictor(blur)
-        diff = sharp - x_init
+        # x_init = self.predictor(blur)
+        #diff = sharp - x_init
+        diff = sharp - blur
         xt = self.q_sample(diff, t, eps=noise)
         # concatenate channel wise
         xt = torch.cat((xt, blur), 1)
