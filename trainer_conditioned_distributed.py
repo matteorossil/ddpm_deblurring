@@ -64,16 +64,15 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
     # where to training and validation data is stored
-    dataset: str = '/home/mr6744/gopro_128/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro_128'
-    #dataset = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
+    dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_epoch: int = 0
-    checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
@@ -152,6 +151,7 @@ class Trainer():
             blur = blur.to(self.gpu_id)
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
+            torch.cuda.manual_seed(0)
             x = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
@@ -162,26 +162,24 @@ class Trainer():
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, blur, t_vec)
             # Log samples
-            if self.wandb:
-                wandb.log({'samples': wandb.Image(x)}, step=self.step)
+            #if self.wandb:
+                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
-            # save sharp images
-            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
+            if epoch == 0:
+                # save sharp images
+                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_X.png'))
 
-            # save blur images
-            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
+                # save blur images
+                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_Y.png'))
 
-            # save x_init
-            save_image(self.diffusion.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_X_init.png'))
+                # save true z0
+                save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_Z.png'))
 
-            # save true z0
-            save_image(sharp - self.diffusion.predictor(blur), os.path.join(self.exp_path, f'epoch_{epoch}_true_Z.png'))
-
-            # save result (no summation)
-            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_Z.png'))
-
-            # save result (with summation)
-            save_image(self.diffusion.predictor(blur) + x, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_X.png'))
+            # sampled z
+            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_Z_hat.png'))
+            
+            # sampled x
+            save_image(blur + x, os.path.join(self.exp_path, f'epoch_{epoch}_X_hat.png'))
 
             return x
 
@@ -213,16 +211,8 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if epoch % 5 == 0:
-                # Sample some images
-                self.sample(self.n_samples, epoch)
-            # Train the model
-            self.train()
-            if (epoch+1) % 10 == 0:
-                # Save the eps model
-                torch.save(self.eps_model.state_dict(), os.path.join(self.exp_path, f'checkpoint_{epoch+1}.pt'))
-
-        for epoch in range(self.epochs):
+            if (epoch == 0) and (self.gpu_id == 0):
+                self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
             if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
@@ -254,6 +244,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    #world_size = 2
+    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    world_size = 1
     mp.spawn(main, args=(world_size,), nprocs=world_size)
