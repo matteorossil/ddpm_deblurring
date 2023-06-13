@@ -247,7 +247,7 @@ class Upsample(nn.Module):
         # `t` is not used, but it's kept in the arguments because for the attention layer function signature
         # to match with `ResidualBlock`.
         _ = t
-        return self.conv(x)
+        return self.conv(x).contiguous()
 
 
 class Downsample(nn.Module):
