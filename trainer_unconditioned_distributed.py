@@ -96,7 +96,7 @@ class Trainer():
             #map_location = {'cuda:%d' % 0: 'cuda:%d' % self.gpu_id}
             #checkpoint_ = torch.load(self.checkpoint, map_location=map_location)
             checkpoint_ = torch.load(self.checkpoint)
-            self.eps_model.load_state_dict(checkpoint_)
+            self.eps_model.module.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(

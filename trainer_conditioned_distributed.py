@@ -95,6 +95,7 @@ class Trainer():
             is_attn=self.is_attention,
         ).to(self.gpu_id)
         '''
+        self.predictor = None
 
         self.eps_model = self.eps_model.to(self.gpu_id)
         self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
