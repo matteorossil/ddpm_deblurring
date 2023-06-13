@@ -103,7 +103,7 @@ class Trainer():
         # only loads checkpoint if model is trained
         if self.checkpoint_epoch != 0:
             checkpoint_ = torch.load(self.checkpoint)
-            self.eps_model.load_state_dict(checkpoint_)
+            self.eps_model.module.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
