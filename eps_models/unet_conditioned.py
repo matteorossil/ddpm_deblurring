@@ -143,7 +143,7 @@ class AttentionBlock(nn.Module):
         # Get shape
         batch_size, n_channels, height, width = x.shape
         # Change `x` to shape `[batch_size, seq, n_channels]`
-        x = x.view(batch_size, n_channels, -1).permute(0, 2, 1).contiguous()
+        x = x.view(batch_size, n_channels, -1).permute(0, 2, 1).contiguous() # contiguous added for DDP
         # Get query, key, and values (concatenated) and shape it to `[batch_size, seq, n_heads, 3 * d_k]`
         qkv = self.projection(x).view(batch_size, -1, self.n_heads, 3 * self.d_k)
         # Split query, key, and values. Each of them will have shape `[batch_size, seq, n_heads, d_k]`
@@ -163,7 +163,7 @@ class AttentionBlock(nn.Module):
         res += x
 
         # Change to shape `[batch_size, in_channels, height, width]`
-        res = res.permute(0, 2, 1).contiguous().view(batch_size, n_channels, height, width)
+        res = res.permute(0, 2, 1).contiguous().view(batch_size, n_channels, height, width) # contiguous added for DDP
 
         #
         return res
