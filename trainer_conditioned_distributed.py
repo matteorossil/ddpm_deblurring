@@ -194,6 +194,7 @@ class Trainer():
         for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
             # Increment global step
             self.step += 1
+            print("step", self.step)
             # Move data to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
