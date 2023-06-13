@@ -50,7 +50,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 2
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -120,7 +120,7 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=1,
+                                            num_workers=2,
                                             #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
@@ -129,7 +129,7 @@ class Trainer():
         
         self.data_loader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
-                                          num_workers=1, 
+                                          num_workers=0, 
                                           #num_workers=os.cpu_count() // 4, 
                                           drop_last=True, 
                                           shuffle=False, 
