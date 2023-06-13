@@ -62,7 +62,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 16
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # where to store the checkpoints
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
@@ -248,7 +248,7 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb:
+    if trainer.wandb and rank==0:
         wandb.init()
     trainer.init(rank) # initialize trainer class
     trainer.run() # perform training
@@ -256,5 +256,5 @@ def main(rank: int, world_size:int):
 
 if __name__ == "__main__":
     #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 1
+    world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)
