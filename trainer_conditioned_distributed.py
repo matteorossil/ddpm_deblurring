@@ -98,7 +98,7 @@ class Trainer():
         self.predictor = None
 
         self.eps_model = self.eps_model.to(self.gpu_id)
-        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
+        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id], find_unused_parameters=True)
 
         # only loads checkpoint if model is trained
         if self.checkpoint_epoch != 0:
@@ -120,7 +120,8 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=os.cpu_count() // 4,
+                                            num_workers=1,
+                                            #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
@@ -128,7 +129,8 @@ class Trainer():
         
         self.data_loader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
-                                          num_workers=os.cpu_count() // 4, 
+                                          num_workers=1, 
+                                          #num_workers=os.cpu_count() // 4, 
                                           drop_last=True, 
                                           shuffle=False, 
                                           pin_memory=False,
