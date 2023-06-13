@@ -64,15 +64,15 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
-    #store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
+    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
-    #dataset: str = '/home/mr6744/gopro_128/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_epoch: int = 0
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/checkpoint_{checkpoint_epoch}.pt'
-    #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
