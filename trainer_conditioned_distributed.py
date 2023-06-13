@@ -203,6 +203,12 @@ class Trainer():
             loss = self.diffusion.loss(sharp, blur)
             # Compute gradients
             loss.backward()
+
+            # Take an optimization step
+            for name, param in self.eps_model.named_parameters():
+                if param.grad is None:
+                    print(name)
+                    
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
