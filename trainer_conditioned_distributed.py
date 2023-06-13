@@ -50,7 +50,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 4
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -62,7 +62,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 16
     # Use wandb
-    wandb: bool = True
+    wandb: bool = False
     # where to store the checkpoints
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
@@ -208,7 +208,7 @@ class Trainer():
             for name, param in self.eps_model.named_parameters():
                 if param.grad is None:
                     print(name)
-                    
+
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
@@ -246,7 +246,7 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb and rank==0:
+    if trainer.wandb:
         wandb.init()
     trainer.init(rank) # initialize trainer class
     trainer.run() # perform training
@@ -254,5 +254,5 @@ def main(rank: int, world_size:int):
 
 if __name__ == "__main__":
     #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 2
+    world_size = 1
     mp.spawn(main, args=(world_size,), nprocs=world_size)
