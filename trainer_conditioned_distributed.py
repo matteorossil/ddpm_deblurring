@@ -50,7 +50,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -60,7 +60,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 10_000
     # Number of sample images
-    n_samples: int = 16
+    n_samples: int = 1
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
