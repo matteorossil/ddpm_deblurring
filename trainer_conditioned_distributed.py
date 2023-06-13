@@ -98,7 +98,7 @@ class Trainer():
         self.predictor = None
 
         self.eps_model = self.eps_model.to(self.gpu_id)
-        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id], find_unused_parameters=True)
+        self.eps_model = DDP(self.eps_model, device_ids=[self.gpu_id])
 
         # only loads checkpoint if model is trained
         if self.checkpoint_epoch != 0:
