@@ -194,7 +194,6 @@ class Trainer():
         for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
             # Increment global step
             self.step += 1
-            print("gpu:", self.gpu_id)
             # Move data to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
@@ -204,13 +203,6 @@ class Trainer():
             loss = self.diffusion.loss(sharp, blur)
             # Compute gradients
             loss.backward()
-
-            # Take an optimization step
-            for name, param in self.eps_model.named_parameters():
-                if param.grad is None:
-                    print(name)
-            print("pass")
-
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
