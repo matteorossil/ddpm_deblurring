@@ -208,6 +208,7 @@ class Trainer():
             for name, param in self.eps_model.named_parameters():
                 if param.grad is None:
                     print(name)
+            print("pass")
 
             # Take an optimization step
             self.optimizer.step()
