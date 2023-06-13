@@ -62,7 +62,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 16
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # where to store the checkpoints
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
@@ -240,7 +240,7 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb:
+    if trainer.wandb and rank==0:
         wandb.init()
     trainer.init(rank) # initialize trainer class
     trainer.run() # perform training
