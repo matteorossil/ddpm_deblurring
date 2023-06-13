@@ -248,7 +248,7 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb and rank==0:
+    if trainer.wandb:
         wandb.init()
     trainer.init(rank) # initialize trainer class
     trainer.run() # perform training
