@@ -216,7 +216,7 @@ class UNet(nn.Module):
             # `n_blocks` at the same resolution
             out_channels = n_channels * ch_mults[i]
             for _ in range(n_blocks):
-                up.append(UpBlock(in_channels, out_channels, n_channels))
+                up.append(UpBlock(in_channels, out_channels, out_channels))
                 in_channels = out_channels
 
         # Combine the set of modules
