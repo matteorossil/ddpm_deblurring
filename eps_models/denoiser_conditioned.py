@@ -185,7 +185,7 @@ class UNet(nn.Module):
         # Number of resolutions
         n_resolutions = len(ch_mults)
 
-        # Time embedding layer. Time embedding has `n_channels * 4` channels
+        # Time embedding layer. Time embedding has `n_channels` channels
         self.noise_emb = NoiseEmbedding(n_channels)
 
         # Project image into feature map
@@ -201,7 +201,7 @@ class UNet(nn.Module):
             out_channels = n_channels * ch_mults[i]
             # Add `n_blocks`
             for _ in range(n_blocks):
-                down.append(DownBlock(in_channels, out_channels, n_channels * 4))
+                down.append(DownBlock(in_channels, out_channels, n_channels))
                 in_channels = out_channels
 
         # Combine the set of modules
@@ -216,7 +216,7 @@ class UNet(nn.Module):
             # `n_blocks` at the same resolution
             out_channels = n_channels * ch_mults[i]
             for _ in range(n_blocks):
-                up.append(UpBlock(in_channels, out_channels, n_channels * 4))
+                up.append(UpBlock(in_channels, out_channels, n_channels))
                 in_channels = out_channels
 
         # Combine the set of modules
