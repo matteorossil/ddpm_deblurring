@@ -250,7 +250,7 @@ class UNet(nn.Module):
 
         print(a_bar.shape)
         # Final normalization and convolution
-        return self.noise_proj(x + a_bar)
+        return self.noise_proj(x + a_bar[:, :, None, None])
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         """
