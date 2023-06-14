@@ -72,7 +72,7 @@ class Trainer():
     #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
     checkpoint_epoch: int = int(sys.argv[1])
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_195350/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_143449/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
