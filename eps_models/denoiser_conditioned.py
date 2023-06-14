@@ -125,6 +125,8 @@ class ResidualBlockUp(nn.Module):
         h1 = self.conv1_1x1(self.upsample1(x))
 
         print((self.conv2_3x3(self.upsample2(self.act1(x)))).shape)
+        print((self.act2(a_bar)).shape)
+
         print((self.noise_emb(self.act2(a_bar))).shape)
 
         h2 = self.conv2_3x3(self.upsample2(self.act1(x))) + self.noise_emb(self.act2(a_bar))[:, :, None, None]
