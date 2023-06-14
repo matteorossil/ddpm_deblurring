@@ -219,7 +219,7 @@ class UNet(nn.Module):
         # For each resolution
         for i in reversed(range(1, n_resolutions)):
             # `n_blocks` at the same resolution
-            out_channels = n_channels * ch_mults[i]
+            out_channels = n_channels * ch_mults[i-1]
             for _ in range(n_blocks):
                 up.append(UpBlock(in_channels, out_channels, n_channels))
                 in_channels = out_channels
