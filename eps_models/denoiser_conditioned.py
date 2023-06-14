@@ -124,11 +124,6 @@ class ResidualBlockUp(nn.Module):
         """
         h1 = self.conv1_1x1(self.upsample1(x))
 
-        print((self.conv2_3x3(self.upsample2(self.act1(x)))).shape)
-        print((self.act2(a_bar)).shape)
-
-        print((self.noise_emb(self.act2(a_bar))).shape)
-
         h2 = self.conv2_3x3(self.upsample2(self.act1(x))) + self.noise_emb(self.act2(a_bar))[:, :, None, None]
 
         h3 = self.conv3_3x3(self.dropout(self.act3(h2)))
@@ -238,17 +233,22 @@ class UNet(nn.Module):
         # First half of U-Net
         for m in self.down:
             x = m(x, a_bar)
+            print(x.shape)
             h.append(x)
 
         # Middle (bottom)
         x = h.pop()
 
+        print()
+        
         # Second half of U-Net
         for m in self.up:
             x = m(x, a_bar)
+            print(x.shape)
             s = h.pop()
             x = x + s
 
+        print(a_bar.shape)
         # Final normalization and convolution
         return self.noise_proj(x + a_bar)
 
