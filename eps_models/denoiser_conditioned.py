@@ -115,7 +115,7 @@ class ResidualBlockUp(nn.Module):
 
         self.dropout = nn.Dropout(p=0.2)
 
-        self.noise_emb = nn.Linear(noise_channels, in_channels)
+        self.noise_emb = nn.Linear(noise_channels, out_channels)
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         """
