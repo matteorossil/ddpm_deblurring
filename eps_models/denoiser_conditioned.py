@@ -115,7 +115,7 @@ class ResidualBlockUp(nn.Module):
 
         self.dropout = nn.Dropout(p=0.2)
 
-        self.noise_emb = nn.Linear(noise_channels, out_channels)
+        self.noise_emb = nn.Linear(noise_channels, in_channels)
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         """
@@ -221,7 +221,7 @@ class UNet(nn.Module):
             # `n_blocks` at the same resolution
             out_channels = n_channels * ch_mults[i]
             for _ in range(n_blocks):
-                up.append(UpBlock(in_channels, out_channels, out_channels))
+                up.append(UpBlock(in_channels, out_channels, n_channels))
                 in_channels = out_channels
 
         # Combine the set of modules
