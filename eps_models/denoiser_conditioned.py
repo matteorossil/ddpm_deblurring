@@ -207,6 +207,8 @@ class UNet(nn.Module):
         # Combine the set of modules
         self.down = nn.ModuleList(down)
 
+        self.middle = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1,1))
+
         # #### Second half of U-Net - increasing resolution
         up = []
         # Number of channels
@@ -233,13 +235,11 @@ class UNet(nn.Module):
         # First half of U-Net
         for m in self.down:
             x = m(x, a_bar)
-            print(x.shape)
             h.append(x)
 
         # Middle (bottom)
         x = h.pop()
-
-        print()
+        x = self.middle(x)
         
         # Second half of U-Net
         for m in self.up:
@@ -248,7 +248,6 @@ class UNet(nn.Module):
             s = h.pop()
             x = x + s
 
-        print(a_bar.shape)
         # Final normalization and convolution
         return self.noise_proj(x + a_bar[:, :, None, None])
 
@@ -257,7 +256,6 @@ class UNet(nn.Module):
         * `x` has shape `[batch_size, in_channels, height, width]`
         * `t` has shape `[batch_size]`
         """
-
         # Get noise embeddings
         a_bar = self.noise_emb(a_bar)
 
