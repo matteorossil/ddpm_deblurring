@@ -129,6 +129,42 @@ class ResidualBlockUp(nn.Module):
         h3 = self.conv3_3x3(self.dropout(self.act3(h2)))
 
         return h1 + h3
+    
+class ResidualBlockMiddle(nn.Module):
+    """
+    ### Residual block
+
+    A residual block has two convolution layers with group normalization.
+    Each resolution is processed with two residual blocks.
+    """
+
+    def __init__(self, in_channels: int, out_channels: int, noise_channels: int):
+        """
+        * `in_channels` is the number of input channels
+        * `out_channels` is the number of input channels
+        * `time_channels` is the number channels in the time step ($t$) embeddings
+        """
+        super().__init__()
+
+        self.act1 = Swish()
+        self.act2 = Swish()
+
+        self.conv1_1x1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, 1))
+        self.conv2_3x3 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.conv3_3x3 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+
+        self.dropout = nn.Dropout(p=0.2)
+
+    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
+        """
+        * `x` has shape `[batch_size, in_channels, height, width]`
+        * `t` has shape `[batch_size, time_channels]`
+        """
+        h1 = self.conv1_1x1(x)
+
+        h2 = self.conv3_3x3(self.dropout(self.act2(self.conv2_3x3(self.act1(x)))))
+
+        return h1 + h2
 
 class DownBlock(nn.Module):
     """
@@ -161,6 +197,23 @@ class UpBlock(nn.Module):
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         x = self.res(x, a_bar)
+        return x
+    
+class MiddleBlock(nn.Module):
+    """
+    ### Up block
+
+    This combines `ResidualBlock`. These are used in the second half of U-Net at each resolution.
+    """
+
+    def __init__(self, in_channels: int, out_channels: int):
+        super().__init__()
+        # The input has `in_channels + out_channels` because we concatenate the output of the same resolution
+        # from the first half of the U-Net
+        self.res = ResidualBlockMiddle(in_channels, out_channels)
+
+    def forward(self, x: torch.Tensor):
+        x = self.res(x)
         return x
 
 
@@ -207,7 +260,7 @@ class UNet(nn.Module):
         # Combine the set of modules
         self.down = nn.ModuleList(down)
 
-        self.middle = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1,1))
+        self.middle = MiddleBlock(in_channels, out_channels)
 
         # #### Second half of U-Net - increasing resolution
         up = []
