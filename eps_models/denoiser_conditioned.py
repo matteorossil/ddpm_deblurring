@@ -154,7 +154,8 @@ class UNet(nn.Module):
         n_resolutions = len(ch_mults)
 
         # Time embedding layer. Time embedding has `n_channels` channels
-        self.noise_emb = NoiseEmbedding(n_channels * ch_mults[1])
+        noise_channels = n_channels * ch_mults[0]
+        self.noise_emb = NoiseEmbedding(noise_channels)
 
         # Project image into feature map
         self.init = nn.Conv2d(image_channels, image_channels, kernel_size=(1, 1))
@@ -170,7 +171,7 @@ class UNet(nn.Module):
             out_channels = n_channels * ch_mults[i]
             # Add `n_blocks`
             down.append(IntermediateBlock(in_channels, out_channels))
-            down.append(ResidualBlock(out_channels, n_channels, downsample=True))
+            down.append(ResidualBlock(out_channels, noise_channels, downsample=True))
             in_channels = out_channels
 
         # Combine the set of modules
@@ -187,7 +188,7 @@ class UNet(nn.Module):
         for i in reversed(range(n_resolutions - 1)):
             # `n_blocks` at the same resolution
             out_channels = n_channels * ch_mults[i]
-            up.append(ResidualBlock(in_channels, n_channels, downsample=False))
+            up.append(ResidualBlock(in_channels, noise_channels, downsample=False))
             up.append(IntermediateBlock(in_channels + out_channels, out_channels))
             in_channels = out_channels
 
