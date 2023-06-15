@@ -56,24 +56,28 @@ class ResidualBlock(nn.Module):
         """
         super().__init__()
 
-        self.act1 = Swish()
-        self.act2 = Swish()
-        self.act3 = Swish()
-
         if downsample:
             self.sample1 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
-            self.sample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
         else:
             self.sample1 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
-            self.sample2 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
-
         self.conv1_1x1 = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 1))
+
+
+        self.act1 = Swish()
+        if downsample:
+            self.sample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
+        else:
+            self.sample2 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
         self.conv2_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
-        self.conv3_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
 
-        self.dropout = nn.Dropout(p=0.2)
 
+        self.act2 = Swish()
         self.noise_emb = nn.Linear(noise_channels, in_channels)
+
+
+        self.act3 = Swish()
+        self.dropout = nn.Dropout(p=0.2)
+        self.conv3_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         """
@@ -150,7 +154,7 @@ class UNet(nn.Module):
         n_resolutions = len(ch_mults)
 
         # Time embedding layer. Time embedding has `n_channels` channels
-        self.noise_emb = NoiseEmbedding(n_channels)
+        self.noise_emb = NoiseEmbedding(n_channels * ch_mults[1])
 
         # Project image into feature map
         self.init = nn.Conv2d(image_channels, n_channels, kernel_size=(1, 1))
@@ -201,9 +205,11 @@ class UNet(nn.Module):
         h = []
         # First half of U-Net
         for m in self.down:
-            x = m(x)
             if isinstance(m, IntermediateBlock):
+                x = m(x)
                 h.append(x)
+            else:
+                x = m(x, a_bar)
 
         # Middle (bottom)
         x = self.middle(x)
@@ -215,10 +221,11 @@ class UNet(nn.Module):
                 s = s * (1 / 2**0.5)
                 x = torch.cat((x, s), dim=1)
                 x = m(x)
-            x = m(x)
+            else:
+                x = m(x, a_bar)
 
         # Final convolution
-        x = self.noise_proj(x + a_bar[:, :, None, None])
+        #x = self.noise_proj(x + a_bar[:, :, None, None])
         x = self.final(x)
 
         return x
