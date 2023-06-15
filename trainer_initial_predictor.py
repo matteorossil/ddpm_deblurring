@@ -165,12 +165,12 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                self.val(self.n_samples, epoch)
+                self.val(epoch)
             # Train the model
             self.train()
             if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.val(self.n_samples, self.checkpoint_epoch+epoch+1)
+                self.val(self.checkpoint_epoch+epoch+1)
                 torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
 
 def ddp_setup(rank, world_size):
