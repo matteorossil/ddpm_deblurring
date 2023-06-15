@@ -129,7 +129,7 @@ class MiddleBlock(nn.Module):
 
         return self.block2(self.block1(x))
 
-class UNet_InitialPredictor(nn.Module):
+class UNet(nn.Module):
     """
     ## U-Net
     """
