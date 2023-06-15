@@ -113,7 +113,7 @@ class Trainer():
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-    def val(self, n_samples, epoch):
+    def val(self, epoch):
         """
         ### Sample images
         """
