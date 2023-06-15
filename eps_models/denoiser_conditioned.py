@@ -40,7 +40,7 @@ class NoiseEmbedding(nn.Module):
 
         return emb
 
-class ResidualBlockDown(nn.Module):
+class ResidualBlock(nn.Module):
     """
     ### Residual block
 
@@ -48,7 +48,7 @@ class ResidualBlockDown(nn.Module):
     Each resolution is processed with two residual blocks.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, noise_channels: int):
+    def __init__(self, in_channels: int, noise_channels: int, downsample: bool):
         """
         * `in_channels` is the number of input channels
         * `out_channels` is the number of input channels
@@ -60,162 +60,73 @@ class ResidualBlockDown(nn.Module):
         self.act2 = Swish()
         self.act3 = Swish()
 
-        self.downsample1 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
-        self.downsample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
+        if downsample:
+            self.sample1 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
+            self.sample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
+        else:
+            self.sample1 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
+            self.sample2 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
 
-        self.conv1_1x1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, 1))
-        self.conv2_3x3 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
-        self.conv3_3x3 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.conv1_1x1 = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 1))
+        self.conv2_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.conv3_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
 
         self.dropout = nn.Dropout(p=0.2)
 
-        self.noise_emb = nn.Linear(noise_channels, out_channels)
+        self.noise_emb = nn.Linear(noise_channels, in_channels)
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         """
         * `x` has shape `[batch_size, in_channels, height, width]`
         * `t` has shape `[batch_size, time_channels]`
         """
-        h1 = self.conv1_1x1(self.downsample1(x))
+        h1 = self.conv1_1x1(self.sample1(x))
 
-        h2 = self.conv2_3x3(self.downsample2(self.act1(x))) + self.noise_emb(self.act2(a_bar))[:, :, None, None]
+        h2 = self.conv2_3x3(self.sample2(self.act1(x))) + self.noise_emb(self.act2(a_bar))[:, :, None, None]
 
         h3 = self.conv3_3x3(self.dropout(self.act3(h2)))
 
         return h1 + h3
-    
 
-class ResidualBlockUp(nn.Module):
+class IntermediateBlock(nn.Module):
     """
-    ### Residual block
-
-    A residual block has two convolution layers with group normalization.
-    Each resolution is processed with two residual blocks.
-    """
-
-    def __init__(self, in_channels: int, out_channels: int, noise_channels: int):
-        """
-        * `in_channels` is the number of input channels
-        * `out_channels` is the number of input channels
-        * `time_channels` is the number channels in the time step ($t$) embeddings
-        * `n_groups` is the number of groups for [group normalization](../../normalization/group_norm/index.html)
-        """
-        super().__init__()
-
-        self.act1 = Swish()
-        self.act2 = Swish()
-        self.act3 = Swish()
-
-        self.upsample1 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
-        self.upsample2 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
-
-        self.conv1_1x1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, 1))
-        self.conv2_3x3 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
-        self.conv3_3x3 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
-
-        self.dropout = nn.Dropout(p=0.2)
-
-        self.noise_emb = nn.Linear(noise_channels, out_channels)
-
-    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
-        """
-        * `x` has shape `[batch_size, in_channels, height, width]`
-        * `t` has shape `[batch_size, time_channels]`
-        """
-        h1 = self.conv1_1x1(self.upsample1(x))
-
-        h2 = self.conv2_3x3(self.upsample2(self.act1(x))) + self.noise_emb(self.act2(a_bar))[:, :, None, None]
-
-        h3 = self.conv3_3x3(self.dropout(self.act3(h2)))
-
-        return h1 + h3
-    
-class ResidualBlockMiddle(nn.Module):
-    """
-    ### Residual block
-
-    A residual block has two convolution layers with group normalization.
-    Each resolution is processed with two residual blocks.
-    """
-
-    def __init__(self, in_channels: int, out_channels: int):
-        """
-        * `in_channels` is the number of input channels
-        * `out_channels` is the number of input channels
-        * `time_channels` is the number channels in the time step ($t$) embeddings
-        """
-        super().__init__()
-
-        self.act1 = Swish()
-        self.act2 = Swish()
-
-        self.conv1_1x1 = nn.Conv2d(in_channels, out_channels, kernel_size=(1, 1))
-        self.conv2_3x3 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
-        self.conv3_3x3 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
-
-        self.dropout = nn.Dropout(p=0.2)
-
-    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
-        """
-        * `x` has shape `[batch_size, in_channels, height, width]`
-        * `t` has shape `[batch_size, time_channels]`
-        """
-        h1 = self.conv1_1x1(x)
-
-        h2 = self.conv3_3x3(self.dropout(self.act2(self.conv2_3x3(self.act1(x)))))
-
-        return h1 + h2
-
-class DownBlock(nn.Module):
-    """
-    ### Down block
+    ### Intermediate block
 
     This combines `ResidualBlock`. These are used in the first half of U-Net at each resolution.
     """
 
-    def __init__(self, in_channels: int, out_channels: int, noise_channels: int):
+    def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
-        self.res = ResidualBlockDown(in_channels, out_channels, noise_channels)
 
-    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
-        x = self.res(x, a_bar)
-        return x
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.act1 = Swish()
+        self.dropout = nn.Dropout(p=0.2)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.act2 = Swish()
 
+    def forward(self, x: torch.Tensor):
 
-class UpBlock(nn.Module):
-    """
-    ### Up block
+        x = self.dropout(self.act1(self.conv1(x)))
+        x = self.act2(self.conv2(x))
 
-    This combines `ResidualBlock`. These are used in the second half of U-Net at each resolution.
-    """
-
-    def __init__(self, in_channels: int, out_channels: int, noise_channels: int):
-        super().__init__()
-        # The input has `in_channels + out_channels` because we concatenate the output of the same resolution
-        # from the first half of the U-Net
-        self.res = ResidualBlockUp(in_channels, out_channels, noise_channels)
-
-    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
-        x = self.res(x, a_bar)
         return x
     
 class MiddleBlock(nn.Module):
     """
-    ### Up block
+    ### Intermediate block
 
-    This combines `ResidualBlock`. These are used in the second half of U-Net at each resolution.
+    This combines `ResidualBlock`. These are used in the first half of U-Net at each resolution.
     """
 
     def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
-        # The input has `in_channels + out_channels` because we concatenate the output of the same resolution
-        # from the first half of the U-Net
-        self.res = ResidualBlockMiddle(in_channels, out_channels)
+
+        self.block1 = IntermediateBlock(in_channels, out_channels)
+        self.block2 = IntermediateBlock(out_channels, out_channels)
 
     def forward(self, x: torch.Tensor):
-        x = self.res(x)
-        return x
 
+        return self.block2(self.block1(x))
 
 class UNet(nn.Module):
     """
@@ -242,24 +153,25 @@ class UNet(nn.Module):
         self.noise_emb = NoiseEmbedding(n_channels)
 
         # Project image into feature map
-        self.image_proj = nn.Conv2d(image_channels, n_channels * ch_mults[0], kernel_size=(1, 1))
+        self.init = nn.Conv2d(image_channels, n_channels, kernel_size=(1, 1))
 
         # #### First half of U-Net - decreasing resolution
         down = []
         # Number of channels
-        out_channels = in_channels = n_channels * ch_mults[0]
+        out_channels = in_channels = n_channels
         # For each resolution
-        for i in range(1, n_resolutions):
+        for i in range(n_resolutions - 1):
             # Number of output channels at this resolution
             out_channels = n_channels * ch_mults[i]
             # Add `n_blocks`
-            for _ in range(n_blocks):
-                down.append(DownBlock(in_channels, out_channels, n_channels))
-                in_channels = out_channels
+            down.append(IntermediateBlock(in_channels, out_channels))
+            down.append(ResidualBlock(out_channels, n_channels, downsample=True))
+            in_channels = out_channels
 
         # Combine the set of modules
         self.down = nn.ModuleList(down)
 
+        out_channels = n_channels * ch_mults[-1]
         self.middle = MiddleBlock(in_channels, out_channels)
 
         # #### Second half of U-Net - increasing resolution
@@ -267,42 +179,49 @@ class UNet(nn.Module):
         # Number of channels
         in_channels = out_channels
         # For each resolution
-        for i in reversed(range(1, n_resolutions)):
+        for i in reversed(range(n_resolutions - 1)):
             # `n_blocks` at the same resolution
-            out_channels = n_channels * ch_mults[i-1]
-            for _ in range(n_blocks):
-                up.append(UpBlock(in_channels, out_channels, n_channels))
-                in_channels = out_channels
+            out_channels = n_channels * ch_mults[i]
+            up.append(ResidualBlock(in_channels, n_channels, downsample=False))
+            up.append(IntermediateBlock(in_channels + out_channels, out_channels))
+            in_channels = out_channels
 
         # Combine the set of modules
         self.up = nn.ModuleList(up)
+
+        self.final = nn.Conv2d(n_channels, 3, kernel_size=(1, 1))
 
         self.noise_proj = nn.Conv2d(in_channels, image_channels // 2, kernel_size=(1, 1))
 
     def unet_forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         # Get image projection
-        x = self.image_proj(x)
+        x = self.init(x)
 
         # `h` will store outputs at each resolution for skip connection
-        h = [x]
+        h = []
         # First half of U-Net
         for m in self.down:
-            x = m(x, a_bar)
-            h.append(x)
+            x = m(x)
+            if isinstance(m, IntermediateBlock):
+                h.append(x)
 
         # Middle (bottom)
-        x = h.pop()
         x = self.middle(x)
         
         # Second half of U-Net
         for m in self.up:
-            x = m(x, a_bar)
-            print(x.shape)
-            s = h.pop()
-            x = x + s
+            if isinstance(m, IntermediateBlock):
+                s = h.pop()
+                s = s * (1 / 2**0.5)
+                x = torch.cat((x, s), dim=1)
+                x = m(x)
+            x = m(x)
 
-        # Final normalization and convolution
-        return self.noise_proj(x + a_bar[:, :, None, None])
+        # Final convolution
+        x = self.noise_proj(x + a_bar[:, :, None, None])
+        x = self.final(x)
+
+        return x
 
     def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
         """

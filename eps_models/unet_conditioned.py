@@ -288,7 +288,7 @@ class UNet(nn.Module):
         n_resolutions = len(ch_mults)
 
         # Project image into feature map
-        self.image_proj = nn.Conv2d(image_channels, n_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.init = nn.Conv2d(image_channels, n_channels, kernel_size=(3, 3), padding=(1, 1))
 
         # Time embedding layer. Time embedding has `n_channels * 4` channels
         self.time_emb = TimeEmbedding(n_channels * 4)
@@ -311,9 +311,6 @@ class UNet(nn.Module):
 
         # Combine the set of modules
         self.down = nn.ModuleList(down)
-
-        # Middle block
-        self.middle = MiddleBlock(out_channels, n_channels * 4, )
 
         # #### Second half of U-Net - increasing resolution
         up = []
@@ -366,6 +363,10 @@ class UNet(nn.Module):
                 x = m(x, t)
 
         # Final normalization and convolution
+
+
+
+
         return self.final(self.act(self.norm(x)))
 
 
