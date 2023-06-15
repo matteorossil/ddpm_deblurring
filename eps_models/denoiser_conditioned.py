@@ -157,12 +157,13 @@ class UNet(nn.Module):
         self.noise_emb = NoiseEmbedding(n_channels * ch_mults[1])
 
         # Project image into feature map
-        self.init = nn.Conv2d(image_channels, n_channels, kernel_size=(1, 1))
+        self.init = nn.Conv2d(image_channels, image_channels, kernel_size=(1, 1))
 
         # #### First half of U-Net - decreasing resolution
         down = []
         # Number of channels
-        out_channels = in_channels = n_channels
+        in_channels = image_channels
+        out_channels = n_channels
         # For each resolution
         for i in range(n_resolutions - 1):
             # Number of output channels at this resolution
