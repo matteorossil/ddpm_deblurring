@@ -119,6 +119,8 @@ class Trainer():
         """
         with torch.no_grad():
 
+            print(next(iter(self.data_loader_val)).shape)
+
             sharp, blur = next(iter(self.data_loader_val))
             # push to device
             sharp = sharp.to(self.gpu_id)
