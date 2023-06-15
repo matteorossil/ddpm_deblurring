@@ -35,7 +35,7 @@ class ResidualBlockDown(nn.Module):
         self.conv3_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
         self.downsample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
 
-    def forward(self, x: torch.Tensor, t: torch.Tensor):
+    def forward(self, x: torch.Tensor):
         """
         * `x` has shape `[batch_size, in_channels, height, width]`
         * `t` has shape `[batch_size, time_channels]`
