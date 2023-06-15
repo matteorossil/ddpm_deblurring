@@ -53,7 +53,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 4
     # Use wandb
-    wandb: bool = True
+    wandb: bool = False
     # where to store the checkpoints
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/'
     store_checkpoints: str = '/home/mr6744/checkpoints_init_predictor/'
@@ -113,7 +113,7 @@ class Trainer():
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-    def sample(self, n_samples, epoch):
+    def val(self, n_samples, epoch):
         """
         ### Sample images
         """
@@ -163,12 +163,12 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(self.n_samples, epoch=0)
+                self.val(self.n_samples, epoch=0)
             # Train the model
             self.train()
             if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
+                self.val(self.n_samples, self.checkpoint_epoch+epoch+1)
                 torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
 
 def ddp_setup(rank, world_size):
