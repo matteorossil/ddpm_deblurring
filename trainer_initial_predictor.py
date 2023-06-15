@@ -165,7 +165,7 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                self.val(self.n_samples, epoch=0)
+                self.val(self.n_samples, epoch)
             # Train the model
             self.train()
             if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
