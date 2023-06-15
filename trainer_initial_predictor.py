@@ -87,14 +87,26 @@ class Trainer():
             self.eps_model.module.load_state_dict(checkpoint_)
 
         # Create dataloader
-        dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        self.data_loader_train = DataLoader(dataset=dataset,
-                                    batch_size=self.batch_size,
-                                    num_workers=16,
-                                    drop_last=True,
-                                    shuffle=False,
-                                    pin_memory=False,
-                                    sampler=DistributedSampler(dataset)) # assures no overlapping samples
+        dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+
+        self.data_loader_train = DataLoader(dataset=dataset_train,
+                                            batch_size=self.batch_size, 
+                                            num_workers=8,
+                                            #num_workers=os.cpu_count() // 4, 
+                                            drop_last=True, 
+                                            shuffle=False, 
+                                            pin_memory=False,
+                                            sampler=DistributedSampler(dataset_train))
+        
+        self.data_loader_val = DataLoader(dataset=dataset_val, 
+                                          batch_size=self.n_samples, 
+                                          num_workers=0, 
+                                          #num_workers=os.cpu_count() // 4, 
+                                          drop_last=True, 
+                                          shuffle=False, 
+                                          pin_memory=False,
+                                          sampler=DistributedSampler(dataset_val))
 
         # Create optimizer
         self.optimizer = torch.optim.AdamW(self.eps_model.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
@@ -106,35 +118,21 @@ class Trainer():
         ### Sample images
         """
         with torch.no_grad():
-            # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
-            # Sample Initial Image (Random Gaussian Noise)
-            torch.cuda.manual_seed(7)
-            x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
-                            device=self.gpu_id)
-            # Remove noise for $T$ steps
-            #for t_ in range(self.n_steps):
-            for t_ in range(self.n_steps):
-                # $t$
-                t = self.n_steps - t_ - 1
-                # Sample from $p_\theta(x_{t-1}|x_t)$
-                t_vec = x.new_full((n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
 
-                if ((t_+1) % 2000 == 0):
-                    # save sampled images
-                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}.png'))
+            sharp, blur = next(iter(self.data_loader_val))
+            # push to device
+            sharp = sharp.to(self.gpu_id)
+            blur = blur.to(self.gpu_id)
 
-                    min_val = x.min(-1)[0].min(-1)[0]
-                    max_val = x.max(-1)[0].max(-1)[0]
-                    x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
+            if epoch == 0:
+                # save sharp images
+                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_X.png'))
 
-                    save_image(x_norm, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}_norm.png'))
+                # save blur images
+                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_Y.png'))
 
-            # Log samples
-            #if self.wandb:
-                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
-
-            return x
+            # predicted
+            save_image(self.eps_model(blur), os.path.join(self.exp_path, f'epoch_{epoch}_Z_hat.png'))
 
     def train(self):
         """
@@ -145,28 +143,30 @@ class Trainer():
             # Increment global step
             self.step += 1
             # Move data to device
-            sharp = sharp.to(self.device)
-            blur = blur.to(self.device)
+            sharp = sharp.to(self.gpu_id)
+            blur = blur.to(self.gpu_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
             # Calculate loss
-            loss = F.mse_loss(sharp, blur)
+            loss = F.mse_loss(sharp, self.eps_model(blur))
             # Compute gradients
             loss.backward()
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
-            #print('loss:', loss, 'step:', self.step)
-            wandb.log({'loss': loss}, step=self.step)
+            if self.wandb:
+                wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
         """
         ### Training loop
         """
         for epoch in range(self.epochs):
+            if (epoch == 0) and (self.gpu_id == 0):
+                self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
                 torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
