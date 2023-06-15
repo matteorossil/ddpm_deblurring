@@ -9,7 +9,7 @@ class Swish(nn.Module):
     def forward(self, x):
         return x * torch.sigmoid(x)
 
-class NoiseEmbedding(nn.Module):
+class TimeEmbedding(nn.Module):
     """
     ### Embeddings for $t$
     """
@@ -21,26 +21,76 @@ class NoiseEmbedding(nn.Module):
         super().__init__()
         self.n_channels = n_channels
         # First linear layer
-        self.lin1 = nn.Linear(1, self.n_channels)
+        self.lin1 = nn.Linear(self.n_channels // 4, self.n_channels)
         # Activation
         self.act = Swish()
         # Second linear layer
         self.lin2 = nn.Linear(self.n_channels, self.n_channels)
 
-    def forward(self, a_bar: torch.Tensor):
+    def forward(self, t: torch.Tensor):
         # Create sinusoidal position embeddings
         # [same as those from the transformer](../../transformers/positional_encoding.html)
         #
         # PE^{(1)}_{t,i} &= sin\Bigg(\frac{t}{10000^{\frac{i}{d - 1}}}\Bigg) \\
         # PE^{(2)}_{t,i} &= cos\Bigg(\frac{t}{10000^{\frac{i}{d - 1}}}\Bigg)
         #
+        # where $d$ is `half_dim`
+        half_dim = self.n_channels // 8
+        emb = math.log(10_000) / (half_dim - 1)
+        emb = torch.exp(torch.arange(half_dim, device=t.device) * -emb)
+        emb = t[:, None] * emb[None, :]
+        emb = torch.cat((emb.sin(), emb.cos()), dim=1)
+
         # Transform with the MLP
-        emb = self.act(self.lin1(a_bar))
+        emb = self.act(self.lin1(emb))
         emb = self.lin2(emb)
 
         return emb
 
-class ResidualBlock(nn.Module):
+class ResidualBlockDown(nn.Module):
+    """
+    ### Residual block
+
+    A residual block has two convolution layers with group normalization.
+    Each resolution is processed with two residual blocks.
+    """
+
+    def __init__(self, in_channels: int, noise_channels: int):
+        """
+        * `in_channels` is the number of input channels
+        * `out_channels` is the number of input channels
+        * `time_channels` is the number channels in the time step ($t$) embeddings
+        """
+        super().__init__()
+
+        self.conv1_1x1 = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 1))
+        self.downsample1 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
+
+        self.act1 = Swish()
+        self.conv2_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
+
+        self.act2 = Swish()
+        self.noise_emb = nn.Linear(noise_channels, in_channels)
+
+        self.act3 = Swish()
+        self.dropout = nn.Dropout(p=0.2)
+        self.conv3_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.downsample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
+
+    def forward(self, x: torch.Tensor, t: torch.Tensor):
+        """
+        * `x` has shape `[batch_size, in_channels, height, width]`
+        * `t` has shape `[batch_size, time_channels]`
+        """
+        h1 = self.downsample1(self.conv1_1x1(x))
+
+        h2 = self.conv2_3x3(self.act1(x)) + self.noise_emb(self.act2(t))[:, :, None, None]
+
+        h3 = self.downsample2(self.conv3_3x3(self.dropout(self.act3(h2))))
+
+        return h1 + h3
+
+class ResidualBlockUp(nn.Module):
     """
     ### Residual block
 
@@ -56,43 +106,35 @@ class ResidualBlock(nn.Module):
         """
         super().__init__()
 
-        if downsample:
-            self.sample1 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
-        else:
-            self.sample1 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
+
+        self.upsample1 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
         self.conv1_1x1 = nn.Conv2d(in_channels, in_channels, kernel_size=(1, 1))
 
-
         self.act1 = Swish()
-        if downsample:
-            self.sample2 = nn.Conv2d(in_channels, in_channels, (3, 3), (2, 2), (1, 1))
-        else:
-            self.sample2 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
+        self.upsample2 = nn.ConvTranspose2d(in_channels, in_channels, (4, 4), (2, 2), (1, 1))
         self.conv2_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
-
 
         self.act2 = Swish()
         self.noise_emb = nn.Linear(noise_channels, in_channels)
-
 
         self.act3 = Swish()
         self.dropout = nn.Dropout(p=0.2)
         self.conv3_3x3 = nn.Conv2d(in_channels, in_channels, kernel_size=(3, 3), padding=(1, 1))
 
-    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
+    def forward(self, x: torch.Tensor, t: torch.Tensor):
         """
         * `x` has shape `[batch_size, in_channels, height, width]`
         * `t` has shape `[batch_size, time_channels]`
         """
-        h1 = self.conv1_1x1(self.sample1(x))
+        h1 = self.conv1_1x1(self.upsample1(x))
 
-        h2 = self.conv2_3x3(self.sample2(self.act1(x))) + self.noise_emb(self.act2(a_bar))[:, :, None, None]
+        h2 = self.conv2_3x3(self.upsample2(self.act1(x))) + self.noise_emb(self.act2(t))[:, :, None, None]
 
         h3 = self.conv3_3x3(self.dropout(self.act3(h2)))
 
         return h1 + h3
 
-class IntermediateBlock(nn.Module):
+class Intermediate(nn.Module):
     """
     ### Intermediate block
 
@@ -125,8 +167,8 @@ class MiddleBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
 
-        self.block1 = IntermediateBlock(in_channels, out_channels)
-        self.block2 = IntermediateBlock(out_channels, out_channels)
+        self.block1 = Intermediate(in_channels, out_channels)
+        self.block2 = Intermediate(out_channels, out_channels)
 
     def forward(self, x: torch.Tensor):
 
@@ -154,8 +196,8 @@ class UNet(nn.Module):
         n_resolutions = len(ch_mults)
 
         # Time embedding layer. Time embedding has `n_channels` channels
-        noise_channels = n_channels * ch_mults[0]
-        self.noise_emb = NoiseEmbedding(noise_channels)
+        time_embedding = n_channels * 4
+        self.time_emb = TimeEmbedding(time_embedding)
 
         # Project image into feature map
         self.init = nn.Conv2d(image_channels, image_channels, kernel_size=(1, 1))
@@ -170,8 +212,8 @@ class UNet(nn.Module):
             # Number of output channels at this resolution
             out_channels = n_channels * ch_mults[i]
             # Add `n_blocks`
-            down.append(IntermediateBlock(in_channels, out_channels))
-            down.append(ResidualBlock(out_channels, noise_channels, downsample=True))
+            down.append(Intermediate(in_channels, out_channels))
+            down.append(ResidualBlockDown(out_channels, time_embedding))
             in_channels = out_channels
 
         # Combine the set of modules
@@ -188,8 +230,8 @@ class UNet(nn.Module):
         for i in reversed(range(n_resolutions - 1)):
             # `n_blocks` at the same resolution
             out_channels = n_channels * ch_mults[i]
-            up.append(ResidualBlock(in_channels, noise_channels, downsample=False))
-            up.append(IntermediateBlock(in_channels + out_channels, out_channels))
+            up.append(ResidualBlockUp(in_channels, time_embedding))
+            up.append(Intermediate(in_channels + out_channels, out_channels))
             in_channels = out_channels
 
         # Combine the set of modules
@@ -199,7 +241,7 @@ class UNet(nn.Module):
 
         self.noise_proj = nn.Conv2d(in_channels, image_channels // 2, kernel_size=(1, 1))
 
-    def unet_forward(self, x: torch.Tensor, a_bar: torch.Tensor):
+    def unet_forward(self, x: torch.Tensor, t: torch.Tensor):
         # Get image projection
         x = self.init(x)
 
@@ -207,37 +249,37 @@ class UNet(nn.Module):
         h = []
         # First half of U-Net
         for m in self.down:
-            if isinstance(m, IntermediateBlock):
+            if isinstance(m, Intermediate):
                 x = m(x)
                 h.append(x)
             else:
-                x = m(x, a_bar)
+                x = m(x, t)
 
         # Middle (bottom)
         x = self.middle(x)
         
         # Second half of U-Net
         for m in self.up:
-            if isinstance(m, IntermediateBlock):
+            if isinstance(m, Intermediate):
                 s = h.pop()
                 s = s * (1 / 2**0.5)
                 x = torch.cat((x, s), dim=1)
                 x = m(x)
             else:
-                x = m(x, a_bar)
+                x = m(x, t)
 
         # Final convolution
-        #x = self.noise_proj(x + a_bar[:, :, None, None])
+        #x = self.noise_proj(x + t[:, :, None, None])
         x = self.final(x)
 
         return x
 
-    def forward(self, x: torch.Tensor, a_bar: torch.Tensor):
+    def forward(self, x: torch.Tensor, t: torch.Tensor):
         """
         * `x` has shape `[batch_size, in_channels, height, width]`
         * `t` has shape `[batch_size]`
         """
         # Get noise embeddings
-        a_bar = self.noise_emb(a_bar)
+        t = self.time_emb(t)
 
-        return self.unet_forward(x, a_bar)
+        return self.unet_forward(x, t)
