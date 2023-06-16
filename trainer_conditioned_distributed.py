@@ -122,7 +122,7 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=24,
+                                            num_workers=16,
                                             #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
