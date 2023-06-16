@@ -89,13 +89,11 @@ class DenoiseDiffusion:
         """
 
         # $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$
-        xt_y = torch.cat((xt, blur), 1)
+        xt_y = torch.cat((xt, blur), dim=1)
+        
+        eps_theta = self.eps_model(xt_y, t)
 
         alpha_bar = gather(self.alpha_bar, t)
-        
-        eps_theta = self.eps_model(xt_y, alpha_bar)
-        #eps_theta = self.eps_model(xt_y, t)
-
         # $\alpha_t$
         alpha = gather(self.alpha, t)
         # $\frac{\beta}{\sqrt{1-\bar\alpha_t}}$
@@ -140,9 +138,7 @@ class DenoiseDiffusion:
         # concatenate channel wise
         xt = torch.cat((xt, blur), dim=1)
         # Get $\textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)$
-        alpha_bar = gather(self.alpha_bar, t)
-        eps_theta = self.eps_model(xt, alpha_bar)
-        #eps_theta = self.eps_model(xt, t)
+        eps_theta = self.eps_model(xt, t)
         # MSE loss
         return F.mse_loss(noise, eps_theta)
 

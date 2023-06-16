@@ -35,6 +35,7 @@ class TimeEmbedding(nn.Module):
         # PE^{(2)}_{t,i} &= cos\Bigg(\frac{t}{10000^{\frac{i}{d - 1}}}\Bigg)
         #
         # where $d$ is `half_dim`
+        
         half_dim = self.n_channels // 8
         emb = math.log(10_000) / (half_dim - 1)
         emb = torch.exp(torch.arange(half_dim, device=t.device) * -emb)
