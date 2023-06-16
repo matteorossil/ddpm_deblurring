@@ -185,10 +185,10 @@ class Trainer():
 
             # prediction for sharp image
             init = self.init_predictor(blur)
-            save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_predicted.png'))
+            save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
             
             # initial predictor
-            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_X_hat.png'))
+            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
 
             return z
 
