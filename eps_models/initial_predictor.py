@@ -192,7 +192,6 @@ class UNet(nn.Module):
     def unet_forward(self, x: torch.Tensor):
         # Get image projection
         x = self.init(x)
-        print(x.shape)
 
         # `h` will store outputs at each resolution for skip connection
         h = []
@@ -202,11 +201,8 @@ class UNet(nn.Module):
             if isinstance(m, Intermediate):
                 h.append(x)
 
-            print(x.shape)
-
         # Middle (bottom)
         x = self.middle(x)
-        print(x.shape)
         
         # Second half of U-Net
         for m in self.up:
@@ -215,11 +211,9 @@ class UNet(nn.Module):
                 s = s * (1 / 2**0.5)
                 x = torch.cat((x, s), dim=1)
             x = m(x)
-            print(x.shape)
 
         # Final convolution
         x = self.final(x)
-        print(x.shape)
 
         return x
 

@@ -53,7 +53,7 @@ class Trainer():
     # Number of sample images
     n_samples: int = 4
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # where to store the checkpoints
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/'
     store_checkpoints: str = '/home/mr6744/checkpoints_init_predictor/'
