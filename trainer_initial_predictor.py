@@ -12,7 +12,7 @@ from datetime import datetime
 import wandb
 import torch.nn.functional as F
 
-from dataset_unconditioned import Data
+from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
