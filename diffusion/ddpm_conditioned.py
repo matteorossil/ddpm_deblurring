@@ -92,7 +92,7 @@ class DenoiseDiffusion:
         xt_y = torch.cat((xt, blur), dim=1)
         
         eps_theta = self.eps_model(xt_y, t)
-
+        
         alpha_bar = gather(self.alpha_bar, t)
         # $\alpha_t$
         alpha = gather(self.alpha, t)

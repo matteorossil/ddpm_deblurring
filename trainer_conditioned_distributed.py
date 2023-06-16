@@ -70,8 +70,9 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_epoch: int = 0
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 1860
+    checkpoint1: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06162023_010334/checkpoint_denoiser_{checkpoint_epoch}.pt'
+    checkpoint2: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06162023_010334/checkpoint_initpr_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -99,9 +100,12 @@ class Trainer():
         self.init_predictor = DDP(self.init_predictor, device_ids=[self.gpu_id])
 
         # only loads checkpoint if model is trained
-        #if self.checkpoint_epoch != 0:
-            #checkpoint_ = torch.load(self.checkpoint)
-            #self.denoiser.module.load_state_dict(checkpoint_)
+        if self.checkpoint_epoch != 0:
+            checkpoint_ = torch.load(self.checkpoint1)
+            self.denoiser.module.load_state_dict(checkpoint_)
+
+            checkpoint_ = torch.load(self.checkpoint2)
+            self.init_predictor.module.load_state_dict(checkpoint_)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
@@ -118,7 +122,7 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=16,
+                                            num_workers=24,
                                             #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
@@ -127,7 +131,7 @@ class Trainer():
         
         self.data_loader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
-                                          num_workers=0, 
+                                          num_workers=1,
                                           #num_workers=os.cpu_count() // 4, 
                                           drop_last=True, 
                                           shuffle=False, 
@@ -153,36 +157,40 @@ class Trainer():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
             torch.cuda.manual_seed(0)
-            x = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
+            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
-                t_vec = x.new_full((n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, blur, t_vec)
+                t_vec = z.new_full((n_samples,), t, dtype=torch.long)
+                z = self.diffusion.p_sample(z, blur, t_vec)
             # Log samples
             #if self.wandb:
                 #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             if epoch == 0:
                 # save sharp images
-                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_X.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
 
                 # save blur images
-                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_Y.png'))
+                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
 
-                # save true z0
-                save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_Z.png'))
+                # sharp - blur
+                save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
 
-            # sampled z
-            save_image(x, os.path.join(self.exp_path, f'epoch_{epoch}_Z_hat.png'))
+            # sampled residual
+            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
+
+            # prediction for sharp image
+            init = self.init_predictor(blur)
+            save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_predicted.png'))
             
-            # sampled x
-            save_image(blur + x, os.path.join(self.exp_path, f'epoch_{epoch}_X_hat.png'))
+            # initial predictor
+            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_X_hat.png'))
 
-            return x
+            return z
 
     def train(self):
         """
