@@ -55,17 +55,17 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/'
-    store_checkpoints: str = '/home/mr6744/checkpoints_init_predictor/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/'
+    #store_checkpoints: str = '/home/mr6744/checkpoints_init_predictor/'
     #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
-    dataset: str = '/home/mr6744/gopro_128/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
+    #dataset: str = '/home/mr6744/gopro_128/'
     #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
     checkpoint_epoch: int = 10000
-    #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06132023_143449/checkpoint_{checkpoint_epoch}.pt'
-    checkpoint: str = f'/home/mr6744/checkpoints_init_predictor/06152023_200330/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/checkpoint_{checkpoint_epoch}.pt'
+    #checkpoint: str = f'/home/mr6744/checkpoints_init_predictor/06152023_200330/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
