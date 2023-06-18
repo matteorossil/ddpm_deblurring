@@ -190,6 +190,9 @@ class Trainer():
             # initial predictor
             save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
 
+            # correct residual
+            save_image(sharp - init, os.path.join(self.exp_path, f'epoch_{epoch}_residual_correct.png'))
+
             return z
 
     def train(self):
