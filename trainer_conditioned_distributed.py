@@ -70,10 +70,10 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_epoch1: int = 0
-    checkpoint_epoch2: int = 10000
-    checkpoint1: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06162023_010334/checkpoint_denoiser_{checkpoint_epoch1}.pt'
-    checkpoint2: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/checkpoint_{checkpoint_epoch2}.pt'
+    checkpoint_denoiser_epoch: int = 0
+    checkpoint_init_epoch: int = 10000
+    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06162023_010334/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
+    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/checkpoint_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -101,12 +101,13 @@ class Trainer():
         self.init_predictor = DDP(self.init_predictor, device_ids=[self.gpu_id])
 
         # only loads checkpoint if model is trained
-        if self.checkpoint_epoch != 0:
-            checkpoint_ = torch.load(self.checkpoint1)
+        if self.checkpoint_denoiser != 0:
+            checkpoint_ = torch.load(self.checkpoint_denoiser)
             self.denoiser.module.load_state_dict(checkpoint_)
-
-            checkpoint_ = torch.load(self.checkpoint2)
-            self.init_predictor.module.load_state_dict(checkpoint_)
+        
+        if self.checkpoint_init != 0:
+            checkpoint_2 = torch.load(self.checkpoint_init)
+            self.init_predictor.module.load_state_dict(checkpoint_2)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
