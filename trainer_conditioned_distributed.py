@@ -90,7 +90,7 @@ class Trainer():
         # initial prediction x_init
         self.init_predictor = InitP(
             image_channels=self.image_channels, # *2 because we concatenate y
-            n_channels=self.n_channels*2,
+            n_channels=self.n_channels,
             ch_mults=self.channel_multipliers
         ).to(self.gpu_id)
 
