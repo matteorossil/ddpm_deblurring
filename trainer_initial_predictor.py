@@ -35,7 +35,7 @@ class Trainer():
     # Image size
     image_size: int = 128
     # Number of channels in the initial feature map
-    n_channels: int = 32
+    n_channels: int = 64
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 4, 8]
@@ -63,7 +63,7 @@ class Trainer():
     #dataset: str = '/home/mr6744/gopro_128/'
     #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch: int = 10000
+    checkpoint_epoch: int = 0
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_init_predictor/06152023_200330/checkpoint_{checkpoint_epoch}.pt'
 
