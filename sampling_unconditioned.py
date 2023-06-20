@@ -98,7 +98,7 @@ class Trainer():
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
-            _, (sharp, blur) = next(iter(self.dataloader))
+            sharp, blur = next(iter(self.dataloader))
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
             print("done")
