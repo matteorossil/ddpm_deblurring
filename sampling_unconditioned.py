@@ -93,7 +93,7 @@ class Trainer():
         with torch.no_grad():
 
             # Set seed for replicability
-            torch.cuda.manual_seed_all(1)
+            torch.cuda.manual_seed_all(7)
 
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
@@ -105,7 +105,7 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            t_vec = torch.floor(torch.linspace(99, self.n_steps - 1, 21, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_vec = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
             for t in t_vec:
                 noise = torch.randn_like(blur)
