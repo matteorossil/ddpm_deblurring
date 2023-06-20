@@ -105,7 +105,7 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            t_vec = torch.floor(torch.linspace(0, self.n_steps - 1, 21, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_vec = torch.floor(torch.linspace(99, self.n_steps - 1, 21, device=self.device)).type(torch.long).unsqueeze(-1)
 
             for t in t_vec:
                 noise = torch.randn_like(blur)
