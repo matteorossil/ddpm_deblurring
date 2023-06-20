@@ -9,10 +9,9 @@ from diffusion.ddpm_unconditioned import DenoiseDiffusion
 from eps_models.unet_unconditioned import UNet
 import torch.nn.functional as F
 
-from dataset_unconditioned import Data
+from dataset import Data
+from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-
-import torch.multiprocessing as mp
 
 import sys
 
@@ -44,11 +43,14 @@ class Trainer():
     n_samples: int = int(sys.argv[2])
     # checkpoint path
     epoch = int(sys.argv[3])
-    checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
-    #checkpoint = f'/home/mr6744/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
+    #checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
-    sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    #sampling_path = '/home/mr6744/checkpoints_distributed/06132023_202606/sampling/'
+    #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
+    sampling_path = '/home/mr6744/checkpoints_distributed/sampling/'
+    # dataset
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset: str = '/home/mr6744/gopro_ALL_128/'
 
     def init(self):
         # device
@@ -76,6 +78,14 @@ class Trainer():
             beta_T=self.beta_T
         )
 
+        dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        self.dataloader = DataLoader(dataset=dataset,
+                                    batch_size=self.n_samples, 
+                                    num_workers=0,
+                                    drop_last=True, 
+                                    shuffle=True, 
+                                    pin_memory=False)
+
     def sample(self):
         """
         ### Sample images
@@ -83,36 +93,45 @@ class Trainer():
         with torch.no_grad():
 
             # Set seed for replicability
-            torch.cuda.manual_seed_all(0)
+            torch.cuda.manual_seed_all(7)
 
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
-            #x = torch.load('xt.pt')
-            #x = x.to(self.device)
+            sharp, blur = next(iter(self.dataloader))
+            sharp = sharp.to(self.device)
+            blur = blur.to(self.device)
 
-            #print(x)
-            
+            save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
+            save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
+
+            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
+
+            for t in t_seq:
+                noise = torch.randn_like(blur)
+                blur_noise = self.diffusion.q_sample(blur, t.repeat(blur.shape[0]), eps=noise)
+                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t.item()+1}.png"))
+
+            for t in t_seq:
+
             # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
+            #for t_ in range(self.n_steps):
+                print("running for t:", t.item()+1)
+                x = self.diffusion.q_sample(blur, t.repeat(blur.shape[0]), eps=noise)
 
-                print(t_)
+                for t_ in range(t.item()):
 
-                t = self.n_steps - t_ - 1
+                    print(t_)
 
-                # Sample
-                t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
+                    t = self.n_steps - t_ - 1
 
-                # Normalize img
-                #min_val = x.min(-1)[0].min(-1)[0]
-                #max_val = x.max(-1)[0].max(-1)[0]
-                #x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
+                    # Sample
+                    t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
+                    x = self.diffusion.p_sample(x, t_vec)
 
-                # save sampled images
-                if ((t_+1) % self.n_steps == 0):
-                    save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
-                    #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
+                    # save sampled images
+                    if ((t_+1) % t.item() == 0):
+                        save_image(x, os.path.join(self.sampling_path, f"tseq_{t.item()}_t{t_+1}.png"))
 
             return x
 
