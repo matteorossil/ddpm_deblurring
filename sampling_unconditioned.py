@@ -106,12 +106,11 @@ class Trainer():
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
             for i in range(1, 11):
-                t = torch.tensor([self.n_steps // i])
-                t = t.to(self.device)
+                t = torch.tensor([self.n_steps // i], device=blur.device, dtype=torch.long)
                 t = t.repeat(blur.shape[0])
                 noise = torch.randn_like(blur)
                 blur_noise = self.diffusion.q_sample(blur, t, eps=noise)
-                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{self.n_steps // i}.png"))
+                #save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{self.n_steps // i}.png"))
 
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
