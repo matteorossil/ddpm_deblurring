@@ -108,6 +108,7 @@ class Trainer():
             t = torch.randint(self.n_steps, self.n_steps+1, (blur.shape[0],), device=blur.device, dtype=torch.long)
             noise = torch.randn_like(blur)
             blur_noise = self.diffusion.q_sample(blur, t, eps=noise)
+            print(blur_noise)
             save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise.png"))
 
             # Remove noise for $T$ steps
