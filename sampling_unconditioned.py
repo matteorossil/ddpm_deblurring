@@ -9,10 +9,9 @@ from diffusion.ddpm_unconditioned import DenoiseDiffusion
 from eps_models.unet_unconditioned import UNet
 import torch.nn.functional as F
 
-from dataset_unconditioned import Data
+from dataset import Data
+from torch.utils.data import DataLoader
 from torchvision.utils import save_image
-
-import torch.multiprocessing as mp
 
 import sys
 
@@ -49,6 +48,9 @@ class Trainer():
     # store sample
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
     sampling_path = '/home/mr6744/checkpoints_distributed/sampling/'
+    # dataset
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset: str = '/home/mr6744/gopro_ALL_128/'
 
     def init(self):
         # device
@@ -76,6 +78,14 @@ class Trainer():
             beta_T=self.beta_T
         )
 
+        dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        self.dataloader = DataLoader(dataset=dataset,
+                                    batch_size=self.n_samples, 
+                                    num_workers=0,
+                                    drop_last=True, 
+                                    shuffle=False, 
+                                    pin_memory=False)
+
     def sample(self):
         """
         ### Sample images
@@ -88,10 +98,10 @@ class Trainer():
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
-            #x = torch.load('xt.pt')
-            #x = x.to(self.device)
-
-            #print(x)
+            _, (sharp, blur) = next(iter(self.dataloader))
+            save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
+            save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
+            print("done")
             
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
@@ -111,7 +121,8 @@ class Trainer():
 
                 # save sampled images
                 if ((t_+1) % self.n_steps == 0):
-                    save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+                    pass
+                    #save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
                     #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
 
             return x
