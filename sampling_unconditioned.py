@@ -125,7 +125,8 @@ class Trainer():
 
                 # save sampled images
                 if ((t_+1) % self.n_steps == 0):
-                    save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+                    pass
+                    #save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
 
             return x
 
