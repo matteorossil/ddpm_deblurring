@@ -105,28 +105,33 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            t_vec = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
-            for t in t_vec:
+            for t in t_seq:
                 noise = torch.randn_like(blur)
                 blur_noise = self.diffusion.q_sample(blur, t.repeat(blur.shape[0]), eps=noise)
                 save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t.item()+1}.png"))
 
+            for t in t_seq:
+
             # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
+            #for t_ in range(self.n_steps):
+                print("running for t:", t.item())
+                x = self.diffusion.q_sample(blur, t.repeat(blur.shape[0]), eps=noise)
 
-                print(t_)
+                for t_ in range(t.item()):
 
-                t = self.n_steps - t_ - 1
+                    print(t_)
 
-                # Sample
-                t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
+                    t = self.n_steps - t_ - 1
 
-                # save sampled images
-                if ((t_+1) % self.n_steps == 0):
-                    pass
-                    #save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+                    # Sample
+                    t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
+                    x = self.diffusion.p_sample(x, t_vec)
+
+                    # save sampled images
+                    if ((t_+1) % self.n_steps == 0):
+                        save_image(x, os.path.join(self.sampling_path, f"tseq_{t.item()}_t{t_+1}.png"))
 
             return x
 
