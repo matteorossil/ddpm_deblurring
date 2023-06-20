@@ -101,7 +101,6 @@ class Trainer():
             sharp, blur = next(iter(self.dataloader))
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
-            print("done")
             
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
@@ -114,17 +113,10 @@ class Trainer():
                 t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
 
-                # Normalize img
-                #min_val = x.min(-1)[0].min(-1)[0]
-                #max_val = x.max(-1)[0].max(-1)[0]
-                #x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
-
                 # save sampled images
                 if ((t_+1) % self.n_steps == 0):
-                    pass
-                    #save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
-                    #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
-
+                    save_image(x, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}.png"))
+                    
             return x
 
 def main():
