@@ -109,7 +109,7 @@ class Trainer():
 
             for t_i in t_seq:
 
-                print("running for t:", t.item()+1)
+                print("running for t:", t_i.item()+1)
 
                 noise = torch.randn_like(blur)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
