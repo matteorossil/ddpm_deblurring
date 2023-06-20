@@ -107,31 +107,27 @@ class Trainer():
 
             t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
-            for t in t_seq:
-                noise = torch.randn_like(blur)
-                blur_noise = self.diffusion.q_sample(blur, t.repeat(blur.shape[0]), eps=noise)
-                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t.item()+1}.png"))
+            for t_i in t_seq:
 
-            for t in t_seq:
-
-            # Remove noise for $T$ steps
-            #for t_ in range(self.n_steps):
                 print("running for t:", t.item()+1)
-                x = self.diffusion.q_sample(blur, t.repeat(blur.shape[0]), eps=noise)
 
-                for t_ in range(t.item()):
+                noise = torch.randn_like(blur)
+                blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
+                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
+
+                for t_ in range(t_i.item()):
 
                     print(t_)
 
                     t = self.n_steps - t_ - 1
 
                     # Sample
-                    t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
-                    x = self.diffusion.p_sample(x, t_vec)
+                    t_vec = blur_noise.new_full((self.n_samples,), t, dtype=torch.long)
+                    blur_noise = self.diffusion.p_sample(x, t_vec)
 
                     # save sampled images
-                    if ((t_+1) % t.item() == 0):
-                        save_image(x, os.path.join(self.sampling_path, f"tseq_{t.item()}_t{t_+1}.png"))
+                    if ((t_+1) % t_i.item() == 0):
+                        save_image(blur_noise, os.path.join(self.sampling_path, f"tseq_{t_i.item()}_t{t_+1}.png"))
 
             return x
 
