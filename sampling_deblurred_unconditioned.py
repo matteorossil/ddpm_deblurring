@@ -110,7 +110,7 @@ class Trainer():
 
             #t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
-            t_seq = torch.floor(torch.linspace(0, 2000 - 1, 21, device="cpu")).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(0, self.n_steps - 1, 21, device="cpu")).type(torch.long).unsqueeze(-1)
 
             for t_i in t_seq:
 
