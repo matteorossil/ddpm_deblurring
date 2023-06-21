@@ -88,6 +88,7 @@ class DenoiseDiffusion:
 
         # $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$
         eps_theta = self.eps_model(xt, t)
+        print(eps_theta)
         # [gather](utils.html) $\bar\alpha_t$
         alpha_bar = gather(self.alpha_bar, t)
         # $\alpha_t$
