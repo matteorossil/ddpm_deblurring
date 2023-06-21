@@ -130,6 +130,7 @@ class Trainer():
                     # Sample
                     t_vec = blur_noise.new_full((self.n_samples,), t, dtype=torch.long)
                     blur_noise = self.diffusion.p_sample(blur_noise, t_vec)
+                    save_image(blur_noise, os.path.join(self.sampling_path, f"deblurred_{t_i.item()+1}.png"))
 
                     # save sampled images
                     if ((t_+1) % t_i.item() == 0):
