@@ -108,13 +108,16 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
+            #t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
+
+            t_seq = torch.floor(torch.linspace(0, 2000 - 1, 21, device="cpu")).type(torch.long).unsqueeze(-1)
 
             for t_i in t_seq:
 
                 print("running for t:", t_i.item()+1)
 
-                noise = torch.randn_like(blur)
+                #noise = torch.randn_like(blur)
+                noise = torch.zeros(blur.shape)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
                 save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
 
