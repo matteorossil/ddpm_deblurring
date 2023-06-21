@@ -117,7 +117,7 @@ class Trainer():
                 print("running for t:", t_i.item()+1)
 
                 #noise = torch.randn_like(blur)
-                noise = torch.zeros(blur.shape)
+                noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
                 save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
 
