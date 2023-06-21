@@ -106,7 +106,7 @@ class DenoiseDiffusion:
         # Sample
         # import pdb; pdb.set_trace()
 
-        return mean #+ (var ** .5) * eps
+        return mean + (var ** .5) * eps
 
     def loss(self, x0: torch.Tensor, noise: Optional[torch.Tensor] = None):
         """
