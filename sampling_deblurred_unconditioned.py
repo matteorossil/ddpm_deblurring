@@ -114,8 +114,8 @@ class Trainer():
 
                 print("running for t:", t_i.item()+1)
 
-                #noise = torch.randn_like(blur, device=self.device)
-                noise = torch.zeros(blur.shape, device=self.device)
+                noise = torch.randn_like(blur, device=self.device)
+                #noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
 
                 for t_ in range(t_i.item()):
