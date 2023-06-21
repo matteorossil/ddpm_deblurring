@@ -12,6 +12,7 @@ import torch.nn.functional as F
 from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
+from utils import gather
 
 import sys
 
@@ -50,7 +51,7 @@ class Trainer():
     checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    sampling_path = '/home/mr6744/checkpoints_distributed/sampling4/'
+    sampling_path = '/home/mr6744/checkpoints_distributed/sampling3/'
     # dataset
     #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     dataset: str = '/home/mr6744/gopro_ALL_128/'
@@ -108,16 +109,23 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, self.n_steps // 100, device=self.device)).type(torch.long).unsqueeze(-1)
 
             for t_i in t_seq:
 
                 print("running for t:", t_i.item()+1)
 
-                #noise = torch.randn_like(blur, device=self.device)
-                noise = torch.zeros(blur.shape, device=self.device)
+                noise = torch.randn_like(blur, device=self.device)
+                #noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
                 save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
+
+                a_bar_t = gather(self.diffusion.alpha_bar, t_i.repeat(blur.shape[0]))
+                a = a_bar_t ** 0.5 * (sharp - blur)
+                b = (1 - a_bar_t)  ** 0.5 * (noise)
+            
+                save_image(a, os.path.join(self.sampling_path, f"residual_{t_i.item()+1}.png"))
+                save_image(a + b, os.path.join(self.sampling_path, f"residual_noise_{t_i.item()+1}.png"))
 
                 for t_ in range(t_i.item()):
 
