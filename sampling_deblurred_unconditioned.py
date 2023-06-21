@@ -115,17 +115,10 @@ class Trainer():
 
                 print("running for t:", t_i.item()+1)
 
-                noise = torch.randn_like(blur, device=self.device)
-                #noise = torch.zeros(blur.shape, device=self.device)
+                #noise = torch.randn_like(blur, device=self.device)
+                noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
                 save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
-
-                a_bar_t = gather(self.diffusion.alpha_bar, t_i.repeat(blur.shape[0]))
-                a = a_bar_t ** 0.5 * (sharp - blur)
-                b = (1 - a_bar_t)  ** 0.5 * (noise)
-            
-                save_image(a, os.path.join(self.sampling_path, f"residual_{t_i.item()+1}.png"))
-                save_image(a + b, os.path.join(self.sampling_path, f"residual_noise_{t_i.item()+1}.png"))
 
                 for t_ in range(t_i.item()):
 
@@ -136,6 +129,7 @@ class Trainer():
                     # Sample
                     t_vec = blur_noise.new_full((self.n_samples,), t, dtype=torch.long)
                     blur_noise = self.diffusion.p_sample(blur_noise, t_vec)
+                    save_image(blur_noise, os.path.join(self.sampling_path, f"p_sample_{t_i.item()+1}.png"))
 
                     # save sampled images
                     if ((t_+1) % t_i.item() == 0):
