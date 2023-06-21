@@ -99,7 +99,7 @@ class Trainer():
             torch.cuda.manual_seed_all(7)
 
             # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
+            #x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
 
             sharp, blur = next(iter(self.dataloader))
             sharp = sharp.to(self.device)
@@ -108,15 +108,13 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            #t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
-
-            t_seq = torch.floor(torch.linspace(0, self.n_steps - 1, 21, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
             for t_i in t_seq:
 
                 print("running for t:", t_i.item()+1)
 
-                #noise = torch.randn_like(blur)
+                #noise = torch.randn_like(blur, device=self.device)
                 noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
                 save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
@@ -136,7 +134,7 @@ class Trainer():
                     if ((t_+1) % t_i.item() == 0):
                         save_image(blur_noise, os.path.join(self.sampling_path, f"deblurred_{t_i.item()+1}.png"))
 
-            return x
+            #return x
 
 def main():
     trainer = Trainer()
