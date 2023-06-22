@@ -135,10 +135,10 @@ class Trainer():
             savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_val2)]))
 
             # compute ssim for val
-            ssim_val1 = psnr(sharp_val, blur_val)
+            ssim_val1 = ssim(sharp_val, blur_val)
             savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}.txt"), ssim_val1)
             savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_val1)]))
-            ssim_val2 = psnr(sharp_val, deblurred_val)
+            ssim_val2 = ssim(sharp_val, deblurred_val)
             savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}.txt"), ssim_val2)
             savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_val2)]))
 
