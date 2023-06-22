@@ -102,6 +102,12 @@ class Trainer():
             psnr_train2 = psnr(sharp_train, deblurred_train)
             savetxt(os.path.join(self.sampling_path, f"psnr_train_deblurred_epoch{self.epoch}.txt"), psnr_train2)
 
+            # compute ssim for train
+            ssim_train1 = ssim(sharp_train, blur_train)
+            savetxt(os.path.join(self.sampling_path, f"ssim_train_blur_epoch{self.epoch}.txt"), ssim_train1)
+            ssim_train2 = ssim(sharp_train, deblurred_train)
+            savetxt(os.path.join(self.sampling_path, f"ssim_train_deblurred_epoch{self.epoch}.txt"), ssim_train2)
+
             # validation dataset
             sharp_val, blur_val = next(iter(self.dataloader_val))
             sharp_val = sharp_val.to(self.device)
@@ -118,6 +124,12 @@ class Trainer():
             savetxt(os.path.join(self.sampling_path, f"psnr_val_blur_epoch{self.epoch}.txt"), psnr_val1)
             psnr_val2 = psnr(sharp_val, deblurred_val)
             savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}.txt"), psnr_val2)
+
+            # compute ssim for val
+            ssim_val1 = psnr(sharp_val, blur_val)
+            savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}.txt"), ssim_val1)
+            ssim_val2 = psnr(sharp_val, deblurred_val)
+            savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}.txt"), ssim_val2)
 
 
 def main():
