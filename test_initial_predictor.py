@@ -36,7 +36,7 @@ class Trainer():
     #n_samples: int = 1
     # checkpoint path
     epoch: int = int(sys.argv[2])
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06202023_123619/checkpoint_{epoch}.pt'
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
     #checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
     sampling_path: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/sampling/'

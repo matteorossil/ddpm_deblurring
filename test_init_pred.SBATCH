@@ -14,4 +14,4 @@ module purge
 singularity exec --nv \
 	    --overlay /scratch/mr6744/pytorch/overlay-25GB-500K.ext3:ro \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
-	    /bin/bash -c "source /ext3/env.sh; python -u /scratch/mr6744/pytorch/ddpm_deblurring/test_initial_predictor.py 64 14460"
+	    /bin/bash -c "source /ext3/env.sh; python -u /scratch/mr6744/pytorch/ddpm_deblurring/test_initial_predictor.py 64 3600"
