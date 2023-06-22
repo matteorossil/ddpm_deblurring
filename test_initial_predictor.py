@@ -32,10 +32,10 @@ class Trainer():
     # Define sampling
 
     # Number of sample images
-    n_samples: int = int(sys.argv[2])
+    n_samples: int = int(sys.argv[1])
     #n_samples: int = 1
     # checkpoint path
-    epoch: int = int(sys.argv[3])
+    epoch: int = int(sys.argv[2])
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06202023_123619/checkpoint_{epoch}.pt'
     #checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
@@ -60,35 +60,55 @@ class Trainer():
         checkpoint_ = torch.load(self.checkpoint)
         self.eps_model.load_state_dict(checkpoint_)
 
-        dataset = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
 
-        self.dataloader = DataLoader(dataset=dataset,
+        self.dataloader_train = DataLoader(dataset=dataset_train,
                                     batch_size=self.n_samples, 
                                     num_workers=0,
                                     drop_last=True, 
                                     shuffle=True, 
                                     pin_memory=False)
 
-    def sample(self):
+        self.dataloader_val = DataLoader(dataset=dataset_val,
+                                    batch_size=self.n_samples, 
+                                    num_workers=0,
+                                    drop_last=True, 
+                                    shuffle=True, 
+                                    pin_memory=False)
+
+    def test(self):
         """
         ### Sample images
         """
         with torch.no_grad():
+            
+            # training dataset
+            sharp_train, blur_train = next(iter(self.dataloader_train))
+            sharp_train = sharp_train.to(self.device)
+            blur_train = blur_train.to(self.device)
 
-            sharp, blur = next(iter(self.dataloader))
-            sharp = sharp.to(self.device)
-            blur = blur.to(self.device)
+            save_image(sharp_train, os.path.join(self.sampling_path, f"sharp.png"))
+            save_image(blur_train, os.path.join(self.sampling_path, f"blur.png"))
 
-            save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
-            save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
+            deblurred_train = self.eps_model(blur_train)
+            save_image(deblurred_train, os.path.join(self.sampling_path, f"deblurred_train_epoch{self.epoch}.png"))
 
-            deblurred = self.eps_model(blur)
-            save_image(deblurred, os.path.join(self.sampling_path, f"deblurred_epoch{self.epoch}.png"))
+            # validation dataset
+            sharp_val, blur_val = next(iter(self.dataloader_val))
+            sharp_val = sharp_val.to(self.device)
+            blur_val = blur_val.to(self.device)
+
+            save_image(sharp_val, os.path.join(self.sampling_path, f"sharp.png"))
+            save_image(blur_val, os.path.join(self.sampling_path, f"blur.png"))
+
+            deblurred_val = self.eps_model(blur_val)
+            save_image(deblurred_val, os.path.join(self.sampling_path, f"deblurred_val_epoch{self.epoch}.png"))
 
 def main():
     trainer = Trainer()
     trainer.init()
-    trainer.sample()
+    trainer.test()
 
 if __name__ == "__main__":
     main()
