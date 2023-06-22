@@ -12,6 +12,8 @@ from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 from utils import gather
+from metrics import *
+from numpy import savetxt
 
 import sys
 
@@ -36,7 +38,7 @@ class Trainer():
     #n_samples: int = 1
     # checkpoint path
     epoch: int = int(sys.argv[2])
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06202023_123619/checkpoint_{epoch}.pt'
     #checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
     sampling_path: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/sampling/'
@@ -94,6 +96,12 @@ class Trainer():
             deblurred_train = self.eps_model(blur_train)
             save_image(deblurred_train, os.path.join(self.sampling_path, f"deblurred_train_epoch{self.epoch}.png"))
 
+            # compute psnr for train
+            psnr_train1 = psnr(sharp_train, blur_train)
+            savetxt(os.path.join(self.sampling_path, f"psnr_train_blur_epoch{self.epoch}.txt", psnr_train1))
+            psnr_train2 = psnr(sharp_train, deblurred_train)
+            savetxt(os.path.join(self.sampling_path, f"psnr_train_deblurred_epoch{self.epoch}.txt", psnr_train2))
+
             # validation dataset
             sharp_val, blur_val = next(iter(self.dataloader_val))
             sharp_val = sharp_val.to(self.device)
@@ -104,6 +112,13 @@ class Trainer():
 
             deblurred_val = self.eps_model(blur_val)
             save_image(deblurred_val, os.path.join(self.sampling_path, f"deblurred_val_epoch{self.epoch}.png"))
+
+            # compute psnr for val
+            psnr_val1 = psnr(sharp_val, blur_val)
+            savetxt(os.path.join(self.sampling_path, f"psnr_val_blur_epoch{self.epoch}.txt", psnr_val1))
+            psnr_val2 = psnr(sharp_val, deblurred_val)
+            savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}.txt", psnr_val2))
+
 
 def main():
     trainer = Trainer()

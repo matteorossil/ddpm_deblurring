@@ -1,2 +1,0 @@
-## Perceptual and Distortion Metrics
-
