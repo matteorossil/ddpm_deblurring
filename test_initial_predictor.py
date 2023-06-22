@@ -88,8 +88,8 @@ class Trainer():
             sharp_train = sharp_train.to(self.device)
             blur_train = blur_train.to(self.device)
 
-            save_image(sharp_train, os.path.join(self.sampling_path, f"sharp.png"))
-            save_image(blur_train, os.path.join(self.sampling_path, f"blur.png"))
+            save_image(sharp_train, os.path.join(self.sampling_path, f"sharp_train.png"))
+            save_image(blur_train, os.path.join(self.sampling_path, f"blur_train.png"))
 
             deblurred_train = self.eps_model(blur_train)
             save_image(deblurred_train, os.path.join(self.sampling_path, f"deblurred_train_epoch{self.epoch}.png"))
@@ -99,8 +99,8 @@ class Trainer():
             sharp_val = sharp_val.to(self.device)
             blur_val = blur_val.to(self.device)
 
-            save_image(sharp_val, os.path.join(self.sampling_path, f"sharp.png"))
-            save_image(blur_val, os.path.join(self.sampling_path, f"blur.png"))
+            save_image(sharp_val, os.path.join(self.sampling_path, f"sharp_val.png"))
+            save_image(blur_val, os.path.join(self.sampling_path, f"blur_val.png"))
 
             deblurred_val = self.eps_model(blur_val)
             save_image(deblurred_val, os.path.join(self.sampling_path, f"deblurred_val_epoch{self.epoch}.png"))
