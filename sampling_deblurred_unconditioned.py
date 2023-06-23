@@ -57,7 +57,8 @@ class Trainer():
     sampling_path = '/home/mr6744/checkpoints_distributed/sampling4/'
     # dataset
     #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
-    dataset: str = '/home/mr6744/gopro_ALL_128/'
+    #dataset: str = '/home/mr6744/gopro_ALL_128/'
+    dataset: str = '/home/mr6744/gopro/'
 
     def init(self):
         # device
