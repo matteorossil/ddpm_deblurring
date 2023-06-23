@@ -54,7 +54,7 @@ class Trainer():
     checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    sampling_path = '/home/mr6744/checkpoints_distributed/sampling5/'
+    sampling_path = '/home/mr6744/checkpoints_distributed/sampling4/'
     # dataset
     #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     dataset: str = '/home/mr6744/gopro_ALL_128/'
@@ -129,10 +129,10 @@ class Trainer():
 
                 print("running for t:", t_i.item()+1)
 
-                noise = torch.randn_like(blur, device=self.device)
-                #noise = torch.zeros(blur.shape, device=self.device)
+                #noise = torch.randn_like(blur, device=self.device)
+                noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
-                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_with_noise_{t_i.item()+1}.png"))
+                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_no_noise_{t_i.item()+1}.png"))
 
                 for t_ in range(t_i.item()):
 
@@ -147,16 +147,16 @@ class Trainer():
 
                     # save sampled images
                     if ((t_+1) % t_i.item() == 0):
-                        save_image(blur_noise, os.path.join(self.sampling_path, f"deblurred_with_noise_{t_i.item()+1}.png"))
+                        save_image(blur_noise, os.path.join(self.sampling_path, f"deblurred_no_noise_{t_i.item()+1}.png"))
 
 
                 psnr_val2 = psnr(sharp, blur_noise)
-                savetxt(os.path.join(self.sampling_path, f"psnr_sharp_deblur_with_noise_t{t_i.item()+1}.txt"), psnr_val2)
-                savetxt(os.path.join(self.sampling_path, f"psnr_sharp_deblur_with_noise_t{t_i.item()+1}_avg.txt"), np.array([np.mean(psnr_val2)]))
+                savetxt(os.path.join(self.sampling_path, f"psnr_sharp_deblur_no_noise_t{t_i.item()+1}.txt"), psnr_val2)
+                savetxt(os.path.join(self.sampling_path, f"psnr_sharp_deblur_no_noise_t{t_i.item()+1}_avg.txt"), np.array([np.mean(psnr_val2)]))
                 
                 ssim_val2 = ssim(sharp, blur_noise)
-                savetxt(os.path.join(self.sampling_path, f"ssim_sharp_deblur_with_noise_t{t_i.item()+1}.txt"), ssim_val2)
-                savetxt(os.path.join(self.sampling_path, f"ssim_sharp_deblur_with_noise_t{t_i.item()+1}_avg.txt"), np.array([np.mean(ssim_val2)]))
+                savetxt(os.path.join(self.sampling_path, f"ssim_sharp_deblur_no_noise_t{t_i.item()+1}.txt"), ssim_val2)
+                savetxt(os.path.join(self.sampling_path, f"ssim_sharp_deblur_no_noise_t{t_i.item()+1}_avg.txt"), np.array([np.mean(ssim_val2)]))
                 
 
             #return x
