@@ -112,7 +112,8 @@ class Trainer():
             save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
-            t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, self.n_steps // 100, device=self.device)).type(torch.long).unsqueeze(-1)
+            #t_seq = torch.floor(torch.linspace(99, self.n_steps - 1, self.n_steps // 100, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(24, 50 - 1, 50 // 25, device=self.device)).type(torch.long).unsqueeze(-1)
 
             # compute psnr 
             psnr_val1 = psnr(sharp, blur)
