@@ -32,32 +32,31 @@ class Data(Dataset):
         self.mode = mode
 
         # stores paths
-        self.sharp = os.path.join(self.dataset_name[mode], "sharp")
+        if mode == "train":
+            self.imgs_dir = os.path.join(self.dataset_name[mode], "sharp")
+        else:
+            self.imgs_dir = os.path.join(self.dataset_name[mode], "blur")
 
-        self.sharp_imgs = os.listdir(self.sharp)
-        self.sharp_imgs.sort()
+        self.imgs = os.listdir(self.imgs_dir)
+        self.imgs.sort()
 
     def __len__(self):
-        return len(self.sharp_imgs)
+        return len(self.imgs)
     
     def __getitem__(self, idx):
-
-        sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert('RGB')
         
-        '''
         if self.mode == 'train':
-            return self.transform_train(sharp, blur)
+            sharp = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
+            return TF.to_tensor(self.transform_train(sharp))
         else: # do not apply trainsfomation to validation set
-            return self.transform_val(sharp, blur)
-        '''
+            blur = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
+            return TF.to_tensor(blur)
 
-        return TF.to_tensor(sharp)
-
-    def transform_train(self, sharp, blur):
+    def transform_train(self, sharp):
 
         # Random crop
-        i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        sharp = TF.crop(sharp, i, j, h, w)
+        # i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
+        # sharp = TF.crop(sharp, i, j, h, w)
 
         # random horizontal flip
         if random.random() > 0.5:
@@ -66,19 +65,5 @@ class Data(Dataset):
         # Random vertical flip
         if random.random() > 0.5:
             sharp = TF.vflip(sharp)
-
-        # convert to tensors
-        sharp = TF.to_tensor(sharp)
-
-        return sharp
-    
-    def transform_val(self, sharp, blur):
-
-        # Random crop
-        i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        sharp = TF.crop(sharp, i, j, h, w)
-
-        # convert to tensors
-        sharp = TF.to_tensor(sharp)
 
         return sharp

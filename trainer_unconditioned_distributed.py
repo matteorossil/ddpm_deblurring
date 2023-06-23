@@ -41,8 +41,8 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
+    is_attention: List[int] = [False, False, False, True]
+    attention_middle: List[int] = [True]
     # Number of time steps $T$
     n_steps: int = 2_000
     # noise scheduler
@@ -59,17 +59,15 @@ class Trainer():
     # Number of training epochs
     epochs: int = 10_000
     # Number of sample images
-    n_samples: int = 1
+    n_samples: int = 8
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
     store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_distributed/'
     #store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
-    #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_ALL_128/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_ALL_128/'
-    #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
     checkpoint_epoch: int = int(sys.argv[1])
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06152023_233012/checkpoint_{checkpoint_epoch}.pt'
@@ -108,9 +106,9 @@ class Trainer():
         )
         # Create dataloader
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        self.data_loader = DataLoader(dataset=dataset,
+        self.dataloader_train = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=16,
+                                    num_workers=24,
                                     drop_last=True,
                                     shuffle=False,
                                     pin_memory=False,
@@ -161,7 +159,7 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        for batch_idx, sharp in enumerate(self.data_loader):
+        for batch_idx, sharp in enumerate(self.dataloader_train):
             # Increment global step
             self.step += 1
             # Move data to device
