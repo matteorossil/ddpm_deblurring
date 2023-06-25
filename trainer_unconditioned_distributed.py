@@ -66,8 +66,8 @@ class Trainer():
     store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_distributed/'
     #store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
-    #dataset: str = '/home/mr6744/gopro_ALL_128/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_epoch: int = 0
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06152023_233012/checkpoint_{checkpoint_epoch}.pt'
