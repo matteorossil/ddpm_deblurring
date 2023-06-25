@@ -126,7 +126,7 @@ class Trainer():
         with torch.no_grad():
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
-            torch.cuda.manual_seed(7)
+            torch.cuda.manual_seed(0)
             x = torch.randn([n_samples, self.image_channels, self.image_size, self.image_size],
                             device=self.gpu_id)
             # Remove noise for $T$ steps
@@ -137,16 +137,8 @@ class Trainer():
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = x.new_full((n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
-
-                if ((t_+1) % 2000 == 0):
-                    # save sampled images
-                    save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}.png'))
-
-                    min_val = x.min(-1)[0].min(-1)[0]
-                    max_val = x.max(-1)[0].max(-1)[0]
-                    x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
-
-                    save_image(x_norm, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}_norm.png'))
+            
+            save_image(x, os.path.join(self.exp_path, f'epoch{epoch}_t{t_+1}.png'))
 
             # Log samples
             #if self.wandb:

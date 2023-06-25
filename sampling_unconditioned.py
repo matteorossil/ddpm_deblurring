@@ -44,11 +44,11 @@ class Trainer():
     n_samples: int = int(sys.argv[2])
     # checkpoint path
     epoch = int(sys.argv[3])
-    checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
-    #checkpoint = f'/home/mr6744/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
+    #checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
     # store sample
-    sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    #sampling_path = '/home/mr6744/checkpoints_distributed/06132023_202606/sampling/'
+    #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
+    sampling_path = '/home/mr6744/checkpoints_distributed/sampling_new/'
 
     def init(self):
         # device
@@ -103,11 +103,6 @@ class Trainer():
                 # Sample
                 t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
                 x = self.diffusion.p_sample(x, t_vec)
-
-                # Normalize img
-                #min_val = x.min(-1)[0].min(-1)[0]
-                #max_val = x.max(-1)[0].max(-1)[0]
-                #x_norm = (x-min_val[:,:,None,None])/(max_val[:,:,None,None]-min_val[:,:,None,None])
 
                 # save sampled images
                 if ((t_+1) % self.n_steps == 0):
