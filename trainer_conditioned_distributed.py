@@ -141,8 +141,12 @@ class Trainer():
                                           sampler=DistributedSampler(dataset_val))
 
         # Create optimizer
-        params = list(self.denoiser.parameters()) + list(self.init_predictor.parameters())
+        params = list(self.denoiser.parameters())
         self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+
+        params2 = list(self.init_predictor.parameters())
+        self.optimizer2 = torch.optim.AdamW(params2, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
+
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
@@ -156,6 +160,7 @@ class Trainer():
             # push to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
+            init = self.init_predictor(blur)
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
             torch.cuda.manual_seed(0)
@@ -167,7 +172,7 @@ class Trainer():
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = z.new_full((n_samples,), t, dtype=torch.long)
-                z = self.diffusion.p_sample(z, blur, t_vec)
+                z = self.diffusion.p_sample(z, init, t_vec)
             # Log samples
             #if self.wandb:
                 #wandb.log({'samples': wandb.Image(x)}, step=self.step)
@@ -186,7 +191,6 @@ class Trainer():
             save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
 
             # prediction for sharp image
-            init = self.init_predictor(blur)
             save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
             
             # initial predictor
@@ -210,12 +214,14 @@ class Trainer():
             blur = blur.to(self.gpu_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
+            self.optimizer2.zero_grad()
             # Calculate loss
             loss = self.diffusion.loss(sharp, blur)
             # Compute gradients
             loss.backward()
             # Take an optimization step
             self.optimizer.step()
+            self.optimizer2.step()
             # Track the loss
             if self.wandb:
                 wandb.log({'loss': loss}, step=self.step)

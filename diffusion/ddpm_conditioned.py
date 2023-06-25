@@ -136,7 +136,7 @@ class DenoiseDiffusion:
         # diff = sharp - blur
         xt = self.q_sample(diff, t, eps=noise)
         # concatenate channel wise
-        xt = torch.cat((xt, blur), dim=1)
+        xt = torch.cat((xt, x_init), dim=1)
         # Get $\textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)$
         eps_theta = self.eps_model(xt, t)
         # MSE loss
