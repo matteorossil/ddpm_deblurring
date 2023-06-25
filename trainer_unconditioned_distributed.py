@@ -59,7 +59,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 10_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 16
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
@@ -69,7 +69,7 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_ALL_128/'
     # load from a checkpoint
-    checkpoint_epoch: int = int(sys.argv[1])
+    checkpoint_epoch: int = 0
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06152023_233012/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
@@ -109,7 +109,7 @@ class Trainer():
         self.dataloader_train = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
                                     num_workers=16,
-                                    drop_last=True,
+                                    drop_last=False,
                                     shuffle=False,
                                     pin_memory=False,
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
@@ -176,7 +176,7 @@ class Trainer():
         for epoch in range(self.epochs):
             # Train the model
             self.train()
-            if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
+            if (epoch % 19 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
                 torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))

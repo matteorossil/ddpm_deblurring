@@ -47,7 +47,7 @@ class Data(Dataset):
         
         if self.mode == 'train':
             sharp = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
-            return TF.to_tensor(self.transform_train(sharp))
+            return TF.to_tensor(sharp)
         else: # do not apply trainsfomation to validation set
             blur = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
             return TF.to_tensor(blur)
