@@ -45,8 +45,8 @@ class Data(Dataset):
 
         assert len(self.sharp_imgs) == len(self.blur_imgs)
 
-    def __len__(self):
-        return len(self.sharp_imgs)
+    #def __len__(self):
+        #return len(self.sharp_imgs)
     
     def __getitem__(self, idx):
 
@@ -57,8 +57,8 @@ class Data(Dataset):
 
             s, b = self.transform_train(sharp, blur)
 
-            #save_image(s, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/train/sharp/'+str(idx)+'.png')
-            #save_image(b, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/train/blur/'+str(idx)+'.png')
+            save_image(s, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/train/sharp/'+str(idx)+'.png')
+            save_image(b, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/train/blur/'+str(idx)+'.png')
 
             save_image(s, '/home/mr6744/gopro_128/train/sharp/'+str(idx)+'.png')
             save_image(b, '/home/mr6744/gopro_128/train/blur/'+str(idx)+'.png')
@@ -69,8 +69,8 @@ class Data(Dataset):
 
             s, b = self.transform_val(sharp, blur)
 
-            #save_image(s, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/val/sharp/'+str(idx)+'.png')
-            #save_image(b, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/val/blur/'+str(idx)+'.png')
+            save_image(s, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/val/sharp/'+str(idx)+'.png')
+            save_image(b, '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset2/val/blur/'+str(idx)+'.png')
 
             save_image(s, '/home/mr6744/gopro_128/val/sharp/'+str(idx)+'.png')
             save_image(b, '/home/mr6744/gopro_128/val/blur/'+str(idx)+'.png')
@@ -118,6 +118,6 @@ class Data(Dataset):
         return sharp, blur
     
 
-#dataset = Data(path='/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/', mode="train", size=(128,128))
+#dataset = Data(path='/scratch/mr6744/pytorch/HIDE_dataset', mode="train", size=(128,128))
 #dataloader = DataLoader(dataset=dataset, batch_size=1, num_workers=0, drop_last=False)
 
