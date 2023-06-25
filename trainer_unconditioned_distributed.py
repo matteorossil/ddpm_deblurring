@@ -66,7 +66,7 @@ class Trainer():
     store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_distributed/'
     #store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_ALL_128/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_ALL_128/'
     # load from a checkpoint
     checkpoint_epoch: int = 0
@@ -174,9 +174,12 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
+            if (epoch == 0) and (self.gpu_id == 0):
+                self.sample(self.n_samples, self.checkpoint_epoch+epoch)
+
             # Train the model
             self.train()
-            if (epoch % 20 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
                 torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
