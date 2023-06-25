@@ -59,7 +59,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 10_000
     # Number of sample images
-    n_samples: int = 16
+    n_samples: int = 8
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
@@ -69,8 +69,8 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_epoch: int = 0
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06152023_233012/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 8600
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06232023_171322/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
