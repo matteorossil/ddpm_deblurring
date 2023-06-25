@@ -72,7 +72,7 @@ class Data(Dataset):
 
         return blur
 
-dataset = Data(path='/scratch/mr6744/pytorch/HIDE_dataset', mode="val", size=(128,128))
+dataset = Data(path='/scratch/mr6744/pytorch/HIDE_dataset/', mode="val", size=(128,128))
 dataloader = DataLoader(dataset=dataset, batch_size=1, num_workers=0, drop_last=False)
 
 for _ in enumerate(dataloader):
