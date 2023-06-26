@@ -166,7 +166,7 @@ class Trainer():
             self.optimizer.step()
             # Track the loss
             #print('loss:', loss, 'step:', self.step)
-            if self.wandb:
+            if self.wandb and self.gpu_id == 0:
                 wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
