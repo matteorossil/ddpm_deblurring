@@ -33,8 +33,8 @@ class Data(Dataset):
         self.blur_imgs = os.listdir(self.blur)
         self.blur_imgs.sort()
 
-    #def __len__(self):
-        #return len(self.sharp_imgs)
+    def __len__(self):
+        return len(self.blur_imgs)
     
     def __getitem__(self, idx):
 
