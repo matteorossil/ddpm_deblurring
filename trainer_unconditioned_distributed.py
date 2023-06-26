@@ -69,8 +69,8 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_epoch: int = 9640
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06252023_183221/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 11380
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06252023_230516/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -200,9 +200,26 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb:
-        wandb.init()
     trainer.init(rank) # initialize trainer class
+    
+    if trainer.wandb and rank == 0:
+
+        params = sum(p.numel() for p in trainer.eps_model.parameters() if p.requires_grad)
+        
+        wandb.init(
+            project="deblurring",
+            name=f"uncondtioned_gpus:{world_size}",
+            config=
+            {
+            "GPUs": world_size,
+            "GPU Type": torch.cuda.get_device_name(rank),
+            "dataset": trainer.dataset,
+            "denoiser # params": params,
+            "from checkpoint": trainer.checkpoint,
+            "checkpoints path": trainer.exp_path
+            }
+        )
+
     trainer.run() # perform training
     destroy_process_group()
 
