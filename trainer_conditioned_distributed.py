@@ -271,7 +271,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"condtioned_gpus:{world_size}_init_pretrained:{trainer.checkpoint_init_epoch>0}_conditioning:{trainer.conditioning}",
+            name=f"condtioned_gpus:{world_size}_init_pretrained:{trainer.checkpoint_init_epoch>0}_conditioning:blur",
             config=
             {
             "GPUs": world_size,
