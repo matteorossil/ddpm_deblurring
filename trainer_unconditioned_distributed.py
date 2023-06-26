@@ -208,15 +208,15 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"uncondtioned_gpus:{world_size}",
+            name=f"uncondtioned",
             config=
             {
             "GPUs": world_size,
             "GPU Type": torch.cuda.get_device_name(rank),
-            "dataset": trainer.dataset,
             "denoiser # params": params,
-            "from checkpoint": trainer.checkpoint,
-            "checkpoints path": trainer.exp_path
+            "dataset": trainer.dataset,
+            "loaded from checkpoint": trainer.checkpoint,
+            "checkpoints saved at": trainer.exp_path
             }
         )
 

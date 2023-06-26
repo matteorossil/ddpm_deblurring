@@ -271,18 +271,18 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"condtioned_gpus:{world_size}_init_pretrained:{trainer.checkpoint_init_epoch>0}_conditioning:blur",
+            name=f"condtioned",
             config=
             {
             "GPUs": world_size,
             "GPU Type": torch.cuda.get_device_name(rank),
+            "freeze init": True,
+            "pretrained init": trainer.checkpoint_init_epoch > 0,
+            "conditioning": "blurred image",
             "dataset": trainer.dataset,
             "denoiser # params": params_denoiser,
             "init # params": init_denoiser,
-            "freeze init": True,
-            "conditioning": "blur",
-            "pretrained init": trainer.checkpoint_init_epoch > 0,
-            "checkpoints path": trainer.exp_path
+            "checkpoints saved at": trainer.exp_path
             }
         )
     ##### ####
