@@ -40,7 +40,7 @@ class Data(Dataset):
 
         blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
-        save_image(blur, os.path.join('/scratch/mr6744/pytorch/HIDE/val', str(idx) + '.png'))
+        save_image(TF.to_tensor(blur), os.path.join('/scratch/mr6744/pytorch/HIDE/val', str(idx) + '.png'))
 
         blur = self.transform(blur)
 
