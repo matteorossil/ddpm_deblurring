@@ -23,11 +23,14 @@ class DenoiseDiffusion:
         * `device` is the device to place constants on
         """
         super().__init__()
+
+        # denoiser model
         self.eps_model = eps_model
 
+        # initial predictor
         self.predictor = predictor
 
-        # Create $\beta_1, \dots, \beta_T$ linearly increasing variance schedule
+        # Create linearly increasing variance schedule
         self.beta = torch.linspace(beta_0, beta_T, n_steps).to(device)
 
         # $\alpha_t = 1 - \beta_t$
@@ -123,26 +126,28 @@ class DenoiseDiffusion:
 
         # Get batch size
         batch_size = sharp.shape[0]
+
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=sharp.device, dtype=torch.long)
 
-        # $\epsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
+        # generate noise if None
         if noise is None:
             noise = torch.randn_like(sharp)
 
-        # Sample $x_t$ for $q(x_t|x_0)$
+        # compute residual
         init = self.predictor(blur)
-        residual = sharp - init
-        # diff = sharp - blur
+        residual = sharp - init  # or residual = sharp - blur
+
+        # generate q_sample from residual
         xt = self.q_sample(residual, t, eps=noise)
-        # concatenate channel wise
-        if self.eps_model.conditioning == "y":
-            xt_ = torch.cat((xt, blur), dim=1)
-        else: # g(y)
-            xt_ = torch.cat((xt, init), dim=1)
-        # Get $\textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)$
+
+        # concatenate channel wise for conditioning
+        xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
+
+        # predict noise
         eps_theta = self.eps_model(xt_, t)
-        # MSE loss
+
+        # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
 
     def save_model_copy(self):

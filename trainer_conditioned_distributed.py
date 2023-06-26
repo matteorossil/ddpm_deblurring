@@ -150,8 +150,6 @@ class Trainer():
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-        self.conditioning = "y"
-
     def sample(self, n_samples, epoch):
         """
         ### Sample images
@@ -164,22 +162,20 @@ class Trainer():
             blur = blur.to(self.gpu_id)
             init = self.init_predictor(blur)
 
-            if self.conditioning == "y":
-                condition = blur
-            else: # g(y)
-                condition = init
-            # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
+            #condition = blur # or condition = init 
+
             # Sample Initial Image (Random Gaussian Noise)
             torch.cuda.manual_seed(0)
             z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.gpu_id)
+            
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = z.new_full((n_samples,), t, dtype=torch.long)
-                z = self.diffusion.p_sample(z, condition, t_vec)
+                z = self.diffusion.p_sample(z, blur, t_vec)
 
             # Log samples
             #if self.wandb:
@@ -270,15 +266,12 @@ def main(rank: int, world_size:int):
     #### Track Hyperparameters ####
     if trainer.wandb and rank == 0:
 
-        if trainer.checkpoint_init_epoch > 0:
-            pretrained_init_pred = True
-
         params_denoiser = sum(p.numel() for p in trainer.params_denoiser if p.requires_grad)
         init_denoiser = sum(p.numel() for p in trainer.params_init if p.requires_grad)
         
         wandb.init(
             project="deblurring",
-            name=f"condtioned_gpus:{world_size}_init_pretrained:{pretrained_init_pred}_conditioning:{trainer.conditioning}",
+            name=f"condtioned_gpus:{world_size}_init_pretrained:{trainer.checkpoint_init_epoch>0}_conditioning:{trainer.conditioning}",
             config=
             {
             "GPUs": world_size,
@@ -286,11 +279,10 @@ def main(rank: int, world_size:int):
             "dataset": trainer.dataset,
             "denoiser # params": params_denoiser,
             "init # params": init_denoiser,
-            "conditioning": trainer.conditioning,
-            "pretrained initial predictor": pretrained_init_pred,
-            "checkpoint denoiser": trainer.checkpoint_denoiser,
-            "checkpoint initial predictor": trainer.checkpoint_init,
-            "checkpoint path": trainer.exp_path
+            "freeze init": True,
+            "conditioning": "blur",
+            "pretrained init": trainer.checkpoint_init_epoch > 0,
+            "checkpoints path": trainer.exp_path
             }
         )
     ##### ####
