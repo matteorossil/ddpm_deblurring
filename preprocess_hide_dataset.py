@@ -46,6 +46,8 @@ class Data(Dataset):
 
         save_image(blur, os.path.join('/scratch/mr6744/pytorch/HIDE_128/val', str(idx) + '.png'))
 
+        return blur
+
     def transform(self, blur):
 
         # Random crop
