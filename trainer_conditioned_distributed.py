@@ -141,14 +141,16 @@ class Trainer():
                                           sampler=DistributedSampler(dataset_val))
 
         # Create optimizer
-        params = list(self.denoiser.parameters())
-        self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.params_denoiser = list(self.denoiser.parameters())
+        self.params_init = list(self.init_predictor.parameters())
 
-        params2 = list(self.init_predictor.parameters())
-        self.optimizer2 = torch.optim.AdamW(params2, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        #self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
 
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
+
+        self.conditioning = "y"
 
     def sample(self, n_samples, epoch):
         """
@@ -161,6 +163,11 @@ class Trainer():
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
             init = self.init_predictor(blur)
+
+            if self.conditioning == "y":
+                condition = blur
+            else: # g(y)
+                condition = init
             # $x_T \sim p(x_T) = \mathcal{N}(x_T; \mathbf{0}, \mathbf{I})$
             # Sample Initial Image (Random Gaussian Noise)
             torch.cuda.manual_seed(0)
@@ -172,8 +179,8 @@ class Trainer():
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = z.new_full((n_samples,), t, dtype=torch.long)
-                z = self.diffusion.p_sample(z, init, t_vec)
-                #z = self.diffusion.p_sample(z, blur, t_vec)
+                z = self.diffusion.p_sample(z, condition, t_vec)
+
             # Log samples
             #if self.wandb:
                 #wandb.log({'samples': wandb.Image(x)}, step=self.step)
@@ -215,14 +222,14 @@ class Trainer():
             blur = blur.to(self.gpu_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
-            self.optimizer2.zero_grad()
+            #self.optimizer2.zero_grad()
             # Calculate loss
             loss = self.diffusion.loss(sharp, blur)
             # Compute gradients
             loss.backward()
             # Take an optimization step
             self.optimizer.step()
-            self.optimizer2.step()
+            #self.optimizer2.step()
             # Track the loss
             if self.wandb:
                 wandb.log({'loss': loss}, step=self.step)
@@ -258,9 +265,36 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb:
-        wandb.init()
     trainer.init(rank) # initialize trainer class
+
+    #### Track Hyperparameters ####
+    if trainer.wandb and rank == 0:
+
+        if trainer.checkpoint_init_epoch > 0:
+            pretrained_init_pred = True
+
+        params_denoiser = sum(p.numel() for p in trainer.params_denoiser if p.requires_grad)
+        init_denoiser = sum(p.numel() for p in trainer.params_init if p.requires_grad)
+        
+        wandb.init(
+            project="deblurring",
+            name=f"condtioned_gpus:{world_size}_init_pretrained:{pretrained_init_pred}_conditioning:{trainer.conditioning}",
+            config=
+            {
+            "GPUs": world_size,
+            "GPU Type": torch.cuda.get_device_name(rank),
+            "dataset": trainer.dataset,
+            "denoiser # params": params_denoiser,
+            "init # params": init_denoiser,
+            "conditioning": trainer.conditioning,
+            "pretrained initial predictor": pretrained_init_pred,
+            "checkpoint denoiser": trainer.checkpoint_denoiser,
+            "checkpoint initial predictor": trainer.checkpoint_init,
+            "checkpoint path": trainer.exp_path
+            }
+        )
+    ##### ####
+
     trainer.run() # perform training
     destroy_process_group()
 

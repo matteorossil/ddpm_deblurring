@@ -131,15 +131,17 @@ class DenoiseDiffusion:
             noise = torch.randn_like(sharp)
 
         # Sample $x_t$ for $q(x_t|x_0)$
-        x_init = self.predictor(blur)
-        diff = sharp - x_init
+        init = self.predictor(blur)
+        residual = sharp - init
         # diff = sharp - blur
-        xt = self.q_sample(diff, t, eps=noise)
+        xt = self.q_sample(residual, t, eps=noise)
         # concatenate channel wise
-        xt = torch.cat((xt, blur), dim=1)
-        #xt = torch.cat((xt, x_init), dim=1)
+        if self.eps_model.conditioning == "y":
+            xt_ = torch.cat((xt, blur), dim=1)
+        else: # g(y)
+            xt_ = torch.cat((xt, init), dim=1)
         # Get $\textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)$
-        eps_theta = self.eps_model(xt, t)
+        eps_theta = self.eps_model(xt_, t)
         # MSE loss
         return F.mse_loss(noise, eps_theta)
 
