@@ -4,7 +4,7 @@ import os
 
 from torch.utils.data import Dataset
 import torchvision.transforms.functional as TF
-from torchvision import transforms
+from torchvision import transforms as T
 
 from PIL import Image
 import random
@@ -25,11 +25,14 @@ class Data(Dataset):
             'val': path + "val",
         }
 
-        #size of the crop
+        # size of the crop
         self.size = size
 
-        #store mode
+        # store mode
         self.mode = mode
+
+        # angles for tranformations
+        self.angles = [90,180,270]
 
         # stores paths
         if mode == "train":
@@ -39,7 +42,7 @@ class Data(Dataset):
 
         self.imgs = os.listdir(self.imgs_dir)
         self.imgs.sort()
-
+        
     def __len__(self):
         return len(self.imgs)
     
@@ -47,23 +50,32 @@ class Data(Dataset):
         
         if self.mode == 'train':
             sharp = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
-            return TF.to_tensor(sharp)
+            return self.transform_train(sharp)
         else: # do not apply trainsfomation to validation set
             blur = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
-            return TF.to_tensor(blur)
-
+            return self.transform_val(blur)
+        
     def transform_train(self, sharp):
-
-        # Random crop
-        # i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        # sharp = TF.crop(sharp, i, j, h, w)
+                
+        i, j, h, w = T.RandomCrop.get_params(sharp, output_size=self.size)
+        sharp = TF.crop(sharp, i, j, h, w)
 
         # random horizontal flip
         if random.random() > 0.5:
             sharp = TF.hflip(sharp)
-
-        # Random vertical flip
+        
+        # random vertical flip
         if random.random() > 0.5:
             sharp = TF.vflip(sharp)
+        
+        # random rotation
+        if random.random() > 0.5:
+            angle = random.choice(self.angles)
+            sharp = TF.rotate(sharp, angle)
 
-        return sharp
+        return TF.to_tensor(sharp)
+                
+
+    def transform_val(self, blur):
+
+        return TF.to_tensor(blur)

@@ -41,8 +41,8 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
+    is_attention: List[int] = [False, False, False, True]
+    attention_middle: List[int] = [True]
     # Number of time steps $T$
     n_steps: int = 2_000
     # noise scheduler
@@ -63,14 +63,14 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_distributed/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_unconditioned/'
     #store_checkpoints: str = '/home/mr6744/checkpoints_distributed/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_epoch: int = 11380
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_distributed/06252023_230516/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 0
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06252023_230516/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
