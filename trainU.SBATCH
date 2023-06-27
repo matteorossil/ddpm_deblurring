@@ -2,9 +2,9 @@
 
 #SBATCH --nodes=1                # node count
 #SBATCH --ntasks-per-node=1      # total number of tasks across all nodes
-#SBATCH --cpus-per-task=24       # cpu-cores per task (>1 if multi-threaded tasks)
-#SBATCH --mem=60GB
-#SBATCH --gres=gpu:4  		     # number of gpus per node
+#SBATCH --cpus-per-task=16       # cpu-cores per task (>1 if multi-threaded tasks)
+#SBATCH --mem=30GB
+#SBATCH --gres=gpu:2  		     # number of gpus per node
 #SBATCH --time=48:00:00
 #SBATCH --job-name=trainU
 #SBATCH --output=/scratch/mr6744/pytorch/outputs_slurm/%j.out
