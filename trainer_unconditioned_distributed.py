@@ -208,7 +208,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"uncondtioned",
+            name=f"unconditioned",
             config=
             {
             "GPUs": world_size,

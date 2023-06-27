@@ -145,7 +145,7 @@ class Trainer():
         self.params_init = list(self.init_predictor.parameters())
 
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
-        #self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
 
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
@@ -271,7 +271,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"condtioned",
+            name=f"conditioned",
             config=
             {
             "GPUs": world_size,
@@ -282,6 +282,7 @@ def main(rank: int, world_size:int):
             "dataset": trainer.dataset,
             "denoiser # params": params_denoiser,
             "init # params": init_denoiser,
+            "loaded from checkpoint": trainer.checkpoint_init,
             "checkpoints saved at": trainer.exp_path
             }
         )
