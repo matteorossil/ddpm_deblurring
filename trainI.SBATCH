@@ -6,7 +6,7 @@
 #SBATCH --mem=20GB
 #SBATCH --gres=gpu:2		 # number of gpus per node
 #SBATCH --time=48:00:00
-#SBATCH --job-name=trainI-64
+#SBATCH --job-name=trainI
 #SBATCH --output=/scratch/mr6744/pytorch/outputs_slurm/%j.out
 
 module purge
@@ -14,4 +14,4 @@ module purge
 singularity exec --nv \
 	    --overlay /scratch/mr6744/pytorch/overlay-25GB-500K.ext3:ro \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
-	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/trainer_initial_predictor.py"
+	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/trainer_init.py"
