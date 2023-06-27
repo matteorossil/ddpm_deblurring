@@ -108,7 +108,7 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.dataloader_train = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=16,
+                                    num_workers=24,
                                     drop_last=False,
                                     shuffle=False,
                                     pin_memory=False,
