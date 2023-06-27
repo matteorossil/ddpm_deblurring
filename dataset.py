@@ -31,6 +31,9 @@ class Data(Dataset):
         #store mode
         self.mode = mode
 
+        # angles for tranformations
+        self.angles = [90,180,270]
+
         # stores paths
         self.sharp = os.path.join(self.dataset_name[mode], "sharp")
         self.blur = os.path.join(self.dataset_name[mode], "blur")
@@ -51,14 +54,10 @@ class Data(Dataset):
         sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert('RGB')
         blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
-        '''
         if self.mode == 'train':
             return self.transform_train(sharp, blur)
         else: # do not apply trainsfomation to validation set
             return self.transform_val(sharp, blur)
-        '''
-
-        return TF.to_tensor(sharp), TF.to_tensor(blur)
 
     def transform_train(self, sharp, blur):
 
@@ -67,7 +66,7 @@ class Data(Dataset):
         sharp = TF.crop(sharp, i, j, h, w)
         blur = TF.crop(blur, i, j, h, w)
 
-        # random horizontal flip
+         # random horizontal flip
         if random.random() > 0.5:
             sharp = TF.hflip(sharp)
             blur = TF.hflip(blur)
@@ -77,21 +76,15 @@ class Data(Dataset):
             sharp = TF.vflip(sharp)
             blur = TF.vflip(blur)
 
-        # convert to tensors
-        sharp = TF.to_tensor(sharp)
-        blur = TF.to_tensor(blur)
+        # random rotation
+        if random.random() > 0.5:
+            angle = random.choice(self.angles)
+            sharp = TF.rotate(sharp, angle)
+            blur = TF.rotate(blur, angle)
 
-        return sharp, blur
+        return TF.to_tensor(sharp), TF.to_tensor(blur)
     
     def transform_val(self, sharp, blur):
 
-        # Random crop
-        i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        sharp = TF.crop(sharp, i, j, h, w)
-        blur = TF.crop(blur, i, j, h, w)
-
         # convert to tensors
-        sharp = TF.to_tensor(sharp)
-        blur = TF.to_tensor(blur)
-
-        return sharp, blur
+        return TF.to_tensor(sharp), TF.to_tensor(blur)

@@ -63,11 +63,11 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_unconditioned/'
-    store_checkpoints: str = '/home/mr6744/checkpoints_unconditioned/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_unconditioned/'
+    #store_checkpoints: str = '/home/mr6744/checkpoints_unconditioned/'
     # where to training and validation data is stored
-    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
-    dataset: str = '/home/mr6744/gopro/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro/'
+    #dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
     checkpoint_epoch: int = 0
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06252023_230516/checkpoint_{checkpoint_epoch}.pt'

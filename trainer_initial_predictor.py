@@ -59,11 +59,10 @@ class Trainer():
     #store_checkpoints: str = '/home/mr6744/checkpoints_init_predictor/'
     #store_checkpoints: str = '/Users/m.rossi/Desktop/research/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
-    #dataset: str = '/home/mr6744/gopro_128/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch: int = 7200
+    checkpoint_epoch: int = 0
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_init_predictor/06152023_200330/checkpoint_{checkpoint_epoch}.pt'
 
@@ -92,7 +91,7 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=8,
+                                            num_workers=16,
                                             #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
@@ -126,13 +125,13 @@ class Trainer():
 
             if epoch == 0:
                 # save sharp images
-                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_X.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
 
                 # save blur images
-                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_Y.png'))
+                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
 
             # predicted
-            save_image(self.eps_model(blur), os.path.join(self.exp_path, f'epoch_{epoch}_Z_hat.png'))
+            save_image(self.eps_model(blur), os.path.join(self.exp_path, f'epoch_{epoch}_deblurred.png'))
 
     def train(self):
         """
@@ -154,7 +153,7 @@ class Trainer():
             # Take an optimization step
             self.optimizer.step()
             # Track the loss
-            if self.wandb:
+            if self.wandb and self.gpu_id == 0:
                 wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
@@ -187,13 +186,28 @@ def ddp_setup(rank, world_size):
 def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
-    if trainer.wandb:
-        wandb.init()
     trainer.init(rank) # initialize trainer class
+
+    params = sum(p.numel() for p in trainer.eps_model.parameters() if p.requires_grad)
+
+    wandb.init(
+            project="deblurring",
+            name=f"initial predictor",
+            config=
+            {
+            "GPUs": world_size,
+            "GPU Type": torch.cuda.get_device_name(rank),
+            "initial predictor # params": params,
+            "dataset": trainer.dataset,
+            "loaded from checkpoint": trainer.checkpoint,
+            "checkpoints saved at": trainer.exp_path
+            }
+        )
+    
     trainer.run() # perform training
     destroy_process_group()
 
 if __name__ == "__main__":
-    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 2
+    world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    #world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)
