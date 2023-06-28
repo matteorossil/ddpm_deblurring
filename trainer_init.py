@@ -188,21 +188,24 @@ def main(rank: int, world_size:int):
     trainer = Trainer()
     trainer.init(rank) # initialize trainer class
 
-    params = sum(p.numel() for p in trainer.eps_model.parameters() if p.requires_grad)
+    #### Track Hyperparameters ####
+    if trainer.wandb and rank == 0:
 
-    wandb.init(
-            project="deblurring",
-            name=f"initial predictor",
-            config=
-            {
-            "GPUs": world_size,
-            "GPU Type": torch.cuda.get_device_name(rank),
-            "initial predictor # params": params,
-            "dataset": trainer.dataset,
-            "loaded from checkpoint": trainer.checkpoint,
-            "checkpoints saved at": trainer.exp_path
-            }
-        )
+        params = sum(p.numel() for p in trainer.eps_model.parameters() if p.requires_grad)
+
+        wandb.init(
+                project="deblurring",
+                name=f"initial predictor",
+                config=
+                {
+                "GPUs": world_size,
+                "GPU Type": torch.cuda.get_device_name(rank),
+                "initial predictor # params": params,
+                "dataset": trainer.dataset,
+                "loaded from checkpoint": trainer.checkpoint,
+                "checkpoints saved at": trainer.exp_path
+                }
+            )
     
     trainer.run() # perform training
     destroy_process_group()
