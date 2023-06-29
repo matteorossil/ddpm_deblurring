@@ -70,10 +70,10 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 360
-    checkpoint_init_epoch: int = 360
-    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06272023_193215/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
-    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06272023_193215/checkpoint_initpr_{checkpoint_init_epoch}.pt'
+    checkpoint_denoiser_epoch: int = 1340
+    checkpoint_init_epoch: int = 1340
+    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06282023_142337/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
+    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06282023_142337/checkpoint_initpr_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -124,7 +124,7 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=24,
+                                            num_workers=20,
                                             #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
@@ -237,12 +237,13 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(self.n_samples, epoch=0)
+                pass
+                #self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
+                #self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
                 torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
