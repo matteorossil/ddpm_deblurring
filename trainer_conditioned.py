@@ -273,7 +273,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"conditioned with pretrained init",
+            name=f"conditioned scratch",
             config=
             {
             "GPUs": world_size,
