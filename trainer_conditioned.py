@@ -50,7 +50,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -60,7 +60,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 1
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -240,7 +240,7 @@ class Trainer():
                 self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 1 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 2 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
                 torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
