@@ -41,8 +41,8 @@ class Trainer():
     #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
     checkpoint = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{epoch}.pt'
     # store sample
-    sampling_path: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/sample/'
-    #sampling_path = '/home/mr6744/checkpoints_init_predictor/sampling/'
+    #sampling_path: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/sample/'
+    sampling_path = '/home/mr6744/checkpoints_init_predictor/sample/'
     # dataset
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     dataset: str = '/home/mr6744/gopro/'
