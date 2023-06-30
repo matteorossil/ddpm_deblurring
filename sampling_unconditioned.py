@@ -5,10 +5,10 @@ from typing import List
 import os
 import torch
 import torch.utils.data
-from ..diffusion.ddpm_conditioned import DenoiseDiffusion
-from ..eps_models.unet_unconditioned import UNet
+from diffusion.ddpm_conditioned import DenoiseDiffusion
+from eps_models.unet_unconditioned import UNet
 
-from ..dataset_unconditioned import Data
+from dataset_unconditioned import Data
 from torchvision.utils import save_image
 
 
