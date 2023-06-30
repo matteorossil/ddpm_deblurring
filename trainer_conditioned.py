@@ -225,7 +225,7 @@ class Trainer():
 
             # Increment global step
         self.step += 1
-        save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
+        #save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
