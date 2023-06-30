@@ -6,7 +6,8 @@ import os
 import torch
 import torch.utils.data
 from diffusion.ddpm_conditioned import DenoiseDiffusion
-from eps_models.denoiser import UNet as Denoiser # conditioned
+#from eps_models.denoiser import UNet as Denoiser # conditioned
+from eps_models.unet_conditioned import UNet as Denoiser # conditioned
 from eps_models.initial_predictor import UNet as InitP # simple Unet (doesn't take t as param)
 from pathlib import Path
 from datetime import datetime
@@ -40,9 +41,11 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 4, 8]
+    #channel_multipliers: List[int] = [1, 2, 4, 8]
+    channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
+    is_attention: List[int] = [False, False, False, True]
+    attention_middle: List[int] = [True]
     # Number of time steps $T$
     n_steps: int = 2_000
     # noise scheduler Beta_0
@@ -81,12 +84,22 @@ class Trainer():
         # gpu id
         self.gpu_id = rank
 
+        '''
         # Create $\epsilon_\theta(x_t, t)$ model
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2, # *2 because we concatenate xt with y
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers
         ).to(self.gpu_id)
+        '''
+
+        self.eps_model = Denoiser(
+            image_channels=self.image_channels*2,
+            n_channels=self.n_channels,
+            ch_mults=self.channel_multipliers,
+            is_attn=self.is_attention,
+            attn_middle=self.attention_middle
+        )
 
         # initial prediction x_init
         self.init_predictor = InitP(
