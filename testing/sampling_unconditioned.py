@@ -39,16 +39,16 @@ class Trainer():
     # Define sampling
 
     # Number of time steps $T$
-    n_steps: int = int(sys.argv[1])
+    n_steps: int = 2000
     # Number of sample images
-    n_samples: int = int(sys.argv[2])
+    n_samples: int = 64
     # checkpoint path
-    epoch = int(sys.argv[3])
+    epoch = 6500
     #checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
-    checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_unconditioned/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    sampling_path = '/home/mr6744/checkpoints_distributed/sampling_new/'
+    sampling_path = '/home/mr6744/checkpoints_unconditioned/sample/'
 
     def init(self):
         # device
