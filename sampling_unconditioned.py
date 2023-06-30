@@ -26,8 +26,8 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
+    is_attention: List[int] = [False, False, False, True]
+    attention_middle: List[int] = [True]
     # noise scheduler
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
