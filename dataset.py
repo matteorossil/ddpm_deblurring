@@ -16,9 +16,9 @@ class Data(Dataset):
 
         # only for validation
         #if mode == 'val':
-        torch.manual_seed(0)
-        torch.cuda.manual_seed_all(0)
-        random.seed(0)
+        #torch.manual_seed(0)
+        #torch.cuda.manual_seed_all(0)
+        #random.seed(0)
 
         self.dataset_name = {
             'train': path + "train",
@@ -61,6 +61,10 @@ class Data(Dataset):
 
     def transform_train(self, sharp, blur):
 
+        torch.manual_seed(0)
+        torch.cuda.manual_seed_all(0)
+        random.seed(0)
+
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
@@ -99,6 +103,10 @@ class Data(Dataset):
         return TF.to_tensor(sharp), TF.to_tensor(blur)
 
     def transform_val2(self, sharp, blur):
+
+        torch.manual_seed(0)
+        torch.cuda.manual_seed_all(0)
+        random.seed(0)
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)

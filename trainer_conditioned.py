@@ -212,8 +212,10 @@ class Trainer():
         # Iterate through the dataset
         #for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
         sharp, blur = next(iter(self.data_loader_train))
+
             # Increment global step
         self.step += 1
+        save_image(sharp, os.path.join(self.exp_path, f'train_epoch_{self.step}_sharp.png'))
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
