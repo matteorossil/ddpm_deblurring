@@ -145,7 +145,7 @@ class Trainer():
         self.params_denoiser = list(self.denoiser.parameters())
         self.params_init = list(self.init_predictor.parameters())
 
-        self.optimizer = torch.optim.AdamW(self.params_denoiser + self.params_init, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
