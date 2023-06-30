@@ -134,7 +134,7 @@ class Trainer():
             # Sample Initial Image (Random Gaussian Noise)
             torch.cuda.manual_seed(0)
             z = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
-                            device=self.gpu_id)
+                            device=self.device)
             
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
