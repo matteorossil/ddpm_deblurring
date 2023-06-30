@@ -104,9 +104,6 @@ class DenoiseDiffusion:
         eps_coef = (1 - alpha) / (1 - alpha_bar) ** .5
         # $$\frac{1}{\sqrt{\alpha_t}} \Big(x_t -
         #      \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\textcolor{lightgreen}{\epsilon_\theta}(x_t, t) \Big)$$
-        print(alpha.shape)
-        print(eps_coef.shape)
-        print(eps_theta.shape)
         mean = 1 / (alpha ** 0.5) * (xt - eps_coef * eps_theta)
         # $\sigma^2$
         var = gather(self.sigma2, t)
