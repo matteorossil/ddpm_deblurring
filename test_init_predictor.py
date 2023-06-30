@@ -35,18 +35,17 @@ class Trainer():
     # Define sampling
 
     # Number of sample images
-    n_samples: int = int(sys.argv[1])
-    #n_samples: int = 1
+    n_samples: int = 64
     # checkpoint path
-    epoch: int = int(sys.argv[2])
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
-    #checkpoint = f'/home/mr6744/checkpoints_distributed/checkpoint_{epoch}.pt'
+    epoch: int = 5600
+    #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{epoch}.pt'
     # store sample
-    sampling_path: str = '/scratch/mr6744/pytorch/checkpoints_init_predictor/sampling_3600/'
+    sampling_path: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/sample/'
     #sampling_path = '/home/mr6744/checkpoints_init_predictor/sampling/'
     # dataset
-    dataset: str = '/scratch/mr6744/pytorch/gopro_128/'
-    #dataset: str = '/home/mr6744/gopro_ALL_128/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
+    dataset: str = '/home/mr6744/gopro/'
 
     def init(self):
         # device
