@@ -138,8 +138,8 @@ class DenoiseDiffusion:
         init = self.predictor(blur)
         residual = sharp - init  # or residual = sharp - blur
         
-        print("############ SHARP ############")
         print(sharp[0])
+        print("############ SHARP ############")
         print("############ BLUR ############")
         print(blur[0])
         print("############ INIT ############")
