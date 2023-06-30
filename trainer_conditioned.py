@@ -70,10 +70,10 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 0
-    checkpoint_init_epoch: int = 4460
-    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06282023_142337/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
-    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06272023_192601/checkpoint_{checkpoint_init_epoch}.pt'
+    checkpoint_denoiser_epoch: int = 2740
+    checkpoint_init_epoch: int = 2740
+    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
+    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -273,12 +273,12 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"conditioned with pretrained init freeze",
+            name=f"conditioned scratch",
             config=
             {
             "GPUs": world_size,
             "GPU Type": torch.cuda.get_device_name(rank),
-            "freeze init": True,
+            "freeze init": False,
             "pretrained init": trainer.checkpoint_init_epoch > 0,
             "conditioning": "blurred image",
             "dataset": trainer.dataset,

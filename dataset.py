@@ -55,9 +55,9 @@ class Data(Dataset):
         blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
         if self.mode == 'train':
-            return self.transform_train2(sharp, blur)
+            return self.transform_train(sharp, blur)
         else: # do not apply trainsfomation to validation set
-            return self.transform_val2(sharp, blur)
+            return self.transform_val(sharp, blur)
 
     def transform_train(self, sharp, blur):
 
