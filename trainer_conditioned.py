@@ -41,8 +41,8 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    #channel_multipliers: List[int] = [1, 2, 4, 8]
-    channel_multipliers: List[int] = [1, 2, 3, 4]
+    channel_multipliers: List[int] = [1, 2, 4, 8]
+    channel_multipliers2: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, True]
     attention_middle: List[int] = [True]
@@ -96,7 +96,7 @@ class Trainer():
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers,
+            ch_mults=self.channel_multipliers2,
             is_attn=self.is_attention,
             attn_middle=self.attention_middle
         )
