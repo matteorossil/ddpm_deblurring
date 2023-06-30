@@ -146,21 +146,23 @@ class DenoiseDiffusion:
         #print(sharp[0])
         #print("############ BLUR ############")
         #print(blur[0])
-        print("############ INIT ############")
-        print(init[0])
+        #print("############ INIT ############")
+        #print(init[0])
         #print("############ RESIDUAL ############")
         #print(residual[0])
 
         # generate q_sample from residual
         xt = self.q_sample(residual, t, eps=noise)
-        #print("############ XT ############")
-        #print(xt[0])
+        print("############ XT ############")
+        print(xt)
 
         # concatenate channel wise for conditioning
         xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
 
         # predict noise
         eps_theta = self.eps_model(xt_, t)
+        print("############ Recover Residual ############")
+        print(xt - eps_theta)
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
