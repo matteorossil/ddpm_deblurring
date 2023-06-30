@@ -35,7 +35,7 @@ class Trainer():
     # Define sampling
 
     # Number of sample images
-    n_samples: int = 64
+    n_samples: int = 32
     # checkpoint path
     epoch: int = 5600
     #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
