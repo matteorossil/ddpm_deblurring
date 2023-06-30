@@ -175,7 +175,7 @@ class Trainer():
             #condition = blur # or condition = init 
 
             # Sample Initial Image (Random Gaussian Noise)
-            torch.cuda.manual_seed(0)
+            #torch.cuda.manual_seed(0)
             z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.gpu_id)
             
