@@ -211,7 +211,6 @@ class Trainer():
         """
         # Iterate through the dataset
         for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
-            print("enter")
             # Increment global step
             self.step += 1
             # Move data to device
@@ -288,7 +287,6 @@ def main(rank: int, world_size:int):
             }
         )
     ##### ####
-    print("train")
     trainer.run() # perform training
     destroy_process_group()
 
