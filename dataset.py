@@ -57,7 +57,7 @@ class Data(Dataset):
         if self.mode == 'train':
             return self.transform_train2(sharp, blur)
         else: # do not apply trainsfomation to validation set
-            return self.transform_val(sharp, blur)
+            return self.transform_val2(sharp, blur)
 
     def transform_train(self, sharp, blur):
 

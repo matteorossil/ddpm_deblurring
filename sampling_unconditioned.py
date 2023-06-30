@@ -60,7 +60,7 @@ class Trainer():
             attn_middle=self.attention_middle
         ).to(self.device)
         
-        #load cfrom checkpoint
+        #load from checkpoint
         checkpoint_ = torch.load(self.checkpoint)
         self.eps_model.load_state_dict(checkpoint_)
 
