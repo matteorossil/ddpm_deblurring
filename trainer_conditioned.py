@@ -224,7 +224,8 @@ class Trainer():
         #self.optimizer2.zero_grad()
         # Calculate loss
         loss = self.diffusion.loss(sharp, blur)
-        print("loss", loss.item())
+        print("loss:", loss.item())
+        print("epoch:", self.step)
         # Compute gradients
         loss.backward()
         # Take an optimization step
