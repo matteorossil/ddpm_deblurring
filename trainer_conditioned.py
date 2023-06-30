@@ -139,7 +139,7 @@ class Trainer():
                                           drop_last=True, 
                                           shuffle=False, 
                                           pin_memory=False,
-                                          sampler=DistributedSampler(dataset_val))
+                                          sampler=DistributedSampler(dataset_val, shuffle=False))
 
         # Create optimizer
         self.params_denoiser = list(self.denoiser.parameters())
