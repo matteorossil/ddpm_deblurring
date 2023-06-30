@@ -104,7 +104,9 @@ class DenoiseDiffusion:
         eps_coef = (1 - alpha) / (1 - alpha_bar) ** .5
         # $$\frac{1}{\sqrt{\alpha_t}} \Big(x_t -
         #      \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\textcolor{lightgreen}{\epsilon_\theta}(x_t, t) \Big)$$
-
+        print(alpha)
+        print(eps_coef)
+        print(eps_theta)
         mean = 1 / (alpha ** 0.5) * (xt - eps_coef * eps_theta)
         # $\sigma^2$
         var = gather(self.sigma2, t)
@@ -161,8 +163,6 @@ class DenoiseDiffusion:
 
         # predict noise
         eps_theta = self.eps_model(xt_, t)
-        print("############ Recover Residual ############")
-        print(xt - eps_theta)
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
