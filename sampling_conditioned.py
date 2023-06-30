@@ -107,16 +107,12 @@ class Trainer():
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.n_samples, 
                                             num_workers=0,
-                                            drop_last=True, 
-                                            shuffle=False, 
-                                            pin_memory=False)
+                                            shuffle=True)
         
         self.data_loader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
                                           num_workers=0,
-                                          drop_last=True, 
-                                          shuffle=False, 
-                                          pin_memory=False)
+                                          shuffle=True)
 
     def sample(self):
         """
