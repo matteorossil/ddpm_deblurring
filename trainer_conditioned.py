@@ -229,7 +229,7 @@ class Trainer():
         # Compute gradients
         loss.backward()
         print("############ GRAD OUTPUT ############")
-        print(self.init_predictor.final.module.bias.grad)
+        print(self.init_predictor.module.final.bias.grad)
         # Take an optimization step
         self.optimizer.step()
         #self.optimizer2.step()
