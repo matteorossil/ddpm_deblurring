@@ -228,6 +228,7 @@ class Trainer():
         print("epoch:", self.step)
         # Compute gradients
         loss.backward()
+        print(self.init_predictor.final.module.bias.grad)
         # Take an optimization step
         self.optimizer.step()
         #self.optimizer2.step()
@@ -267,7 +268,7 @@ def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
     trainer.init(rank) # initialize trainer class
-    print(trainer.init_predictor)
+    #print(trainer.init_predictor)
 
     #### Track Hyperparameters ####
     if trainer.wandb and rank == 0:
