@@ -131,7 +131,7 @@ class Trainer():
         )
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -166,7 +166,7 @@ class Trainer():
         """
         with torch.no_grad():
 
-            sharp, blur = next(iter(self.data_loader_train))
+            sharp, blur = next(iter(self.data_loader_val))
             # push to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
