@@ -50,7 +50,7 @@ class Trainer():
     beta_T = 1e-2 # 0.01
     
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 64
     # where to store the checkpoints
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
@@ -124,7 +124,7 @@ class Trainer():
         """
         with torch.no_grad():
 
-            sharp, blur = next(iter(self.data_loader_val))
+            sharp, blur = next(iter(self.data_loader_train))
             # push to device
             sharp = sharp.to(self.device)
             blur = blur.to(self.device)
