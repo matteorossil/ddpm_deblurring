@@ -117,7 +117,7 @@ class Trainer():
                                           shuffle=False, 
                                           pin_memory=False)
 
-    def sample(self, n_samples, epoch):
+    def sample(self):
         """
         ### Sample images
         """
@@ -133,7 +133,7 @@ class Trainer():
 
             # Sample Initial Image (Random Gaussian Noise)
             torch.cuda.manual_seed(0)
-            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
+            z = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
                             device=self.gpu_id)
             
             # Remove noise for $T$ steps
@@ -141,29 +141,29 @@ class Trainer():
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
-                t_vec = z.new_full((n_samples,), t, dtype=torch.long)
+                t_vec = z.new_full((self.n_samples,), t, dtype=torch.long)
                 z = self.diffusion.p_sample(z, blur, t_vec)
 
             # save sharp images
-            save_image(sharp, os.path.join(self.sampling_path, f'epoch_{epoch}_sharp.png'))
+            save_image(sharp, os.path.join(self.sampling_path, f'epoch_{self.epoch}_sharp.png'))
 
             # save blur images
-            save_image(blur, os.path.join(self.sampling_path, f'epoch_{epoch}_blur.png'))
+            save_image(blur, os.path.join(self.sampling_path, f'epoch_{self.epoch}_blur.png'))
 
             # sharp - blur
-            save_image(sharp - blur, os.path.join(self.sampling_path, f'epoch_{epoch}_sharp-blur.png'))
+            save_image(sharp - blur, os.path.join(self.sampling_path, f'epoch_{self.epoch}_sharp-blur.png'))
 
             # sampled residual
-            save_image(z, os.path.join(self.sampling_path, f'epoch_{epoch}_residual.png'))
+            save_image(z, os.path.join(self.sampling_path, f'epoch_{self.epoch}_residual.png'))
 
             # prediction for sharp image
-            save_image(init + z, os.path.join(self.sampling_path, f'epoch_{epoch}_final.png'))
+            save_image(init + z, os.path.join(self.sampling_path, f'epoch_{self.epoch}_final.png'))
             
             # initial predictor
-            save_image(init, os.path.join(self.sampling_path, f'epoch_{epoch}_init.png'))
+            save_image(init, os.path.join(self.sampling_path, f'epoch_{self.epoch}_init.png'))
 
             # correct residual
-            save_image(sharp - init, os.path.join(self.sampling_path, f'epoch_{epoch}_residual_correct.png'))
+            save_image(sharp - init, os.path.join(self.sampling_path, f'epoch_{self.epoch}_residual_correct.png'))
 
             return z
 
