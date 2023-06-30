@@ -50,7 +50,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -121,7 +121,7 @@ class Trainer():
         )
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -130,7 +130,7 @@ class Trainer():
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
-                                            sampler=DistributedSampler(dataset_train))
+                                            sampler=DistributedSampler(dataset_train, shuffle=False))
         
         self.data_loader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
@@ -181,15 +181,15 @@ class Trainer():
             #if self.wandb:
                 #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
-            if epoch == 0:
-                # save sharp images
-                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
+            #if epoch == 0:
+            # save sharp images
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
 
-                # save blur images
-                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
+            # save blur images
+            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
 
-                # sharp - blur
-                save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
+            # sharp - blur
+            save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
 
             # sampled residual
             save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
@@ -210,25 +210,26 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
+        #for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
+        sharp, blur = next(iter(self.data_loader_train))
             # Increment global step
-            self.step += 1
-            # Move data to device
-            sharp = sharp.to(self.gpu_id)
-            blur = blur.to(self.gpu_id)
-            # Make the gradients zero
-            self.optimizer.zero_grad()
-            #self.optimizer2.zero_grad()
-            # Calculate loss
-            loss = self.diffusion.loss(sharp, blur)
-            # Compute gradients
-            loss.backward()
-            # Take an optimization step
-            self.optimizer.step()
-            #self.optimizer2.step()
-            # Track the loss
-            if self.wandb and self.gpu_id == 0:
-                wandb.log({'loss': loss}, step=self.step)
+        self.step += 1
+        # Move data to device
+        sharp = sharp.to(self.gpu_id)
+        blur = blur.to(self.gpu_id)
+        # Make the gradients zero
+        self.optimizer.zero_grad()
+        #self.optimizer2.zero_grad()
+        # Calculate loss
+        loss = self.diffusion.loss(sharp, blur)
+        # Compute gradients
+        loss.backward()
+        # Take an optimization step
+        self.optimizer.step()
+        #self.optimizer2.step()
+        # Track the loss
+        if self.wandb and self.gpu_id == 0:
+            wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
         """

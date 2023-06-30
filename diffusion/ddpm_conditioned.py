@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.utils.data
 from torch import nn
 from copy import deepcopy
+from torchvision.utils import save_image
 
 from utils import gather # Used for Image Data
 # from utils import gather2d as gather # Used for Gaussian 2D Data
