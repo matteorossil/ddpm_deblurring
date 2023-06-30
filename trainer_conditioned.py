@@ -236,8 +236,7 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                pass
-                #self.sample(self.n_samples, epoch=0)
+                self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
             if ((epoch+1) % 1 == 0) and (self.gpu_id == 0):
