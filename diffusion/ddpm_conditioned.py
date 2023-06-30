@@ -152,8 +152,8 @@ class DenoiseDiffusion:
 
         # generate q_sample from residual
         xt = self.q_sample(residual, t, eps=noise)
-        print("############ XT ############")
-        print(xt)
+        #print("############ XT ############")
+        #print(xt)
 
         # concatenate channel wise for conditioning
         xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning

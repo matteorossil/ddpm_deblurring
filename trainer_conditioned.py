@@ -99,7 +99,7 @@ class Trainer():
             ch_mults=self.channel_multipliers2,
             is_attn=self.is_attention,
             attn_middle=self.attention_middle
-        )
+        ).to(self.gpu_id)
 
         # initial prediction x_init
         self.init_predictor = InitP(
@@ -108,10 +108,7 @@ class Trainer():
             ch_mults=self.channel_multipliers
         ).to(self.gpu_id)
 
-        self.denoiser = self.denoiser.to(self.gpu_id)
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
-
-        self.init_predictor = self.init_predictor.to(self.gpu_id)
         self.init_predictor = DDP(self.init_predictor, device_ids=[self.gpu_id])
 
         # only loads checkpoint if model is trained
@@ -169,7 +166,7 @@ class Trainer():
         """
         with torch.no_grad():
 
-            sharp, blur = next(iter(self.data_loader_val))
+            sharp, blur = next(iter(self.data_loader_train))
             # push to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
@@ -241,9 +238,9 @@ class Trainer():
         print("epoch:", self.step)
         # Compute gradients
         loss.backward()
-        print("############ GRAD OUTPUT ############")
-        print(self.init_predictor.module.final.bias.grad)
-        print(self.denoiser.module.final.bias.grad)
+        #print("############ GRAD OUTPUT ############")
+        #print(self.denoiser.module.final.bias.grad)
+        #print(self.init_predictor.module.final.bias.grad)
 
         # Take an optimization step
         self.optimizer.step()

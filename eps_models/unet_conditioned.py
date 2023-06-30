@@ -47,7 +47,6 @@ class TimeEmbedding(nn.Module):
 
         return emb
 
-
 class ResidualBlock(nn.Module):
     """
     ### Residual block
