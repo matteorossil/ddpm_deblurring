@@ -58,8 +58,9 @@ class Trainer():
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 2740
-    checkpoint_init_epoch: int = 2740
+    epoch: int = 2740
+    checkpoint_denoiser_epoch: int = epoch
+    checkpoint_init_epoch: int = epoch
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_conditioned/checkpoint_initpr_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
@@ -140,7 +141,7 @@ class Trainer():
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
-                print(t)
+                print(t_)
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = z.new_full((self.n_samples,), t, dtype=torch.long)
                 z = self.diffusion.p_sample(z, blur, t_vec)
