@@ -87,9 +87,9 @@ class Data(Dataset):
     def transform_train2(self, sharp, blur):
 
         # Random crop
-        #i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        #sharp = TF.crop(sharp, i, j, h, w)
-        #blur = TF.crop(blur, i, j, h, w)
+        i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
+        sharp = TF.crop(sharp, i, j, h, w)
+        blur = TF.crop(blur, i, j, h, w)
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     
