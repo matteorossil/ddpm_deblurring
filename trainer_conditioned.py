@@ -64,14 +64,14 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # where to store the checkpoints
-    store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
-    #store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
+    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
     # where to training and validation data is stored
-    dataset: str = '/scratch/mr6744/pytorch/gopro/'
-    #dataset: str = '/home/mr6744/gopro_128/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
+    dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 2740
-    checkpoint_init_epoch: int = 2740
+    checkpoint_denoiser_epoch: int = 0
+    checkpoint_init_epoch: int = 0
     checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
@@ -144,10 +144,8 @@ class Trainer():
         self.params_denoiser = list(self.denoiser.parameters())
         self.params_init = list(self.init_predictor.parameters())
 
-        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser + self.params_init, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
-        #self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
-
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
@@ -237,13 +235,13 @@ class Trainer():
         """
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                pass
-                #self.sample(self.n_samples, epoch=0)
+                #pass
+                self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 1 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                #self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
+                self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
                 torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
@@ -294,6 +292,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    #world_size = 2
+    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)
