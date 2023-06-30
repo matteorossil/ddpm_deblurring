@@ -140,6 +140,7 @@ class Trainer():
             for t_ in range(self.n_steps):
                 # $t$
                 t = self.n_steps - t_ - 1
+                print(t)
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = z.new_full((self.n_samples,), t, dtype=torch.long)
                 z = self.diffusion.p_sample(z, blur, t_vec)
