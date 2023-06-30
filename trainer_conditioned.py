@@ -267,6 +267,7 @@ def main(rank: int, world_size:int):
     ddp_setup(rank=rank, world_size=world_size)
     trainer = Trainer()
     trainer.init(rank) # initialize trainer class
+    print(trainer.init_predictor)
 
     #### Track Hyperparameters ####
     if trainer.wandb and rank == 0:
