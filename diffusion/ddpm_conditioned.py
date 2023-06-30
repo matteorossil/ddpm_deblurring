@@ -137,6 +137,7 @@ class DenoiseDiffusion:
 
         # compute residual
         init = self.predictor(blur)
+        init = init.clamp_(0, 1)
 
         residual = sharp - init  # or residual = sharp - blur
 
