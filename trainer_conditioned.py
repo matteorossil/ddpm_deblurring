@@ -50,7 +50,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -293,5 +293,5 @@ def main(rank: int, world_size:int):
 
 if __name__ == "__main__":
     #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 2
+    world_size = 1
     mp.spawn(main, args=(world_size,), nprocs=world_size)
