@@ -287,7 +287,7 @@ def main(rank: int, world_size:int):
             }
         )
     ##### ####
-
+    print("train")
     trainer.run() # perform training
     destroy_process_group()
 
