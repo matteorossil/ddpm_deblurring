@@ -70,10 +70,10 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 1340
+    checkpoint_denoiser_epoch: int = 0
     checkpoint_init_epoch: int = 1340
     checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06282023_142337/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
-    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06282023_142337/checkpoint_initpr_{checkpoint_init_epoch}.pt'
+    checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06272023_192601/checkpoint_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -144,7 +144,7 @@ class Trainer():
         self.params_denoiser = list(self.denoiser.parameters())
         self.params_init = list(self.init_predictor.parameters())
 
-        self.optimizer = torch.optim.AdamW(self.params_denoiser + self.params_init, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         #self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-6, weight_decay= self.weight_decay_rate, betas=self.betas)
 
@@ -273,12 +273,12 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"conditioned scratch",
+            name=f"conditioned with pretrained init freeze",
             config=
             {
             "GPUs": world_size,
             "GPU Type": torch.cuda.get_device_name(rank),
-            "freeze init": False,
+            "freeze init": True,
             "pretrained init": trainer.checkpoint_init_epoch > 0,
             "conditioning": "blurred image",
             "dataset": trainer.dataset,
