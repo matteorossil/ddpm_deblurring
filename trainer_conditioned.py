@@ -124,7 +124,7 @@ class Trainer():
 
         self.data_loader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=20,
+                                            num_workers=0,
                                             #num_workers=os.cpu_count() // 4, 
                                             drop_last=True, 
                                             shuffle=False, 
@@ -210,6 +210,7 @@ class Trainer():
         """
         # Iterate through the dataset
         for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
+            print("enter")
             # Increment global step
             self.step += 1
             # Move data to device
