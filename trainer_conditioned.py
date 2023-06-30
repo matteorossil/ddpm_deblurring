@@ -63,7 +63,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of sample images
-    n_samples: int = 1
+    n_samples: int = 8
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -73,9 +73,9 @@ class Trainer():
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 0
+    checkpoint_denoiser_epoch: int = 2300
     checkpoint_init_epoch: int = 5600
-    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
+    checkpoint_denoiser: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06302023_192836/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
