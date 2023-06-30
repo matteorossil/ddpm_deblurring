@@ -16,6 +16,8 @@ import torch.multiprocessing as mp
 
 import sys
 
+os.chdir('..')
+
 class Trainer():
     """
     ## Configurations
