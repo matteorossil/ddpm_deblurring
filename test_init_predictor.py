@@ -35,14 +35,14 @@ class Trainer():
     # Define sampling
 
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 64
     # checkpoint path
     epoch: int = 5600
     #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
     checkpoint = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/sample/'
-    sampling_path = '/home/mr6744/checkpoints_init_predictor/sample3/'
+    sampling_path = '/home/mr6744/checkpoints_init_predictor/sample4/'
     # dataset
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     dataset: str = '/home/mr6744/gopro/'
