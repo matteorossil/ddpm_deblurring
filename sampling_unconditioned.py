@@ -19,7 +19,8 @@ class Trainer():
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
-    image_size: int = 128
+    image_size_h: int = 720
+    image_size_w: int = 1280
     # Number of channels in the initial feature map
     n_channels: int = 32
     # The list of channel numbers at each resolution.
@@ -37,7 +38,7 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 2000
     # Number of sample images
-    n_samples: int = 64
+    n_samples: int = 1
     # checkpoint path
     epoch = 6500
     #checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
@@ -82,7 +83,7 @@ class Trainer():
             torch.cuda.manual_seed_all(0)
 
             # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([self.n_samples, self.image_channels, self.image_size, self.image_size], device=self.device)
+            x = torch.randn([self.n_samples, self.image_channels, self.image_size_h, self.image_size_w], device=self.device)
 
             #x = torch.load('xt.pt')
             #x = x.to(self.device)
@@ -102,7 +103,7 @@ class Trainer():
 
                 # save sampled images
                 if ((t_+1) % self.n_steps == 0):
-                    save_image(x, os.path.join(self.sampling_path, f"size_{self.image_size}_epoch_{self.epoch}_t{t_+1}.png"))
+                    save_image(x, os.path.join(self.sampling_path, f"size_{self.image_size_h}_epoch_{self.epoch}_t{t_+1}.png"))
                     #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
 
             return x
