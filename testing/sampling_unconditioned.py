@@ -3,20 +3,15 @@
 
 from typing import List
 import os
+os.chdir('..')
 import torch
 import torch.utils.data
 from diffusion.ddpm_unconditioned import DenoiseDiffusion
 from eps_models.unet_unconditioned import UNet
-import torch.nn.functional as F
 
 from dataset_unconditioned import Data
 from torchvision.utils import save_image
 
-import torch.multiprocessing as mp
-
-import sys
-
-os.chdir('..')
 
 class Trainer():
     """
