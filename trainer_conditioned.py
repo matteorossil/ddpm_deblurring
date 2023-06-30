@@ -230,6 +230,8 @@ class Trainer():
         loss.backward()
         print("############ GRAD OUTPUT ############")
         print(self.init_predictor.module.final.bias.grad)
+        print(self.init_predictor.module.init.bias.grad)
+
         # Take an optimization step
         self.optimizer.step()
         #self.optimizer2.step()
