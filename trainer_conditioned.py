@@ -93,7 +93,7 @@ class Trainer():
         ).to(self.gpu_id)
         '''
 
-        self.eps_model = Denoiser(
+        self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
