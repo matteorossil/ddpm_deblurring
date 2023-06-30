@@ -64,7 +64,7 @@ class Trainer():
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_conditioned/checkpoint_initpr_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
-    sampling_path = '/home/mr6744/checkpoints_conditioned/sample2/'
+    sampling_path = '/home/mr6744/checkpoints_conditioned/sample/'
 
     def init(self):
         # gpu id
@@ -124,7 +124,7 @@ class Trainer():
         """
         with torch.no_grad():
 
-            sharp, blur = next(iter(self.data_loader_val))
+            sharp, blur = next(iter(self.data_loader_train))
             # push to device
             sharp = sharp.to(self.device)
             blur = blur.to(self.device)
