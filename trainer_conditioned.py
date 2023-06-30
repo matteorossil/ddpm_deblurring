@@ -215,7 +215,7 @@ class Trainer():
 
             # Increment global step
         self.step += 1
-        save_image(sharp, os.path.join(self.exp_path, f'train_epoch_{self.step}_sharp.png'))
+        save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
@@ -224,6 +224,7 @@ class Trainer():
         #self.optimizer2.zero_grad()
         # Calculate loss
         loss = self.diffusion.loss(sharp, blur)
+        print("loss", loss.item())
         # Compute gradients
         loss.backward()
         # Take an optimization step
