@@ -63,7 +63,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 1
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -176,8 +176,8 @@ class Trainer():
 
             # Sample Initial Image (Random Gaussian Noise)
             #torch.cuda.manual_seed(0)
-            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],
-                            device=self.gpu_id)
+            #z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
+            z = blur
             
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
