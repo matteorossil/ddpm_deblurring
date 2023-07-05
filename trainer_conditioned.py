@@ -61,7 +61,7 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 100_000
+    epochs: int = 500_000
     # Number of sample images
     n_samples: int = 1
     # Use wandb
