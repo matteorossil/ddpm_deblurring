@@ -151,7 +151,7 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        sharp, blur = next(iter(self.data_loader_train))
+        sharp, blur = next(iter(self.dataloader_train))
         #if self.step == 0:
         save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
 
