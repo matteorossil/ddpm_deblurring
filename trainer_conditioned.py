@@ -180,10 +180,10 @@ class Trainer():
             #### z = blur
 
             t_step = torch.randint(0, self.n_steps, (self.batch_size,), device=sharp.device, dtype=torch.long)
-            print("t_spep:", t_step)
+            print("t_step:", t_step.item())
             noise = torch.randn_like(sharp)
             z = self.diffusion.q_sample(sharp, t_step, eps=noise)
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_z.png'))
+            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_xt.png'))
             xt_ = torch.cat((z, blur), dim=1)
             eps_theta = self.denoiser(xt_, t_step)
             loss = F.mse_loss(noise, eps_theta)
@@ -192,11 +192,17 @@ class Trainer():
             # Remove noise for $T$ steps
             #### for t_ in range(self.n_steps):
             for t_ in range(t_step):
+                print(t_)
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
                 t_vec = z.new_full((n_samples,), t, dtype=torch.long)
                 z = self.diffusion.p_sample(z, blur, t_vec)
+
+                #xt_ = torch.cat((z, blur), dim=1)
+                #eps_theta = self.denoiser(xt_, t_step)
+                #loss = F.mse_loss(noise, eps_theta)
+
 
             # Log samples
             #if self.wandb:
@@ -214,7 +220,7 @@ class Trainer():
 
             # sampled residual
             #### save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_sharp.png'))
+            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
 
             # prediction for sharp image
             ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
