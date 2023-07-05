@@ -71,7 +71,7 @@ class Trainer():
     store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
     # where to training and validation data is stored
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
-    dataset: str = '/home/mr6744/gopro/'
+    dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_denoiser_epoch: int = 0
     checkpoint_init_epoch: int = 0
