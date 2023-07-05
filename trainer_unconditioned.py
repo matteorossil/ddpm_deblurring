@@ -69,8 +69,8 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
-    checkpoint_epoch: int = 6440
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06272023_173049/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 11740
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06292023_221044/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
@@ -224,6 +224,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 2
+    world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    #world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)
