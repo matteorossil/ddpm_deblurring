@@ -307,6 +307,9 @@ def main(rank: int, world_size:int):
     trainer.init(rank) # initialize trainer class
     #print(trainer.init_predictor)
 
+    params_denoiser = sum(p.numel() for p in trainer.params_denoiser if p.requires_grad)
+    print("denoiser params:", params_denoiser)
+
     #### Track Hyperparameters ####
     if trainer.wandb and rank == 0:
 
