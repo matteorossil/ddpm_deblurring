@@ -185,7 +185,7 @@ class Trainer():
             self.train()
             if ((epoch+1) % 500 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.n_samples, self.checkpoint_epoch+epoch)
+                self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
