@@ -47,7 +47,7 @@ class Trainer():
     is_attention: List[int] = [False, False, False, True]
     attention_middle: List[int] = [True]
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # noise scheduler Beta_0
     beta_0 = 1e-6 # 0.000001
     # noise scheduler Beta_T
@@ -176,9 +176,11 @@ class Trainer():
 
             # Sample Initial Image (Random Gaussian Noise)
             #torch.cuda.manual_seed(0)
-            #### z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
+            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
             #### z = blur
 
+
+            '''
             t_step = torch.randint(0, self.n_steps, (self.batch_size,), device=sharp.device, dtype=torch.long)
             print("t_step:", t_step.item())
             noise = torch.randn_like(sharp)
@@ -188,10 +190,11 @@ class Trainer():
             eps_theta = self.denoiser(xt_, t_step)
             loss = F.mse_loss(noise, eps_theta)
             print("val loss:", loss)
+            '''
 
             # Remove noise for $T$ steps
-            #### for t_ in range(self.n_steps):
-            for t_ in range(t_step.item()):
+            for t_ in range(self.n_steps):
+            #### for t_ in range(t_step.item()):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
