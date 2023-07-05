@@ -62,8 +62,8 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/Users/m.rossi/Desktop/research/ddpm_deblurring/dataset/'
     # load from a checkpoint
-    checkpoint_epoch: int = 5900
-    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06292023_221141/checkpoint_{checkpoint_epoch}.pt'
+    checkpoint_epoch: int = 12480
+    checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06302023_103807/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_init_predictor/06152023_200330/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
