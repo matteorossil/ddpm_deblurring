@@ -63,7 +63,7 @@ class Trainer():
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
-    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
+    store_checkpoints: str = '/home/mr6744/checkpoints_unconditioned/'
     #store_checkpoints: str = '/home/mr6744/checkpoints_unconditioned/'
     # where to training and validation data is stored
     dataset: str = '/home/mr6744/gopro_128/'
@@ -152,8 +152,8 @@ class Trainer():
         """
         # Iterate through the dataset
         sharp, blur = next(iter(self.dataloader_train))
-        #if self.step == 0:
-        save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
+        if self.step == 0:
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
 
         # Increment global step
         self.step += 1
