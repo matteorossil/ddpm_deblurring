@@ -185,7 +185,7 @@ class Trainer():
             z = self.diffusion.q_sample(sharp, t_step, eps=noise)
             save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_z.png'))
             xt_ = torch.cat((z, blur), dim=1)
-            eps_theta = self.eps_model(xt_, t_step)
+            eps_theta = self.denoiser(xt_, t_step)
             loss = F.mse_loss(noise, eps_theta)
             print("val loss:", loss)
 
