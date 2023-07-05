@@ -207,12 +207,12 @@ class Trainer():
             #if self.wandb:
                 #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
-            #if epoch == 0:
+            if epoch == 0:
                 # save sharp images
-            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_val.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_val.png'))
 
                 # save blur images
-            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
+                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
 
             # sharp - blur
             #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
