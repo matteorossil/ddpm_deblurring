@@ -88,7 +88,7 @@ class Data(Dataset):
 
         #torch.manual_seed(0)
         #torch.cuda.manual_seed_all(0)
-        #random.seed(0)
+        random.seed(0)
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
