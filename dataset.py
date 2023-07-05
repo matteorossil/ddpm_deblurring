@@ -57,7 +57,7 @@ class Data(Dataset):
         if self.mode == 'train':
             return self.transform_train2(sharp, blur)
         else: # do not apply trainsfomation to validation set
-            return self.transform_val2(sharp, blur)
+            return self.transform_val(sharp, blur)
 
     def transform_train(self, sharp, blur):
 
@@ -89,11 +89,6 @@ class Data(Dataset):
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     
     def transform_val(self, sharp, blur):
-
-        # convert to tensors
-        return TF.to_tensor(sharp), TF.to_tensor(blur)
-
-    def transform_val2(self, sharp, blur):
 
         # convert to tensors
         return TF.to_tensor(sharp), TF.to_tensor(blur)
