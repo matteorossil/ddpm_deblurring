@@ -129,6 +129,7 @@ class DenoiseDiffusion:
 
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=sharp.device, dtype=torch.long)
+        print("test", t)
 
         # generate noise if None
         if noise is None:

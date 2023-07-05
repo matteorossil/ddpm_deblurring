@@ -191,8 +191,7 @@ class Trainer():
 
             # Remove noise for $T$ steps
             #### for t_ in range(self.n_steps):
-            for t_ in range(t_step):
-                print(t_)
+            for t_ in range(t_step.item()):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
