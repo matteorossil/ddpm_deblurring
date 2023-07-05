@@ -182,7 +182,7 @@ class Trainer():
             t_step = torch.randint(0, self.n_steps, (self.batch_size,), device=sharp.device, dtype=torch.long)
             print("t_spep:", t_step)
             noise = torch.randn_like(sharp)
-            z = self.q_sample(sharp, t_step, eps=noise)
+            z = self.diffusion.q_sample(sharp, t_step, eps=noise)
             save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_z.png'))
             xt_ = torch.cat((z, blur), dim=1)
             eps_theta = self.eps_model(xt_, t_step)
