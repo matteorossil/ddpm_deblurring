@@ -13,7 +13,7 @@ from datetime import datetime
 import wandb
 import torch.nn.functional as F
 
-from dataset_unconditioned import Data
+from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 
@@ -59,7 +59,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 10_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 1
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -108,7 +108,7 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.dataloader_train = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=16,
+                                    num_workers=0,
                                     drop_last=False,
                                     shuffle=False,
                                     pin_memory=False,
