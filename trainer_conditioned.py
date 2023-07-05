@@ -47,7 +47,7 @@ class Trainer():
     is_attention: List[int] = [False, False, False, True]
     attention_middle: List[int] = [True]
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # noise scheduler Beta_0
     beta_0 = 1e-6 # 0.000001
     # noise scheduler Beta_T
@@ -74,7 +74,7 @@ class Trainer():
     dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
     checkpoint_denoiser_epoch: int = 0
-    checkpoint_init_epoch: int = 5600
+    checkpoint_init_epoch: int = 0
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/06302023_192836/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{checkpoint_init_epoch}.pt'
@@ -170,14 +170,14 @@ class Trainer():
             # push to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
-            init = self.init_predictor(blur)
+            #### init = self.init_predictor(blur)
 
             #condition = blur # or condition = init 
 
             # Sample Initial Image (Random Gaussian Noise)
             #torch.cuda.manual_seed(0)
-            #z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
-            z = blur
+            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
+            #### z = blur
             
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
@@ -193,25 +193,26 @@ class Trainer():
 
             #if epoch == 0:
             # save sharp images
-            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_val.png'))
 
             # save blur images
-            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur.png'))
+            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
 
             # sharp - blur
-            save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
+            #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
 
             # sampled residual
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
+            #### save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
+            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_sampled_sharp.png'))
 
             # prediction for sharp image
-            save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
+            ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
             
             # initial predictor
-            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
+            ### save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
 
             # correct residual
-            save_image(sharp - init, os.path.join(self.exp_path, f'epoch_{epoch}_residual_correct.png'))
+            ### save_image(sharp - init, os.path.join(self.exp_path, f'epoch_{epoch}_residual_correct.png'))
 
             return z
 
@@ -225,7 +226,8 @@ class Trainer():
 
             # Increment global step
         self.step += 1
-        #save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
+        save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
+        save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
@@ -291,7 +293,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"conditioned scratch",
+            name=f"conditioned p x|y",
             config=
             {
             "GPUs": world_size,

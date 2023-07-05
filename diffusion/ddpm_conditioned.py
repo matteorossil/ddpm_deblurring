@@ -135,9 +135,9 @@ class DenoiseDiffusion:
             noise = torch.randn_like(sharp)
 
         # compute residual
-        init = self.predictor(blur)
+        #### init = self.predictor(blur)
 
-        residual = sharp - init  # or residual = sharp - blur
+        #### residual = sharp - init  # or residual = sharp - blur
 
         #print("############ PARAMS ############")
         #print(list(self.predictor.grad()))
@@ -151,9 +151,10 @@ class DenoiseDiffusion:
         #print(residual[0])
 
         # generate q_sample from residual
-        xt = self.q_sample(residual, t, eps=noise)
+        #### xt = self.q_sample(residual, t, eps=noise)
         #print("############ XT ############")
         #print(xt)
+        xt = self.q_sample(sharp, t, eps=noise)
 
         # concatenate channel wise for conditioning
         xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning

@@ -55,15 +55,11 @@ class Data(Dataset):
         blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
         if self.mode == 'train':
-            return self.transform_train(sharp, blur)
+            return self.transform_train2(sharp, blur)
         else: # do not apply trainsfomation to validation set
             return self.transform_val2(sharp, blur)
 
     def transform_train(self, sharp, blur):
-
-        torch.manual_seed(0)
-        torch.cuda.manual_seed_all(0)
-        random.seed(0)
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
@@ -89,6 +85,10 @@ class Data(Dataset):
         return TF.to_tensor(sharp), TF.to_tensor(blur)
 
     def transform_train2(self, sharp, blur):
+
+        torch.manual_seed(0)
+        torch.cuda.manual_seed_all(0)
+        random.seed(0)
 
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)

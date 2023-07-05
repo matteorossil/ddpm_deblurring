@@ -64,7 +64,7 @@ class Trainer():
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_conditioned/checkpoint_initpr_{checkpoint_init_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
-    sampling_path = '/home/mr6744/checkpoints_conditioned/sample2/'
+    sampling_path = '/home/mr6744/checkpoints_conditioned/sample_p_x_y/'
 
     def init(self):
         # gpu id
