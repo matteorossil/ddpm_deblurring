@@ -176,11 +176,22 @@ class Trainer():
 
             # Sample Initial Image (Random Gaussian Noise)
             #torch.cuda.manual_seed(0)
-            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
+            #### z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
             #### z = blur
-            
+
+            t_step = torch.randint(0, self.n_steps, (self.batch_size,), device=sharp.device, dtype=torch.long)
+            print("t_spep:", t_step)
+            noise = torch.randn_like(sharp)
+            xt = self.q_sample(sharp, t_step, eps=noise)
+            save_image(xt, os.path.join(self.exp_path, f'epoch_{epoch}_xt.png'))
+            z = torch.cat((xt, blur), dim=1)
+            eps_theta = self.eps_model(z, t_step)
+            loss = F.mse_loss(noise, eps_theta)
+            print("val loss:", loss)
+
             # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
+            #### for t_ in range(self.n_steps):
+            for t_ in range(t_step):
                 # $t$
                 t = self.n_steps - t_ - 1
                 # Sample from $p_\theta(x_{t-1}|x_t)$
@@ -263,7 +274,7 @@ class Trainer():
                 self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 100 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
