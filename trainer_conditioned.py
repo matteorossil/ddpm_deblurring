@@ -191,12 +191,12 @@ class Trainer():
             #if self.wandb:
                 #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
-            #if epoch == 0:
-            # save sharp images
-            save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_val.png'))
+            if epoch == 0:
+                # save sharp images
+                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_val.png'))
 
-            # save blur images
-            save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
+                # save blur images
+                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
 
             # sharp - blur
             #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
@@ -224,10 +224,13 @@ class Trainer():
         #for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
         sharp, blur = next(iter(self.data_loader_train))
 
-            # Increment global step
+        if self.step == 0:
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
+            save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
+
+        # Increment global step
         self.step += 1
-        save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
-        save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
+
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
@@ -260,11 +263,11 @@ class Trainer():
                 self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 100 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
-                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
-                torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
+                #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
+                #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
 def ddp_setup(rank, world_size):
     """
