@@ -19,8 +19,8 @@ class Trainer():
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
-    image_size_h: int = 720
-    image_size_w: int = 1280
+    image_size_h: int = 128
+    image_size_w: int = 128
     # Number of channels in the initial feature map
     n_channels: int = 32
     # The list of channel numbers at each resolution.
@@ -38,9 +38,9 @@ class Trainer():
     # Number of time steps $T$
     n_steps: int = 2000
     # Number of sample images
-    n_samples: int = 1
+    n_samples: int = 64
     # checkpoint path
-    epoch = 6500
+    epoch = 14940
     #checkpoint = f'/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/checkpoint_{epoch}.pt'
     checkpoint = f'/home/mr6744/checkpoints_unconditioned/checkpoint_{epoch}.pt'
     # store sample
@@ -80,7 +80,7 @@ class Trainer():
         with torch.no_grad():
 
             # Set seed for replicability
-            torch.cuda.manual_seed_all(0)
+            #torch.cuda.manual_seed_all(0)
 
             # Sample Initial Image (Random Gaussian Noise)
             x = torch.randn([self.n_samples, self.image_channels, self.image_size_h, self.image_size_w], device=self.device)
