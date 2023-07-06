@@ -53,7 +53,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -63,7 +63,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000_000
     # Number of sample images
-    n_samples: int = 4
+    n_samples: int = 1
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -155,7 +155,7 @@ class Trainer():
         self.params_denoiser = list(self.denoiser.parameters())
         self.params_init = list(self.init_predictor.parameters())
 
-        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser + self.params_init, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
@@ -170,6 +170,7 @@ class Trainer():
             # push to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
+            residual = sharp - self.diffusion.predictor(blur)
             #### init = self.init_predictor(blur)
 
             #condition = blur # or condition = init 
@@ -218,16 +219,16 @@ class Trainer():
                 save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
 
                 # residual
-                #save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_residual_val.png'))
+                save_image(residual, os.path.join(self.exp_path, f'epoch_{epoch}_residual_val.png'))
 
             # sharp - blur
             #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
 
             # sampled residual
-            #### save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
+            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual_sample.png'))
 
-            #save_image(blur + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
+            # sampled sharp
+            save_image(blur + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
 
             # prediction for sharp image
             ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
@@ -248,24 +249,24 @@ class Trainer():
         #for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
         sharp, blur = next(iter(self.data_loader_train))
 
-        if self.step == 0:
-            save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
-            save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
-            #save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{self.step}_residual_train.png'))
-
-        # Increment global step
-        self.step += 1
-
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
+        residual = sharp - self.diffusion.predictor(blur)
+
+        if self.step == 0:
+            save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
+            save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
+            save_image(residual, os.path.join(self.exp_path, f'epoch_{self.step}_residual_train.png'))
+
+        # Increment global step
+        self.step += 1
         # Make the gradients zero
         self.optimizer.zero_grad()
-        #self.optimizer2.zero_grad()
         # Calculate loss
-        loss = self.diffusion.loss(sharp, blur)
-        #print("loss:", loss.item())
-        #print("epoch:", self.step)
+        loss = self.diffusion.loss(residual, blur)
+        print("loss:", loss.item())
+        print("epoch:", self.step)
         # Compute gradients
         loss.backward()
         #print("############ GRAD OUTPUT ############")
@@ -315,6 +316,8 @@ def main(rank: int, world_size:int):
 
     params_denoiser = sum(p.numel() for p in trainer.params_denoiser if p.requires_grad)
     print("denoiser params:", params_denoiser)
+    init_denoiser = sum(p.numel() for p in trainer.params_init if p.requires_grad)
+    print("init predictor params:", params_denoiser)
 
     #### Track Hyperparameters ####
     if trainer.wandb and rank == 0:
