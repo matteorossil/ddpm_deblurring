@@ -46,7 +46,7 @@ class Trainer():
     checkpoint: str = f'/home/mr6744/checkpoints_unconditioned/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    sampling_path: str = '/home/mr6744/checkpoints_unconditioned/sample2/'
+    sampling_path: str = '/home/mr6744/checkpoints_unconditioned/sample3/'
 
     dataset: str = '/home/mr6744/gopro_128/'
 

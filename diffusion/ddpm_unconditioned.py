@@ -71,7 +71,7 @@ class DenoiseDiffusion:
         mean, var = self.q_xt_x0(x0, t)
         # Sample from $q(x_t|x_0)$
 
-        return mean + (var ** 0.5) * eps
+        return mean #+ (var ** 0.5) * eps
 
     def p_sample(self, xt: torch.Tensor, t: torch.Tensor):
         """
