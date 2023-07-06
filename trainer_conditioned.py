@@ -53,7 +53,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 4
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -61,9 +61,9 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 100_000
+    epochs: int = 1_000_000
     # Number of sample images
-    n_samples: int = 1
+    n_samples: int = 4
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -218,16 +218,16 @@ class Trainer():
                 save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
 
                 # residual
-                save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_residual_val.png'))
+                #save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_residual_val.png'))
 
             # sharp - blur
             #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
 
             # sampled residual
             #### save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual.png'))
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_residual.png'))
+            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
 
-            save_image(blur + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
+            #save_image(blur + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
 
             # prediction for sharp image
             ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
@@ -251,7 +251,7 @@ class Trainer():
         if self.step == 0:
             save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
-            save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{self.step}_residual_train.png'))
+            #save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{self.step}_residual_train.png'))
 
         # Increment global step
         self.step += 1
@@ -263,7 +263,7 @@ class Trainer():
         self.optimizer.zero_grad()
         #self.optimizer2.zero_grad()
         # Calculate loss
-        loss = self.diffusion.loss(sharp - blur, blur)
+        loss = self.diffusion.loss(sharp, blur)
         print("loss:", loss.item())
         print("epoch:", self.step)
         # Compute gradients
