@@ -55,7 +55,7 @@ class Trainer():
     # Batch size
     batch_size: int = 1
     # Learning rate
-    learning_rate: float = 1e-4
+    learning_rate: float = 1e-6
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -231,7 +231,7 @@ class Trainer():
             # sampled sharp
             save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
 
-            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init_sample.png'))
+            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
 
             # prediction for sharp image
             ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
