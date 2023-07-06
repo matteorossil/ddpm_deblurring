@@ -102,7 +102,7 @@ class Trainer():
             #x = torch.load('xt.pt')
             #x = x.to(self.device)
 
-            t_seq = torch.floor(torch.linspace(25, 500 - 1, 20)).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(25, 500 - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
             for t_i in t_seq:
 
