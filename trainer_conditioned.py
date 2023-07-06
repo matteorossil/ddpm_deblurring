@@ -170,7 +170,8 @@ class Trainer():
             # push to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
-            residual = sharp - self.diffusion.predictor(blur)
+            init = self.diffusion.predictor(blur)
+            residual = sharp - init
             #### init = self.init_predictor(blur)
 
             #condition = blur # or condition = init 
@@ -221,6 +222,8 @@ class Trainer():
                 # residual
                 save_image(residual, os.path.join(self.exp_path, f'epoch_{epoch}_residual_val.png'))
 
+                save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init_val.png'))
+
             # sharp - blur
             #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
 
@@ -228,7 +231,9 @@ class Trainer():
             save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual_sample.png'))
 
             # sampled sharp
-            save_image(blur + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
+            save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
+
+            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init_sample.png'))
 
             # prediction for sharp image
             ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
@@ -252,11 +257,13 @@ class Trainer():
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
-        residual = sharp - self.diffusion.predictor(blur)
+        init = self.diffusion.predictor(blur)
+        residual = sharp - init
 
         if self.step == 0:
             save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
+            save_image(init, os.path.join(self.exp_path, f'epoch_{self.step}_init_train.png'))
             save_image(residual, os.path.join(self.exp_path, f'epoch_{self.step}_residual_train.png'))
 
         # Increment global step
