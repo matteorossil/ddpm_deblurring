@@ -46,7 +46,9 @@ class Trainer():
     checkpoint: str = f'/home/mr6744/checkpoints_unconditioned/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
-    sampling_path: str = '/home/mr6744/checkpoints_unconditioned/sample/'
+    sampling_path: str = '/home/mr6744/checkpoints_unconditioned/sample2/'
+
+    dataset: str = '/home/mr6744/gopro/'
 
     def init(self):
         # device
@@ -74,6 +76,13 @@ class Trainer():
             beta_T=self.beta_T
         )
 
+        dataset = Data(path=self.dataset, mode="val", size=(self.image_size_h,self.image_size_w))
+        self.dataloader_val = DataLoader(dataset=dataset,
+                                    batch_size=self.n_samples,
+                                    num_workers=0,
+                                    drop_last=False,
+                                    shuffle=False)
+
     def sample(self):
         """
         ### Sample images
@@ -82,32 +91,41 @@ class Trainer():
 
             # Set seed for replicability
             #torch.cuda.manual_seed_all(0)
+            blur = next(iter(self.dataloader_val))
+            blur = blur.to(self.device)
+
+            save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
             # Sample Initial Image (Random Gaussian Noise)
-            x = torch.randn([self.n_samples, self.image_channels, self.image_size_h, self.image_size_w], device=self.device)
+            # x = torch.randn([self.n_samples, self.image_channels, self.image_size_h, self.image_size_w], device=self.device)
 
             #x = torch.load('xt.pt')
             #x = x.to(self.device)
 
-            #print(x)
-            
-            # Remove noise for $T$ steps
-            for t_ in range(self.n_steps):
+            t_seq = torch.floor(torch.linspace(25, 500 - 1, 20)).type(torch.long).unsqueeze(-1)
 
-                print(t_)
+            for t_i in t_seq:
 
-                t = self.n_steps - t_ - 1
+                print("running for t:", t_i.item()+1)
 
-                # Sample
-                t_vec = x.new_full((self.n_samples,), t, dtype=torch.long)
-                x = self.diffusion.p_sample(x, t_vec)
+                noise = torch.randn_like(blur, device=self.device)
+                #noise = torch.zeros(blur.shape, device=self.device)
+                blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
 
-                # save sampled images
-                if ((t_+1) % self.n_steps == 0):
-                    save_image(x, os.path.join(self.sampling_path, f"size_{self.image_size_h}_epoch_{self.epoch}_t{t_+1}.png"))
-                    #save_image(x_norm, os.path.join(self.sampling_path, f"epoch{self.epoch}_t{t_+1}_norm.png"))
+                for t_ in range(t_i.item()):
 
-            return x
+                    print(t_)
+
+                    t = t_i.item() - t_ - 1
+
+                    # Sample
+                    t_vec = blur_noise.new_full((self.n_samples,), t, dtype=torch.long)
+                    blur_noise = self.diffusion.p_sample(blur_noise, t_vec)
+
+                    # save sampled images
+                    if ((t_+1) % t_i.item() == 0):
+                        save_image(blur_noise, os.path.join(self.sampling_path, f"deblurred_{t_i.item()+1}.png"))
+
 
 def main():
     trainer = Trainer()
