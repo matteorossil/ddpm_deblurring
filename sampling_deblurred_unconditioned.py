@@ -48,7 +48,7 @@ class Trainer():
     #sampling_path = '/scratch/mr6744/pytorch/checkpoints_distributed/06132023_202606/sampling/'
     sampling_path: str = '/home/mr6744/checkpoints_unconditioned/sample2/'
 
-    dataset: str = '/home/mr6744/gopro/'
+    dataset: str = '/home/mr6744/gopro_128/'
 
     def init(self):
         # device
@@ -91,9 +91,10 @@ class Trainer():
 
             # Set seed for replicability
             #torch.cuda.manual_seed_all(0)
-            blur = next(iter(self.dataloader_val))
+            sharp, blur = next(iter(self.dataloader_val))
             blur = blur.to(self.device)
 
+            save_image(sharp, os.path.join(self.sampling_path, f"sharp.png"))
             save_image(blur, os.path.join(self.sampling_path, f"blur.png"))
 
             # Sample Initial Image (Random Gaussian Noise)
@@ -102,7 +103,7 @@ class Trainer():
             #x = torch.load('xt.pt')
             #x = x.to(self.device)
 
-            t_seq = torch.floor(torch.linspace(25, 500 - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
+            t_seq = torch.floor(torch.linspace(49, 1000 - 1, 20, device=self.device)).type(torch.long).unsqueeze(-1)
 
             for t_i in t_seq:
 
@@ -111,7 +112,7 @@ class Trainer():
                 noise = torch.randn_like(blur, device=self.device)
                 #noise = torch.zeros(blur.shape, device=self.device)
                 blur_noise = self.diffusion.q_sample(blur, t_i.repeat(blur.shape[0]), eps=noise)
-                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()}.png"))
+                save_image(blur_noise, os.path.join(self.sampling_path, f"blur_noise_{t_i.item()+1}.png"))
 
                 for t_ in range(t_i.item()):
 

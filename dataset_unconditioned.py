@@ -37,12 +37,15 @@ class Data(Dataset):
         # stores paths
         if mode == "train":
             self.imgs_dir = os.path.join(self.dataset_name[mode], "sharp")
+            self.imgs = os.listdir(self.imgs_dir)
+            self.imgs.sort()
         else:
-            self.imgs_dir = os.path.join(self.dataset_name[mode], "blur")
+            self.imgs_dir_blur = os.path.join(self.dataset_name[mode], "blur")
+            self.imgs_blur = os.listdir(self.imgs_dir_blur)
 
-        self.imgs = os.listdir(self.imgs_dir)
-        self.imgs.sort()
-        
+            self.imgs_dir = os.path.join(self.dataset_name[mode], "sharp")
+            self.imgs = os.listdir(self.imgs_dir)
+
     def __len__(self):
         return len(self.imgs)
     
@@ -52,8 +55,9 @@ class Data(Dataset):
             sharp = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
             return self.transform_train(sharp)
         else: # do not apply trainsfomation to validation set
-            blur = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
-            return self.transform_val2(blur)
+            blur = Image.open(os.path.join(self.imgs_dir_blur, self.imgs_blur[idx])).convert('RGB')
+            sharp = Image.open(os.path.join(self.imgs_dir, self.imgs[idx])).convert('RGB')
+            return self.transform_val(sharp), self.transform_val(blur)
         
     def transform_train(self, sharp):
                 
@@ -75,13 +79,6 @@ class Data(Dataset):
 
         return TF.to_tensor(sharp)
                 
-    def transform_val(self, blur):
+    def transform_val(self, img):
 
-        return TF.to_tensor(blur)
-
-    def transform_val2(self, blur):
-
-        i, j, h, w = T.RandomCrop.get_params(blur, output_size=self.size)
-        blur = TF.crop(blur, i, j, h, w)
-
-        return TF.to_tensor(blur)
+        return TF.to_tensor(img)
