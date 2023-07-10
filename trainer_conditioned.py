@@ -53,7 +53,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 8
     # Learning rate
     #learning_rate: float = 1e-4
     learning_rate: float = 2e-5
@@ -64,7 +64,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of sample images
-    n_samples: int = 2
+    n_samples: int = 10
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -75,7 +75,7 @@ class Trainer():
     dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_denoiser_epoch: int = 0
-    checkpoint_init_epoch: int = 0
+    checkpoint_init_epoch: int = 16880
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/06302023_192836/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{checkpoint_init_epoch}.pt'
