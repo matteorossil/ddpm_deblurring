@@ -53,7 +53,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 8
+    batch_size: int = 1
     # Learning rate
     #learning_rate: float = 1e-4
     learning_rate: float = 2e-5
@@ -62,9 +62,9 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 1_000_000
+    epochs: int = 100_000
     # Number of sample images
-    n_samples: int = 8
+    n_samples: int = 2
     # Use wandb
     wandb: bool = False
     # where to store the checkpoints
@@ -75,7 +75,7 @@ class Trainer():
     dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_denoiser_epoch: int = 0
-    checkpoint_init_epoch: int = 16880
+    checkpoint_init_epoch: int = 0
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/06302023_192836/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{checkpoint_init_epoch}.pt'
@@ -270,7 +270,7 @@ class Trainer():
         # Make the gradients zero
         self.optimizer.zero_grad()
         # Calculate loss
-        loss = self.diffusion.loss(residual, blur)
+        loss = self.diffusion.loss(residual, blur) + F.mse_loss(sharp, init)
         print("loss:", loss.item())
         print("epoch:", self.step)
         # Compute gradients
@@ -295,7 +295,7 @@ class Trainer():
                 self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train()
-            if ((epoch+1) % 500 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
