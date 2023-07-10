@@ -13,10 +13,12 @@ from pathlib import Path
 from datetime import datetime
 import wandb
 import torch.nn.functional as F
+from metrics import *
 
 from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
+from numpy import savetxt
 
 import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
@@ -220,6 +222,11 @@ class Trainer():
                 # save blur images
                 save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
 
+                psnr_sharp_blur = psnr(sharp, blur)
+                ssim_sharp_blur = ssim(sharp, blur)
+                savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_epoch{epoch}.txt"), psnr_sharp_blur)
+                savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
+
             # residual
             save_image(residual, os.path.join(self.exp_path, f'epoch_{epoch}_residual_true.png'))
 
@@ -231,8 +238,16 @@ class Trainer():
 
             # sampled sharp
             save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
+            psnr_sharp_deblurred = psnr(sharp, init)
+            ssim_sharp_deblurred = ssim(sharp, init)
+            savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_epoch{epoch}.txt"), psnr_sharp_deblurred)
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_epoch{epoch}.txt"), ssim_sharp_deblurred)
 
             save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
+            psnr_sharp_init = psnr(sharp, init)
+            ssim_sharp_init = ssim(sharp, init)
+            savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_epoch{epoch}.txt"), psnr_sharp_init)
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_epoch{epoch}.txt"), ssim_sharp_init)
 
             # prediction for sharp image
             ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
@@ -310,7 +325,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12357" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
