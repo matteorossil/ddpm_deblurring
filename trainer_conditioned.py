@@ -34,7 +34,7 @@ def get_exp_path(path=''):
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
-def plot(steps, R, G, B):
+def plot(steps, R, G, B, path):
 
     plt.plot(steps, R, label='red', color='r')
     plt.plot(steps, G, label='green', color='g')
@@ -45,7 +45,7 @@ def plot(steps, R, G, B):
     plt.legend()
     plt.title('channel averages over training time')
     #plt.show()
-    plt.savefig(f'{steps[-1]}.png')
+    plt.savefig(path + f'{steps[-1]}.png')
 
 
 class Trainer():
@@ -349,7 +349,7 @@ class Trainer():
 
             if (epoch+1 % 100 == 0) and (self.gpu_id == 0):
                 fig, ax = plt.subplots()
-                plot(ax, steps, R, G, B)
+                plot(ax, steps, R, G, B, self.exp_path)
                 fig.tight_layout()
 
             if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
