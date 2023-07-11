@@ -36,6 +36,8 @@ def get_exp_path(path=''):
 
 def plot(steps, R, G, B, path):
 
+    print("steps", steps[-1])
+
     plt.plot(steps, R, label='red', color='r')
     plt.plot(steps, G, label='green', color='g')
     plt.plot(steps, B, label='blu', color='b')
@@ -347,10 +349,8 @@ class Trainer():
             # Train the model
             self.train(steps, R, G, B)
 
-            if (epoch+1 % 100 == 0) and (self.gpu_id == 0):
-                fig, ax = plt.subplots()
-                plot(ax, steps, R, G, B, self.exp_path)
-                fig.tight_layout()
+            if (epoch+1 % 20 == 0) and (self.gpu_id == 0):
+                plot(steps, R, G, B, self.exp_path)
 
             if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
                 # Save the eps model
