@@ -5,9 +5,9 @@ from typing import List
 import os
 import torch
 import torch.utils.data
-#from diffusion.ddpm_conditioned import DenoiseDiffusion
+from diffusion.ddpm_conditioned import DenoiseDiffusion
 from eps_models.denoiser import UNet as Denoiser # conditioned
-from eps_models.unet_conditioned import UNet as Denoiser # conditioned
+#from eps_models.unet_conditioned import UNet as Denoiser # conditioned
 from eps_models.initial_predictor import UNet as InitP # simple Unet (doesn't take t as param)
 from pathlib import Path
 from datetime import datetime
