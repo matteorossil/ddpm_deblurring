@@ -47,7 +47,7 @@ def plot(steps, R, G, B, path):
     plt.legend()
     plt.title('channel averages over training time')
     #plt.show()
-    plt.savefig(path + f'{steps[-1]}.png')
+    plt.savefig(path + f'/{steps[-1]}.png')
 
 
 class Trainer():
