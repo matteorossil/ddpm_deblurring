@@ -26,10 +26,26 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 
+import matplotlib.pyplot as plt
+import itertools
+
 def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
+
+def plot(steps, R, G, B):
+
+    plt.plot(steps, R, label='red', color='r')
+    plt.plot(steps, G, label='green', color='g')
+    plt.plot(steps, B, label='blu', color='b')
+
+    plt.xlabel("training steps")
+    plt.ylabel("channel average")
+    plt.legend()
+    plt.title('channel averages over training time')
+    #plt.show()
+    plt.savefig(f'{steps[-1]}.png')
 
 
 class Trainer():
@@ -276,7 +292,7 @@ class Trainer():
         init = self.diffusion.predictor(blur)
         residual = sharp - init
 
-
+        # store mean value of channels
         r = torch.mean(init[:,0,:,:])
         R.append(r.item())
         g = torch.mean(init[:,1,:,:])
@@ -319,10 +335,10 @@ class Trainer():
         """
         ### Training loop
         """
+        steps = []
         R = []
         G = []
         B = []
-        steps = []
         
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
@@ -330,9 +346,12 @@ class Trainer():
                 #self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train(steps, R, G, B)
-            print(R)
-            print(G),
-            print(B)
+
+            if (epoch+1 % 100 == 0) and (self.gpu_id == 0):
+                fig, ax = plt.subplots()
+                plot(ax, steps, R, G, B)
+                fig.tight_layout()
+
             if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
