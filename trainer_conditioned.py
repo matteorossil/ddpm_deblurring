@@ -6,8 +6,8 @@ import os
 import torch
 import torch.utils.data
 from diffusion.ddpm_conditioned import DenoiseDiffusion
-from eps_models.denoiser import UNet as Denoiser # conditioned
-#from eps_models.unet_conditioned import UNet as Denoiser # conditioned
+#from eps_models.denoiser import UNet as Denoiser # conditioned
+from eps_models.unet_conditioned import UNet as Denoiser # conditioned
 from eps_models.initial_predictor import UNet as InitP # simple Unet (doesn't take t as param)
 from pathlib import Path
 from datetime import datetime
@@ -47,8 +47,8 @@ class Trainer():
     channel_multipliers: List[int] = [1, 2, 4, 8]
     channel_multipliers2: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, True]
-    attention_middle: List[int] = [True]
+    is_attention: List[int] = [False, False, False, False]
+    attention_middle: List[int] = [False]
     # Number of time steps $T$
     n_steps: int = 1_000
     # noise scheduler Beta_0
@@ -88,16 +88,15 @@ class Trainer():
         # gpu id
         self.gpu_id = rank
 
-        '''
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers2
+            ch_mults=self.channel_multipliers2,
             is_attn=self.is_attention,
             attn_middle=self.attention_middle
         ).to(self.gpu_id)
-        '''
 
+        '''
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
@@ -105,6 +104,7 @@ class Trainer():
             #is_attn=self.is_attention,
             #attn_middle=self.attention_middle
         ).to(self.gpu_id)
+        '''
 
         # initial prediction x_init
         self.init_predictor = InitP(
@@ -262,7 +262,7 @@ class Trainer():
 
             return z
 
-    def train(self):
+    def train(self, steps, R, G, B):
         """
         ### Train
         """
@@ -276,6 +276,16 @@ class Trainer():
         init = self.diffusion.predictor(blur)
         residual = sharp - init
 
+
+        r = torch.mean(init[:,0,:,:])
+        R.append(r)
+        g = torch.mean(init[:,1,:,:])
+        G.append(g)
+        b = torch.mean(init[:,2,:,:])
+        B.append(b)
+
+        steps.append(self.step)
+
         #if self.step == 0:
             #save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
             #save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
@@ -284,6 +294,7 @@ class Trainer():
 
         # Increment global step
         self.step += 1
+        steps.append(self.step)
         # Make the gradients zero
         self.optimizer.zero_grad()
         # Calculate loss
@@ -307,11 +318,19 @@ class Trainer():
         """
         ### Training loop
         """
+        R = []
+        G = []
+        B = []
+        steps = []
+        
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
                 self.sample(self.n_samples, epoch=0)
             # Train the model
-            self.train()
+            self.train(steps, R, G, B)
+            print(R)
+            print(G),
+            print(B)
             if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
