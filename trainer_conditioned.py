@@ -301,9 +301,6 @@ class Trainer():
         G.append(g.item())
         b = torch.mean(init[:,2,:,:])
         B.append(b.item())
-        print()
-
-        steps.append(self.step)
 
         #if self.step == 0:
             #save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
