@@ -6,14 +6,15 @@ import os
 import torch
 import torch.utils.data
 from diffusion.ddpm_conditioned import DenoiseDiffusion
-#from eps_models.denoiser import UNet as Denoiser # conditioned
-from eps_models.unet_conditioned import UNet as Denoiser # conditioned
+from eps_models.denoiser import UNet as Denoiser # conditioned
+#from eps_models.unet_conditioned import UNet as Denoiser # conditioned
 from eps_models.initial_predictor import UNet as InitP # simple Unet (doesn't take t as param)
 from pathlib import Path
 from datetime import datetime
 import wandb
 import torch.nn.functional as F
 from metrics import *
+import numpy as np
 
 from dataset import Data
 from torch.utils.data import DataLoader
@@ -99,9 +100,9 @@ class Trainer():
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers2,
-            is_attn=self.is_attention,
-            attn_middle=self.attention_middle
+            ch_mults=self.channel_multipliers2
+            #is_attn=self.is_attention,
+            #attn_middle=self.attention_middle
         ).to(self.gpu_id)
 
         # initial prediction x_init
@@ -238,8 +239,8 @@ class Trainer():
 
             # sampled sharp
             save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
-            psnr_sharp_deblurred = psnr(sharp, init)
-            ssim_sharp_deblurred = ssim(sharp, init)
+            psnr_sharp_deblurred = psnr(sharp, init + z)
+            ssim_sharp_deblurred = ssim(sharp, init + z)
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_epoch{epoch}.txt"), psnr_sharp_deblurred)
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_epoch{epoch}.txt"), ssim_sharp_deblurred)
 
