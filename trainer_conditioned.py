@@ -48,6 +48,7 @@ def plot(steps, R, G, B, path):
     plt.title('channel averages over training time')
     #plt.show()
     plt.savefig(path + f'/{steps[-1]}.png')
+    plt.figure().clear()
 
 
 class Trainer():
