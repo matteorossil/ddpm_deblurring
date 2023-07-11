@@ -89,18 +89,19 @@ class Trainer():
         self.gpu_id = rank
 
         '''
-        # Create $\epsilon_\theta(x_t, t)$ model
         self.denoiser = Denoiser(
-            image_channels=self.image_channels*2, # *2 because we concatenate xt with y
+            image_channels=self.image_channels*2,
             n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers
+            ch_mults=self.channel_multipliers2
+            is_attn=self.is_attention,
+            attn_middle=self.attention_middle
         ).to(self.gpu_id)
         '''
 
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers2
+            ch_mults=self.channel_multipliers
             #is_attn=self.is_attention,
             #attn_middle=self.attention_middle
         ).to(self.gpu_id)
