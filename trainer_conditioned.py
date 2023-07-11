@@ -78,7 +78,7 @@ class Trainer():
     dataset: str = '/home/mr6744/gopro_128/'
     # load from a checkpoint
     checkpoint_denoiser_epoch: int = 0
-    checkpoint_init_epoch: int = 0 #16880
+    checkpoint_init_epoch: int = 16880 #0
     checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/06302023_192836/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     checkpoint_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{checkpoint_init_epoch}.pt'
