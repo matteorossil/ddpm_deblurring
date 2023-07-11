@@ -5,8 +5,8 @@ from typing import List
 import os
 import torch
 import torch.utils.data
-from diffusion.ddpm_conditioned import DenoiseDiffusion
-#from eps_models.denoiser import UNet as Denoiser # conditioned
+#from diffusion.ddpm_conditioned import DenoiseDiffusion
+from eps_models.denoiser import UNet as Denoiser # conditioned
 from eps_models.unet_conditioned import UNet as Denoiser # conditioned
 from eps_models.initial_predictor import UNet as InitP # simple Unet (doesn't take t as param)
 from pathlib import Path
@@ -107,6 +107,7 @@ class Trainer():
         # gpu id
         self.gpu_id = rank
 
+        '''
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
@@ -114,8 +115,9 @@ class Trainer():
             is_attn=self.is_attention,
             attn_middle=self.attention_middle
         ).to(self.gpu_id)
-
         '''
+
+        
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
@@ -123,7 +125,7 @@ class Trainer():
             #is_attn=self.is_attention,
             #attn_middle=self.attention_middle
         ).to(self.gpu_id)
-        '''
+        
 
         # initial prediction x_init
         self.init_predictor = InitP(
@@ -350,7 +352,7 @@ class Trainer():
             if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 plot(steps, R, G, B, self.exp_path)
 
-            if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 500 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
@@ -365,7 +367,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12356" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
