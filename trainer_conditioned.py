@@ -278,11 +278,12 @@ class Trainer():
 
 
         r = torch.mean(init[:,0,:,:])
-        R.append(r)
+        R.append(r.item())
         g = torch.mean(init[:,1,:,:])
-        G.append(g)
+        G.append(g.item())
         b = torch.mean(init[:,2,:,:])
-        B.append(b)
+        B.append(b.item())
+        print()
 
         steps.append(self.step)
 
@@ -325,7 +326,8 @@ class Trainer():
         
         for epoch in range(self.epochs):
             if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(self.n_samples, epoch=0)
+                pass
+                #self.sample(self.n_samples, epoch=0)
             # Train the model
             self.train(steps, R, G, B)
             print(R)
