@@ -349,7 +349,7 @@ class Trainer():
             # Train the model
             self.train(steps, R, G, B)
 
-            if (epoch+1 % 20 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 plot(steps, R, G, B, self.exp_path)
 
             if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
