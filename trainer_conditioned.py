@@ -306,7 +306,10 @@ class Trainer():
     def run(self):
 
         # used to plot channel averages
-        R = G = B = steps = []
+        R = []
+        G = []
+        B = []
+        steps = []
 
         for epoch in range(self.epochs):
 
