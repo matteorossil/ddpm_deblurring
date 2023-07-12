@@ -77,7 +77,7 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 2, 4]
+    channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, False]
     # Number of time steps $T$
@@ -89,11 +89,11 @@ class Trainer():
     # Batch size
     batch_size: int = 8
     # Learning rate
-    learning_rate: float = 1e-4 #2e-5
+    learning_rate: float = 1e-5 #1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
-    betas = (0.9, 0.999)
+    betas = (0.99, 0.999)
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
@@ -257,7 +257,7 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
-    def train(self, epoch, steps, R, G, B, loss_):
+    def train(self, epoch, steps, R, G, B, loss_, ch_blur):
         """
         ### Train
         """
@@ -278,11 +278,13 @@ class Trainer():
             # save images blur and sharp image pairs
             save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-            print(f"Blur channel avgs: Red={torch.mean(blur[:,0,:,:])}, Green={torch.mean(blur[:,1,:,:])}, Blue={torch.mean(blur[:,2,:,:])}")
+            # get avg channels for blur dataset
+            ch_blur.append(torch.mean(blur[:,0,:,:]).item())
+            ch_blur.append(torch.mean(blur[:,1,:,:]).item())
+            ch_blur.append(torch.mean(blur[:,2,:,:]).item())
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
-        init = self.sigmoid(init)
 
         # compute residual
         residual = sharp - init
@@ -329,6 +331,7 @@ class Trainer():
         B = []
         steps = []
         loss_ = []
+        ch_blur = []
 
         for epoch in range(self.epochs):
 
@@ -337,11 +340,11 @@ class Trainer():
                 self.sample(epoch=0)
 
             # train
-            self.train(epoch, steps, R, G, B, loss_)
+            self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, LR:{'{:.0e}'.format(self.learning_rate)}, Dataset:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 plot_loss(steps, loss_, self.exp_path, title=title)
 
