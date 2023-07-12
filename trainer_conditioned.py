@@ -76,7 +76,7 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 3, 4]
+    channel_multipliers: List[int] = [1, 2, 2, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, False]
     # Number of time steps $T$
@@ -253,7 +253,7 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
-    def train(self, epoch, steps, R, G, B, loss_, ch_blur):
+    def train(self, epoch, steps, R, G, B, loss_):
         """
         ### Train
         """
@@ -274,9 +274,7 @@ class Trainer():
             # save images blur and sharp image pairs
             save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-            ch_blur.append(torch.mean(blur[:,0,:,:]))
-            ch_blur.append(torch.mean(blur[:,1,:,:]))
-            ch_blur.append(torch.mean(blur[:,2,:,:]))
+            print(f"Blur channel avgs: Red={torch.mean(blur[:,0,:,:])}, Green={torch.mean(blur[:,1,:,:])}, Blue={torch.mean(blur[:,2,:,:])}")
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
@@ -326,7 +324,6 @@ class Trainer():
         B = []
         steps = []
         loss_ = []
-        ch_blur = [] # blur channel averages
 
         for epoch in range(self.epochs):
 
@@ -335,11 +332,11 @@ class Trainer():
                 self.sample(epoch=0)
 
             # train
-            self.train(epoch, steps, R, G, B, loss_, ch_blur)
+            self.train(epoch, steps, R, G, B, loss_)
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, BlurChannelAvgs:{ch_blur}, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 plot_loss(steps, loss_, self.exp_path, title=title)
 
