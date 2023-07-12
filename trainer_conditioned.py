@@ -40,8 +40,6 @@ def get_exp_path(path=''):
 
 def plot(steps, R, G, B, path, title):
 
-    print("steps", steps[-1])
-
     plt.plot(steps, R, label='red', color='r')
     plt.plot(steps, G, label='green', color='g')
     plt.plot(steps, B, label='blu', color='b')
@@ -169,7 +167,7 @@ class Trainer():
         self.num_params_denoiser = sum(p.numel() for p in self.params_denoiser if p.requires_grad)
 
         self.params_init = list(self.initP.parameters())
-        self.num_init_denoiser = sum(p.numel() for p in self.params_init if p.requires_grad)
+        self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
         params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
@@ -244,7 +242,7 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred__avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
-    def train(self, steps, R, G, B):
+    def train(self, epoch, steps, R, G, B):
         """
         ### Train
         """
@@ -260,6 +258,11 @@ class Trainer():
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
+
+        if epoch == 0:
+            # save images blur and sharp image pairs
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
+            save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
@@ -312,11 +315,11 @@ class Trainer():
                 self.sample(epoch=0)
 
             # train
-            self.train(steps, R, G, B)
+            self.train(epoch, steps, R, G, B)
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 20 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.params_denoiser}, G:{self.params_init}, Pretrained G: No, Dataset:{self.batch_size}" 
+                title = f"D:{self.num_params_denoiser}, G:{self.num_init_denoiser}, Pretrained G: No, Dataset:{self.batch_size}" 
                 plot(steps, R, G, B, self.exp_path, title=title)
 
             # sample at 2000's epoch
@@ -347,7 +350,7 @@ def main(rank: int, world_size:int):
 
     if rank == 0:
         print("Denoiser params:", trainer.num_params_denoiser)
-        print("Initial Predictor params:", trainer.num_init_denoiser)
+        print("Initial Predictor params:", trainer.num_params_init)
         print("Learning rate:", trainer.learning_rate)
         print("Channel multipliers", trainer.channel_multipliers)
         print()
