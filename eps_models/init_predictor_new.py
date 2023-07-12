@@ -160,8 +160,8 @@ class UpBlock(nn.Module):
         else:
             self.attn = nn.Identity()
 
-    def forward(self, x: torch.Tensor, t: torch.Tensor):
-        x = self.res(x, t)
+    def forward(self, x: torch.Tensor):
+        x = self.res(x)
         x = self.attn(x)
         return x
 
@@ -214,7 +214,7 @@ class Downsample(nn.Module):
         super().__init__()
         self.conv = nn.Conv2d(n_channels, n_channels, (3, 3), (2, 2), (1, 1))
 
-    def forward(self, x: torch.Tensor, t: torch.Tensor):
+    def forward(self, x: torch.Tensor):
         # `t` is not used, but it's kept in the arguments because for the attention layer function signature
         # to match with `ResidualBlock`.
         return self.conv(x)
@@ -324,7 +324,6 @@ class UNet(nn.Module):
     def forward(self, x: torch.Tensor):
         """
         * `x` has shape `[batch_size, in_channels, height, width]`
-        * `t` has shape `[batch_size]`
         """
 
         return self.unet_forward(x)
