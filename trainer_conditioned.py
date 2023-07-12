@@ -38,7 +38,7 @@ def get_exp_path(path=''):
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
-def plot(steps, R, G, B, path, title):
+def plot_channels(steps, R, G, B, path, title):
 
     plt.plot(steps, R, label='red', color='r')
     plt.plot(steps, G, label='green', color='g')
@@ -49,9 +49,20 @@ def plot(steps, R, G, B, path, title):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/training_steps_{steps[-1]}.png')
+    plt.savefig(path + f'/channel_avgs_steps{steps[-1]}.png')
     plt.figure().clear()
 
+def plot_loss(steps, loss, path, title):
+
+    plt.plot(steps, loss, label='red', color='r')
+
+    plt.xlabel("training steps")
+    plt.ylabel("loss")
+    plt.legend()
+    plt.title(title)
+    #plt.show()
+    plt.savefig(path + f'/loss_steps{steps[-1]}.png')
+    plt.figure().clear()
 
 class Trainer():
     """
@@ -65,7 +76,7 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 2, 4]
+    channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, False]
     # Number of time steps $T$
@@ -242,7 +253,7 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
-    def train(self, epoch, steps, R, G, B):
+    def train(self, epoch, steps, R, G, B, ch_blur):
         """
         ### Train
         """
@@ -263,6 +274,7 @@ class Trainer():
             # save images blur and sharp image pairs
             save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
+            ch_blur.append(torch.mean(blur[:,0,:,:]), torch.mean(blur[:,1,:,:]), torch.mean(blur[:,2,:,:]))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
@@ -288,6 +300,7 @@ class Trainer():
         # Calculate loss
         loss = self.diffusion.loss(residual, blur) #+ F.mse_loss(sharp, init)
         print(f"epoch: {self.step}, loss: {loss.item()}")
+        loss.append(loss.item())
 
         # Compute gradients
         loss.backward()
@@ -310,6 +323,8 @@ class Trainer():
         G = []
         B = []
         steps = []
+        loss = []
+        ch_blur = [] # blur channel averages
 
         for epoch in range(self.epochs):
 
@@ -318,12 +333,13 @@ class Trainer():
                 self.sample(epoch=0)
 
             # train
-            self.train(epoch, steps, R, G, B)
+            self.train(epoch, steps, R, G, B, loss, ch_blur)
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
-                plot(steps, R, G, B, self.exp_path, title=title)
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, BlurChannelAvgs:{ch_blur}, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
+                plot_channels(steps, R, G, B, self.exp_path, title=title)
+                plot_loss(steps, loss, self.exp_path, title=title)
 
             # sample at 2000's epoch
             if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
