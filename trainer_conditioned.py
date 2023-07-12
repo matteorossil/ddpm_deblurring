@@ -166,10 +166,10 @@ class Trainer():
 
         # Create optimizer
         self.params_denoiser = list(self.denoiser.parameters())
-        self.params_denoiser = sum(p.numel() for p in self.params_denoiser if p.requires_grad)
+        self.num_params_denoiser = sum(p.numel() for p in self.params_denoiser if p.requires_grad)
 
         self.params_init = list(self.initP.parameters())
-        self.init_denoiser = sum(p.numel() for p in self.params_init if p.requires_grad)
+        self.num_init_denoiser = sum(p.numel() for p in self.params_init if p.requires_grad)
 
         params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
@@ -348,8 +348,8 @@ def main(rank: int, world_size:int):
     #print(trainer.init_predictor)
 
     if rank == 0:
-        print("Denoiser params:", trainer.params_denoiser)
-        print("Initial Predictor params:", trainer.init_denoiser)
+        print("Denoiser params:", trainer.num_params_denoiser)
+        print("Initial Predictor params:", trainer.num_init_denoiser)
         print("Learning rate:", trainer.learning_rate)
         print("Channel multipliers", trainer.channel_multipliers)
         print()
@@ -368,8 +368,8 @@ def main(rank: int, world_size:int):
             "pretrained init": trainer.checkpoint_init_epoch > 0,
             "conditioning": "blurred image",
             "dataset": trainer.dataset,
-            "denoiser # params": trainer.params_denoiser,
-            "init # params": trainer.init_denoiser,
+            "denoiser # params": trainer.num_params_denoiser,
+            "init # params": trainer.num_init_denoiser,
             "loaded from checkpoint": trainer.checkpoint_init,
             "checkpoints saved at": trainer.exp_path
             }
