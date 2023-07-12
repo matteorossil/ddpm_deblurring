@@ -87,17 +87,17 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 8
+    batch_size: int = 16
     # Learning rate
-    learning_rate: float = 1e-5 #1e-4
+    learning_rate: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
-    betas = (0.99, 0.999)
+    betas = (0.9, 0.999)
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 8
+    n_samples: int = 16
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -344,7 +344,7 @@ class Trainer():
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, LR:{'{:.0e}'.format(self.learning_rate)}, Dataset:{self.batch_size}, Ch_blur:{ch_blur}"
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 plot_loss(steps, loss_, self.exp_path, title=title)
 
