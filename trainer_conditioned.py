@@ -65,7 +65,7 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 3, 4]
+    channel_multipliers: List[int] = [1, 2, 2, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, False]
     # Number of time steps $T$
