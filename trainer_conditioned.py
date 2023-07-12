@@ -52,6 +52,7 @@ def plot_channels(steps, R, G, B, path, title):
     #plt.show()
     plt.savefig(path + f'/channel_avgs_steps{steps[-1]}.png')
     plt.figure().clear()
+    plt.close('all')
 
 def plot_loss(steps, loss, path, title):
 
@@ -64,6 +65,7 @@ def plot_loss(steps, loss, path, title):
     #plt.show()
     plt.savefig(path + f'/loss_steps{steps[-1]}.png')
     plt.figure().clear()
+    plt.close('all')
 
 class Trainer():
     """
@@ -89,7 +91,7 @@ class Trainer():
     # Batch size
     batch_size: int = 1
     # Learning rate
-    learning_rate: float = 2e-5
+    learning_rate: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
