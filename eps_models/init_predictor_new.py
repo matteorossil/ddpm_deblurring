@@ -264,7 +264,7 @@ class UNet(nn.Module):
         self.down = nn.ModuleList(down)
 
         # Middle block
-        self.middle = MiddleBlock(out_channels is_attn[-1]) # false for middle block not having attention
+        self.middle = MiddleBlock(out_channels, is_attn[-1]) # false for middle block not having attention
 
         # #### Second half of U-Net - increasing resolution
         up = []
