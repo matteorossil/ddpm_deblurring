@@ -10,6 +10,7 @@ from diffusion.ddpm_conditioned import DenoiseDiffusion
 
 # Torch
 import torch
+from torch import nn
 import torch.utils.data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
@@ -187,6 +188,9 @@ class Trainer():
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
+        #sigmoid
+        self.sigmoid = nn.Sigmoid()
+
     def sample(self, epoch):
 
         with torch.no_grad():
@@ -278,6 +282,7 @@ class Trainer():
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
+        init = self.sigmoid(init)
 
         # compute residual
         residual = sharp - init
