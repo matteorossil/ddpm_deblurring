@@ -253,7 +253,7 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
-    def train(self, epoch, steps, R, G, B, loss, ch_blur):
+    def train(self, epoch, steps, R, G, B, loss_, ch_blur):
         """
         ### Train
         """
@@ -302,7 +302,7 @@ class Trainer():
         # Calculate loss
         loss = self.diffusion.loss(residual, blur) #+ F.mse_loss(sharp, init)
         print(f"epoch: {self.step}, loss: {loss.item()}")
-        loss.append(loss.item())
+        loss_.append(loss.item())
 
         # Compute gradients
         loss.backward()
@@ -325,7 +325,7 @@ class Trainer():
         G = []
         B = []
         steps = []
-        loss = []
+        loss_ = []
         ch_blur = [] # blur channel averages
 
         for epoch in range(self.epochs):
@@ -335,13 +335,13 @@ class Trainer():
                 self.sample(epoch=0)
 
             # train
-            self.train(epoch, steps, R, G, B, loss, ch_blur)
+            self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, BlurChannelAvgs:{ch_blur}, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
-                plot_loss(steps, loss, self.exp_path, title=title)
+                plot_loss(steps, loss_, self.exp_path, title=title)
 
             # sample at 2000's epoch
             if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
