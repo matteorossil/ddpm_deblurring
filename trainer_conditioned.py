@@ -253,7 +253,7 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
-    def train(self, epoch, steps, R, G, B, ch_blur):
+    def train(self, epoch, steps, R, G, B, loss, ch_blur):
         """
         ### Train
         """
