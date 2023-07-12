@@ -182,6 +182,7 @@ class Trainer():
         self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
         params = list(self.params_denoiser) + list(self.params_init)
+        print(params)
         self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
