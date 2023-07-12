@@ -209,8 +209,8 @@ class Trainer():
 
             if epoch == 0:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'sharp_val.png'))
-                save_image(blur, os.path.join(self.exp_path, f'blur_val.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'epoch{epoch}_sharp_val.png'))
+                save_image(blur, os.path.join(self.exp_path, f'epoch{epoch}_blur_val.png'))
                 
                 # compute metrics for blur sharp pairs
                 psnr_sharp_blur = psnr(sharp, blur)
@@ -222,13 +222,13 @@ class Trainer():
 
 
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'init_epoch{epoch}.png'))
+            save_image(init, os.path.join(self.exp_path, f'epoch{epoch}_init.png'))
             # save true residual
-            save_image(X_true, os.path.join(self.exp_path, f'residual_true_epoch{epoch}.png'))
+            save_image(X_true, os.path.join(self.exp_path, f'epoch{epoch}_residual_true.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'residual_sampled_epoch{epoch}.png'))
+            save_image(X, os.path.join(self.exp_path, f'epoch{epoch}_residual_sampled.png'))
             # save sampled deblurred
-            save_image(init + X, os.path.join(self.exp_path, f'deblurred_epoch{epoch}.png'))
+            save_image(init + X, os.path.join(self.exp_path, f'epoch{epoch}_deblurred.png'))
 
             # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
@@ -261,8 +261,8 @@ class Trainer():
 
         if epoch == 0:
             # save images blur and sharp image pairs
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
-            save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'epoch{epoch}_sharp_train.png'))
+            save_image(blur, os.path.join(self.exp_path, f'epoch{epoch}_blur_train.png'))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
