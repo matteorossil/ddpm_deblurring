@@ -49,7 +49,7 @@ def plot(steps, R, G, B, path, title):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/{steps[-1]}.png')
+    plt.savefig(path + f'/training_steps_{steps[-1]}.png')
     plt.figure().clear()
 
 
@@ -209,8 +209,8 @@ class Trainer():
 
             if epoch == 0:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'epoch{epoch}_sharp_val.png'))
-                save_image(blur, os.path.join(self.exp_path, f'epoch{epoch}_blur_val.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'sharp_val.png'))
+                save_image(blur, os.path.join(self.exp_path, f'blur_val.png'))
                 
                 # compute metrics for blur sharp pairs
                 psnr_sharp_blur = psnr(sharp, blur)
@@ -222,13 +222,13 @@ class Trainer():
 
 
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'epoch{epoch}_init.png'))
+            save_image(init, os.path.join(self.exp_path, f'init_epoch{epoch}.png'))
             # save true residual
-            save_image(X_true, os.path.join(self.exp_path, f'epoch{epoch}_residual_true.png'))
+            save_image(X_true, os.path.join(self.exp_path, f'residual_true_epoch{epoch}.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'epoch{epoch}_residual_sampled.png'))
+            save_image(X, os.path.join(self.exp_path, f'residual_sampled_epoch{epoch}.png'))
             # save sampled deblurred
-            save_image(init + X, os.path.join(self.exp_path, f'epoch{epoch}_deblurred.png'))
+            save_image(init + X, os.path.join(self.exp_path, f'deblurred_epoch{epoch}.png'))
 
             # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
@@ -240,7 +240,7 @@ class Trainer():
             psnr_sharp_deblurred = psnr(sharp, init + X)
             ssim_sharp_deblurred = ssim(sharp, init + X)
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred__avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
     def train(self, epoch, steps, R, G, B):
         """
@@ -261,8 +261,8 @@ class Trainer():
 
         if epoch == 0:
             # save images blur and sharp image pairs
-            save_image(sharp, os.path.join(self.exp_path, f'epoch{epoch}_sharp_train.png'))
-            save_image(blur, os.path.join(self.exp_path, f'epoch{epoch}_blur_train.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
+            save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
@@ -321,7 +321,7 @@ class Trainer():
             self.train(epoch, steps, R, G, B)
 
             # plot graph every 20 epochs
-            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
                 plot(steps, R, G, B, self.exp_path, title=title)
 
