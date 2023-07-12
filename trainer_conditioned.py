@@ -316,8 +316,8 @@ class Trainer():
         #print(self.init_predictor.module.final.bias.grad)
 
         # clip gradients
-        nn.utils.clip_grad_norm_(self.params_denoiser, 1.0)
-        nn.utils.clip_grad_norm_(self.params_init, 1.0)
+        nn.utils.clip_grad_norm_(self.params_denoiser, 0.2)
+        nn.utils.clip_grad_norm_(self.params_init, 0.2)
 
         # Take an optimization step
         self.optimizer.step()
