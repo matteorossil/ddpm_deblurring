@@ -175,13 +175,13 @@ class Trainer():
                                           sampler=DistributedSampler(dataset_val, shuffle=False))
 
         # Create optimizer
-        self.params_denoiser = list(self.denoiser.parameters())
+        self.params_denoiser = self.denoiser.parameters()
         self.num_params_denoiser = sum(p.numel() for p in self.params_denoiser if p.requires_grad)
 
-        self.params_init = list(self.initP.parameters())
+        self.params_init = self.initP.parameters()
         self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
-        params = self.params_denoiser + self.params_init
+        params = list(self.params_denoiser) + list(self.params_init)
         self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
