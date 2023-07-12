@@ -89,7 +89,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -99,7 +99,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 1
+    n_samples: int = 32
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -369,7 +369,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12357" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
