@@ -319,7 +319,7 @@ class Trainer():
 
             # plot graph every 20 epochs
             if ((epoch + 1) % 20 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser}, G:{self.num_init_denoiser}, Pretrained G: No, Dataset:{self.batch_size}" 
+                title = f"D:{self.num_params_denoiser}, G:{self.num_params_init}, Pretrained G: No, Dataset:{self.batch_size}" 
                 plot(steps, R, G, B, self.exp_path, title=title)
 
             # sample at 2000's epoch
