@@ -1,40 +1,44 @@
-# Matteo Rossi
+## Matteo Rossi
+
+# Modules
+from dataset import Data
+from metrics import psnr, ssim
+from eps_models.unet_conditioned import UNet as Denoiser
+from eps_models.init_predictor_new import UNet as Init
+from diffusion.ddpm_conditioned import DenoiseDiffusion
 
 
-from typing import List
-import os
+# Torch
 import torch
 import torch.utils.data
-from diffusion.ddpm_conditioned import DenoiseDiffusion
-#from eps_models.denoiser import UNet as Denoiser # conditioned
-from eps_models.unet_conditioned import UNet as Denoiser # conditioned
-from eps_models.initial_predictor import UNet as InitP # simple Unet (doesn't take t as param)
+from torch.utils.data import DataLoader
+from torchvision.utils import save_image
+
+# Numpy
+import numpy as np
+from numpy import savetxt
+
+# Other
+import os
+from typing import List
 from pathlib import Path
 from datetime import datetime
 import wandb
-import torch.nn.functional as F
-from metrics import *
-import numpy as np
+import matplotlib.pyplot as plt
 
-from dataset import Data
-from torch.utils.data import DataLoader
-from torchvision.utils import save_image
-from numpy import savetxt
-
+# DDP
 import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 
-import matplotlib.pyplot as plt
-import itertools
 
 def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
-def plot(steps, R, G, B, path):
+def plot(steps, R, G, B, path, title):
 
     print("steps", steps[-1])
 
@@ -45,7 +49,7 @@ def plot(steps, R, G, B, path):
     plt.xlabel("training steps")
     plt.ylabel("channel average")
     plt.legend()
-    plt.title('channel averages over training time')
+    plt.title(title)
     #plt.show()
     plt.savefig(path + f'/{steps[-1]}.png')
     plt.figure().clear()
@@ -63,11 +67,9 @@ class Trainer():
     n_channels: int = 32
     # The list of channel numbers at each resolution.
     # The number of channels is `channel_multipliers[i] * n_channels`
-    channel_multipliers: List[int] = [1, 2, 4, 8]
-    channel_multipliers2: List[int] = [1, 2, 3, 4]
+    channel_multipliers: List[int] = [1, 2, 2, 4]
     # The list of booleans that indicate whether to use attention at each resolution
     is_attention: List[int] = [False, False, False, False]
-    attention_middle: List[int] = [False]
     # Number of time steps $T$
     n_steps: int = 1_000
     # noise scheduler Beta_0
@@ -75,104 +77,88 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 6
+    batch_size: int = 8
     # Learning rate
-    #learning_rate: float = 1e-4
-    learning_rate: float = 2e-5
+    learning_rate: float = 1e-4 #2e-5
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
     epochs: int = 100_000
-    # Number of sample images
+    # Number of samples (evaluation)
     n_samples: int = 8
     # Use wandb
     wandb: bool = False
-    # where to store the checkpoints
+    # checkpoints path
+    store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
-    store_checkpoints: str = '/home/mr6744/checkpoints_conditioned/'
-    # where to training and validation data is stored
-    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
+    # dataset path
     dataset: str = '/home/mr6744/gopro_128/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     # load from a checkpoint
-    checkpoint_denoiser_epoch: int = 0
-    checkpoint_init_epoch: int = 0 #16880
-    checkpoint_denoiser: str = f'/home/mr6744/checkpoints_conditioned/06302023_192836/checkpoint_denoiser_{checkpoint_denoiser_epoch}.pt'
+    ckpt_denoiser_epoch: int = 0
+    ckpt_initP_epoch: int = 0
+    ckpt_denoiser: str = f'/home/mr6744/ckpts/06302023_192836/checkpoint_denoiser_{ckpt_denoiser_epoch}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
-    checkpoint_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{checkpoint_init_epoch}.pt'
+    ckpt_init: str = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{ckpt_initP_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int):
         # gpu id
         self.gpu_id = rank
 
-        
         self.denoiser = Denoiser(
             image_channels=self.image_channels*2,
             n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers2,
-            is_attn=self.is_attention,
-            attn_middle=self.attention_middle
+            ch_mults=self.channel_multipliers,
+            is_attn=self.is_attention
         ).to(self.gpu_id)
         
-
-        '''
-        self.denoiser = Denoiser(
-            image_channels=self.image_channels*2,
-            n_channels=self.n_channels,
-            ch_mults=self.channel_multipliers
-            #is_attn=self.is_attention,
-            #attn_middle=self.attention_middle
-        ).to(self.gpu_id)
-        '''
-        
-
-        # initial prediction x_init
-        self.init_predictor = InitP(
+        self.initP = Init(
             image_channels=self.image_channels,
-            n_channels=self.n_channels*2,
-            ch_mults=self.channel_multipliers
+            n_channels=self.n_channels,
+            ch_mults=self.channel_multipliers,
+            is_attn=self.is_attention
         ).to(self.gpu_id)
 
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
-        self.init_predictor = DDP(self.init_predictor, device_ids=[self.gpu_id])
+        self.initP = DDP(self.initP, device_ids=[self.gpu_id])
 
         # only loads checkpoint if model is trained
-        if self.checkpoint_denoiser_epoch != 0:
-            checkpoint_ = torch.load(self.checkpoint_denoiser)
-            self.denoiser.module.load_state_dict(checkpoint_)
+        if self.ckpt_denoiser_epoch != 0:
+            checkpoint_d = torch.load(self.ckpt_denoiser)
+            self.denoiser.module.load_state_dict(checkpoint_d)
         
-        if self.checkpoint_init_epoch != 0:
-            checkpoint_2 = torch.load(self.checkpoint_init)
-            self.init_predictor.module.load_state_dict(checkpoint_2)
+        if self.ckpt_initP_epoch != 0:
+            checkpoint_i = torch.load(self.ckpt_init)
+            self.initP.module.load_state_dict(checkpoint_i)
 
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
             eps_model=self.denoiser,
-            predictor=self.init_predictor,
+            predictor=self.initP,
             n_steps=self.n_steps,
-            device=self.gpu_id,
             beta_0=self.beta_0,
-            beta_T=self.beta_T
+            beta_T=self.beta_T,
+            device=self.gpu_id
         )
+
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
         dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
 
-        self.data_loader_train = DataLoader(dataset=dataset_train,
+        self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=0,
-                                            #num_workers=os.cpu_count() // 4, 
+                                            num_workers=0, # os.cpu_count() // 4,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
                                             sampler=DistributedSampler(dataset_train, shuffle=False))
         
-        self.data_loader_val = DataLoader(dataset=dataset_val, 
+        self.dataloader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
-                                          num_workers=0,
-                                          #num_workers=os.cpu_count() // 4, 
+                                          num_workers=0, # os.cpu_count() // 4,
                                           drop_last=True, 
                                           shuffle=False, 
                                           pin_memory=False,
@@ -180,182 +166,165 @@ class Trainer():
 
         # Create optimizer
         self.params_denoiser = list(self.denoiser.parameters())
-        self.params_init = list(self.init_predictor.parameters())
+        self.params_denoiser = sum(p.numel() for p in self.params_denoiser if p.requires_grad)
 
-        self.optimizer = torch.optim.AdamW(self.params_denoiser + self.params_init, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.params_init = list(self.initP.parameters())
+        self.init_denoiser = sum(p.numel() for p in self.params_init if p.requires_grad)
+
+        params = self.params_denoiser + self.params_init
+        self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         
+        # path 
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-    def sample(self, n_samples, epoch):
-        """
-        ### Sample images
-        """
+    def sample(self, epoch):
+
         with torch.no_grad():
 
-            sharp, blur = next(iter(self.data_loader_val))
-            # push to device
+            sharp, blur = next(iter(self.dataloader_val))
+            
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
+
+            # compute initial predictor
             init = self.diffusion.predictor(blur)
-            residual = sharp - init
-            #### init = self.init_predictor(blur)
+            # get true residual
+            X_true = sharp - init
 
-            #condition = blur # or condition = init 
-
-            # Sample Initial Image (Random Gaussian Noise)
+            # Sample X from Gaussian Noise
             #torch.cuda.manual_seed(0)
-            z = torch.randn([n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
-            #### z = blur
-
-
-            '''
-            t_step = torch.randint(0, self.n_steps, (self.batch_size,), device=sharp.device, dtype=torch.long)
-            print("t_step:", t_step.item())
-            noise = torch.randn_like(sharp)
-            z = self.diffusion.q_sample(sharp, t_step, eps=noise)
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_xt.png'))
-            xt_ = torch.cat((z, blur), dim=1)
-            eps_theta = self.denoiser(xt_, t_step)
-            loss = F.mse_loss(noise, eps_theta)
-            print("val loss:", loss)
-            '''
+            X = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]],device=self.gpu_id)
 
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
-            #### for t_ in range(t_step.item()):
-                # $t$
+                
+                # e.g. t_ from 999 to 0 for 1_000 time steps
                 t = self.n_steps - t_ - 1
-                # Sample from $p_\theta(x_{t-1}|x_t)$
-                t_vec = z.new_full((n_samples,), t, dtype=torch.long)
-                z = self.diffusion.p_sample(z, blur, t_vec)
 
-                #xt_ = torch.cat((z, blur), dim=1)
-                #eps_theta = self.denoiser(xt_, t_step)
-                #loss = F.mse_loss(noise, eps_theta)
+                # create a t for every sample in batch
+                t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
 
+                # take one denoising step
+                X = self.diffusion.p_sample(X, blur, t_vec)
 
-            # Log samples
-            #if self.wandb:
-                #wandb.log({'samples': wandb.Image(x)}, step=self.step)
 
             if epoch == 0:
-                # save sharp images
-                save_image(sharp, os.path.join(self.exp_path, f'epoch_{epoch}_sharp_val.png'))
-
-                # save blur images
-                save_image(blur, os.path.join(self.exp_path, f'epoch_{epoch}_blur_val.png'))
-
+                # save images blur and sharp image pairs
+                save_image(sharp, os.path.join(self.exp_path, f'sharp_val.png'))
+                save_image(blur, os.path.join(self.exp_path, f'blur_val.png'))
+                
+                # compute metrics for blur sharp pairs
                 psnr_sharp_blur = psnr(sharp, blur)
                 ssim_sharp_blur = ssim(sharp, blur)
-                savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_epoch{epoch}.txt"), psnr_sharp_blur)
-                savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
+                savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_avg.txt"), np.array([np.mean(psnr_sharp_blur)]))
+                savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_avg.txt"), np.array([np.mean(ssim_sharp_blur)]))
+                #savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_epoch{epoch}.txt"), psnr_sharp_blur)
+                #savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
 
-            # residual
-            save_image(residual, os.path.join(self.exp_path, f'epoch_{epoch}_residual_true.png'))
 
-            # sharp - blur
-            #### save_image(sharp - blur, os.path.join(self.exp_path, f'epoch_{epoch}_sharp-blur.png'))
+            # save initial predictor
+            save_image(init, os.path.join(self.exp_path, f'init_epoch{epoch}.png'))
+            # save true residual
+            save_image(X_true, os.path.join(self.exp_path, f'residual_true_epoch{epoch}.png'))
+            # save sampled residual
+            save_image(X, os.path.join(self.exp_path, f'residual_sampled_epoch{epoch}.png'))
+            # save sampled deblurred
+            save_image(init + X, os.path.join(self.exp_path, f'deblurred_epoch{epoch}.png'))
 
-            # sampled residual
-            save_image(z, os.path.join(self.exp_path, f'epoch_{epoch}_residual_sample.png'))
-
-            # sampled sharp
-            save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_xt_sample.png'))
-            psnr_sharp_deblurred = psnr(sharp, init + z)
-            ssim_sharp_deblurred = ssim(sharp, init + z)
-            savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_epoch{epoch}.txt"), psnr_sharp_deblurred)
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_epoch{epoch}.txt"), ssim_sharp_deblurred)
-
-            save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
+            # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
             ssim_sharp_init = ssim(sharp, init)
-            savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_epoch{epoch}.txt"), psnr_sharp_init)
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_epoch{epoch}.txt"), ssim_sharp_init)
+            savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_init)]))
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_init)]))
 
-            # prediction for sharp image
-            ### save_image(init + z, os.path.join(self.exp_path, f'epoch_{epoch}_final.png'))
-            
-            # initial predictor
-            ### save_image(init, os.path.join(self.exp_path, f'epoch_{epoch}_init.png'))
-
-            # correct residual
-            ### save_image(sharp - init, os.path.join(self.exp_path, f'epoch_{epoch}_residual_correct.png'))
-
-            return z
+            # compute metrics (sharp, deblurred)
+            psnr_sharp_deblurred = psnr(sharp, init + X)
+            ssim_sharp_deblurred = ssim(sharp, init + X)
+            savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred__avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
 
     def train(self, steps, R, G, B):
         """
         ### Train
         """
         # Iterate through the dataset
+
+        # Increment global step
+        self.step += 1
+
+        # Iterate through the dataset
         #for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
-        sharp, blur = next(iter(self.data_loader_train))
+        sharp, blur = next(iter(self.dataloader_train))
 
         # Move data to device
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
+
+        # get initial prediction
         init = self.diffusion.predictor(blur)
+
+        # compute residual
         residual = sharp - init
 
-        # store mean value of channels
+        # store mean value of channels (RED, GREEN, BLUE)
+        steps.append(self.step)
+
         r = torch.mean(init[:,0,:,:])
         R.append(r.item())
+
         g = torch.mean(init[:,1,:,:])
         G.append(g.item())
+
         b = torch.mean(init[:,2,:,:])
         B.append(b.item())
 
-        #if self.step == 0:
-            #save_image(sharp, os.path.join(self.exp_path, f'epoch_{self.step}_sharp_train.png'))
-            #save_image(blur, os.path.join(self.exp_path, f'epoch_{self.step}_blur_train.png'))
-            #save_image(init, os.path.join(self.exp_path, f'epoch_{self.step}_init_train.png'))
-            #save_image(residual, os.path.join(self.exp_path, f'epoch_{self.step}_residual_train.png'))
-
-        # Increment global step
-        self.step += 1
-        steps.append(self.step)
         # Make the gradients zero
         self.optimizer.zero_grad()
+
         # Calculate loss
         loss = self.diffusion.loss(residual, blur) #+ F.mse_loss(sharp, init)
-        print("loss:", loss.item())
-        print("epoch:", self.step)
+        print(f"epoch: {self.step}, loss: {loss.item()}")
+
         # Compute gradients
         loss.backward()
+
         #print("############ GRAD OUTPUT ############")
         #print(self.denoiser.module.final.bias.grad)
         #print(self.init_predictor.module.final.bias.grad)
 
         # Take an optimization step
         self.optimizer.step()
-        #self.optimizer2.step()
-        # Track the loss
+
+        # Track the loss with WANDB
         if self.wandb and self.gpu_id == 0:
             wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
-        """
-        ### Training loop
-        """
+
+        # used to plot channel averages
+        R = [], G = [], B = []
+        # training steps
         steps = []
-        R = []
-        G = []
-        B = []
         
         for epoch in range(self.epochs):
+
+            # sample at epoch 0
             if (epoch == 0) and (self.gpu_id == 0):
-                pass
-                #self.sample(self.n_samples, epoch=0)
-            # Train the model
+                self.sample(epoch=0)
+
+            # train
             self.train(steps, R, G, B)
 
-            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
-                plot(steps, R, G, B, self.exp_path)
+            # plot graph every 20 epochs
+            if ((epoch + 1) % 20 == 0) and (self.gpu_id == 0):
+                title = f"D:{self.params_denoiser} G:{self.params_init}_G:scratch Dataset:{self.batch_size}" 
+                plot(steps, R, G, B, self.exp_path, title=title)
 
-            if ((epoch+1) % 2000 == 0) and (self.gpu_id == 0):
+            # sample at 2000's epoch
+            if ((epoch + 1) % 2000 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.n_samples, self.checkpoint_denoiser_epoch+epoch+1)
+                self.sample(self.n_samples, self.ckpt_denoiser_epoch + epoch + 1)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
@@ -368,7 +337,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12359" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -378,16 +347,15 @@ def main(rank: int, world_size:int):
     trainer.init(rank) # initialize trainer class
     #print(trainer.init_predictor)
 
-    params_denoiser = sum(p.numel() for p in trainer.params_denoiser if p.requires_grad)
-    print("denoiser params:", params_denoiser)
-    init_denoiser = sum(p.numel() for p in trainer.params_init if p.requires_grad)
-    print("init predictor params:", init_denoiser)
+    if rank == 0:
+        print("Denoiser params:", trainer.params_denoiser)
+        print("Initial Predictor params:", trainer.init_denoiser)
+        print("Learning rate:", trainer.learning_rate)
+        print("Channel multipliers", trainer.channel_multipliers)
+        print()
 
-    #### Track Hyperparameters ####
+    #### Track Hyperparameters with WANDB####
     if trainer.wandb and rank == 0:
-
-        params_denoiser = sum(p.numel() for p in trainer.params_denoiser if p.requires_grad)
-        init_denoiser = sum(p.numel() for p in trainer.params_init if p.requires_grad)
         
         wandb.init(
             project="deblurring",
@@ -400,8 +368,8 @@ def main(rank: int, world_size:int):
             "pretrained init": trainer.checkpoint_init_epoch > 0,
             "conditioning": "blurred image",
             "dataset": trainer.dataset,
-            "denoiser # params": params_denoiser,
-            "init # params": init_denoiser,
+            "denoiser # params": trainer.params_denoiser,
+            "init # params": trainer.init_denoiser,
             "loaded from checkpoint": trainer.checkpoint_init,
             "checkpoints saved at": trainer.exp_path
             }

@@ -6,7 +6,7 @@ import os
 import sys
 import torch
 import torch.utils.data
-from eps_models.initial_predictor import UNet
+from eps_models.init_predictor import UNet
 from pathlib import Path
 from datetime import datetime
 import wandb

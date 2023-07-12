@@ -5,7 +5,7 @@ from typing import List
 import os
 import torch
 import torch.utils.data
-from eps_models.initial_predictor import UNet
+from eps_models.init_predictor import UNet
 import torch.nn.functional as F
 
 from dataset import Data
