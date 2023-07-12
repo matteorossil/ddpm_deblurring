@@ -274,7 +274,9 @@ class Trainer():
             # save images blur and sharp image pairs
             save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-            ch_blur.append(torch.mean(blur[:,0,:,:]), torch.mean(blur[:,1,:,:]), torch.mean(blur[:,2,:,:]))
+            ch_blur.append(torch.mean(blur[:,0,:,:]))
+            ch_blur.append(torch.mean(blur[:,1,:,:]))
+            ch_blur.append(torch.mean(blur[:,2,:,:]))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
@@ -336,7 +338,7 @@ class Trainer():
             self.train(epoch, steps, R, G, B, loss, ch_blur)
 
             # plot graph every 20 epochs
-            if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G pre:No, BlurChannelAvgs:{ch_blur}, LR:{self.learning_rate}, Dataset:{self.batch_size}" 
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 plot_loss(steps, loss, self.exp_path, title=title)
