@@ -91,9 +91,9 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 64
     # Learning rate
-    learning_rate: float = 2e-4
+    learning_rate: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -101,7 +101,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 4
+    n_samples: int = 72
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -159,8 +159,8 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -397,7 +397,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12354" # any free port on machine
+    os.environ["MASTER_PORT"] = "12356" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
