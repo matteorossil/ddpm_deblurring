@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 8
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -101,7 +101,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 1
+    n_samples: int = 8
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -321,8 +321,8 @@ class Trainer():
         # Calculate loss
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = n * F.mse_loss(sharp, init)
-        loss = 0.1 * denoiser_loss + regression_loss
-        print('epoch: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, denoiser_loss.item(), loss.item(), regression_loss.item()))
+        loss = denoiser_loss + regression_loss
+        print('epoch: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
         loss_.append(loss.item())
 
         # Compute gradients
@@ -333,8 +333,8 @@ class Trainer():
         #print(self.init_predictor.module.final.bias.grad)
 
         # clip gradients
-        nn.utils.clip_grad_norm_(self.params_denoiser, 0.2)
-        nn.utils.clip_grad_norm_(self.params_init, 0.2)
+        nn.utils.clip_grad_norm_(self.params_denoiser, 0.1)
+        nn.utils.clip_grad_norm_(self.params_init, 0.1)
 
         # Take an optimization step
         self.optimizer.step()
