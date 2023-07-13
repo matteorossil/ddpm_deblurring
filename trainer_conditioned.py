@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 64
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -101,7 +101,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 72
+    n_samples: int = 40
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -379,7 +379,7 @@ class Trainer():
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
-            if ((epoch + 1) % 50 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 1000 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
