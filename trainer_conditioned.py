@@ -188,7 +188,7 @@ class Trainer():
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
 
-        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=2e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
@@ -316,7 +316,7 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 500:
+        if self.step < 1_000:
             n = 1.
         else:
             n = 0.
