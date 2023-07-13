@@ -64,7 +64,7 @@ def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_de
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/loss_steps{steps[-1]}.png')
+    plt.savefig(path + f'/{ylabel}_steps{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
