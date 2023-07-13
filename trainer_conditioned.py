@@ -194,7 +194,7 @@ class Trainer():
         #sigmoid
         self.sigmoid = nn.Sigmoid()
 
-    def sample(self, epoch, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample(self, epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         with torch.no_grad():
 
@@ -262,6 +262,8 @@ class Trainer():
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
             psnr_deblur.append(np.mean(psnr_sharp_deblurred))
             ssim_deblur.append(np.mean(ssim_sharp_deblurred))
+
+            sample_steps.append(self.step)
 
     def train(self, epoch, steps, R, G, B, loss_, ch_blur):
         """
@@ -342,6 +344,8 @@ class Trainer():
         steps = []
         loss_ = []
         ch_blur = []
+
+        sample_steps= []
         psnr_init = []
         ssim_init = []
         psnr_deblur = []
@@ -351,7 +355,7 @@ class Trainer():
 
             # sample at epoch 0
             if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(epoch, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
@@ -361,13 +365,13 @@ class Trainer():
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
-                plot_metrics(steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
-                plot_metrics(steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
             if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.ckpt_denoiser_epoch + epoch + 1, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
