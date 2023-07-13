@@ -316,8 +316,8 @@ class Trainer():
         # Calculate loss
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = F.mse_loss(sharp, init)
-        loss = denoiser_loss + 0.2 * regression_loss
-        print(f"epoch: {self.step}, tot_loss: {loss.item()}, denoiser_loss: {denoiser_loss.item()}, regression_loss: {regression_loss.item()}")
+        loss = denoiser_loss + 0.1 * regression_loss
+        print("epoch: {':100000.d'}.format({self.step}), tot_loss: {':.6f'}.format({loss.item}), denoiser_loss: {':.6f'}.format({denoiser_loss.item}), regression_loss: {':.6f'}.format({regression_loss.item})")
         loss_.append(loss.item())
 
         # Compute gradients
@@ -364,13 +364,13 @@ class Trainer():
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             # plot graph every 20 epochs
-            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 50 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
-            if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 50 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
