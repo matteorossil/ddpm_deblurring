@@ -54,12 +54,13 @@ def plot_channels(steps, R, G, B, path, title):
     plt.figure().clear()
     plt.close('all')
 
-def plot_loss(steps, loss, path, title):
+def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title):
 
-    plt.plot(steps, loss, label='red', color='r')
+    plt.plot(steps, metric_init, label=label_init, color='b')
+    plt.plot(steps, metric_deblur, label=label_deblur, color='r')
 
     plt.xlabel("training steps")
-    plt.ylabel("loss")
+    plt.ylabel(ylabel)
     plt.legend()
     plt.title(title)
     #plt.show()
@@ -193,7 +194,7 @@ class Trainer():
         #sigmoid
         self.sigmoid = nn.Sigmoid()
 
-    def sample(self, epoch):
+    def sample(self, epoch, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         with torch.no_grad():
 
@@ -251,12 +252,16 @@ class Trainer():
             ssim_sharp_init = ssim(sharp, init)
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_init)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_init)]))
+            psnr_init.append(np.mean(psnr_sharp_init))
+            ssim_init.append(np.mean(ssim_sharp_init))
 
             # compute metrics (sharp, deblurred)
             psnr_sharp_deblurred = psnr(sharp, init + X)
             ssim_sharp_deblurred = ssim(sharp, init + X)
             savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
             savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
+            psnr_deblur.append(np.mean(psnr_sharp_deblurred))
+            ssim_deblur.append(np.mean(ssim_sharp_deblurred))
 
     def train(self, epoch, steps, R, G, B, loss_, ch_blur):
         """
@@ -337,12 +342,16 @@ class Trainer():
         steps = []
         loss_ = []
         ch_blur = []
+        psnr_init = []
+        ssim_init = []
+        psnr_deblur = []
+        ssim_deblur = []
 
         for epoch in range(self.epochs):
 
             # sample at epoch 0
             if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(epoch=0)
+                self.sample(epoch, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
@@ -351,12 +360,14 @@ class Trainer():
             if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
-                plot_loss(steps, loss_, self.exp_path, title=title)
+                #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
+                plot_metrics(steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
+                plot_metrics(steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
             if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.ckpt_denoiser_epoch + epoch + 1)
+                self.sample(self.ckpt_denoiser_epoch + epoch + 1, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
@@ -369,7 +380,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12358" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
