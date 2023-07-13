@@ -14,6 +14,7 @@ from torch import nn
 import torch.utils.data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
+import torch.nn.functional as F
 
 # Numpy
 import numpy as np
@@ -62,7 +63,7 @@ def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_de
     plt.xlabel("training steps")
     plt.ylabel(ylabel)
     plt.legend()
-    plt.title(title)
+    plt.title(title + ylabel)
     #plt.show()
     plt.savefig(path + f'/{ylabel}_steps{steps[-1]}.png')
     plt.figure().clear()
@@ -313,7 +314,7 @@ class Trainer():
         self.optimizer.zero_grad()
 
         # Calculate loss
-        loss = self.diffusion.loss(residual, blur) #+ F.mse_loss(sharp, init)
+        loss = self.diffusion.loss(residual, blur) + 0.2 * F.mse_loss(sharp, init)
         print(f"epoch: {self.step}, loss: {loss.item()}")
         loss_.append(loss.item())
 
@@ -370,8 +371,9 @@ class Trainer():
             if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
-                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
-                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
+                title = f"Distortion Metric:"
+                plot_metrics(sample_steps, ylabel="PSNR", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="SSIM", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
@@ -384,7 +386,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12354" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
