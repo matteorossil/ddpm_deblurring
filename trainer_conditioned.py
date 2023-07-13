@@ -101,14 +101,14 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 40
+    n_samples: int = 32
     # Use wandb
     wandb: bool = False
     # checkpoints path
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro_128/'
+    dataset: str = '/home/mr6744/gopro/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
@@ -160,7 +160,7 @@ class Trainer():
 
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -373,13 +373,13 @@ class Trainer():
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             # plot graph every 20 epochs
-            if ((epoch + 1) % 50 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
-            if ((epoch + 1) % 1000 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
@@ -397,7 +397,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12356" # any free port on machine
+    os.environ["MASTER_PORT"] = "12357" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
