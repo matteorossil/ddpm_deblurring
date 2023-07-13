@@ -313,10 +313,15 @@ class Trainer():
         # Make the gradients zero
         self.optimizer.zero_grad()
 
+        if self.step < 500:
+            n = 1.
+        else:
+            n = 0.
+
         # Calculate loss
         denoiser_loss = self.diffusion.loss(residual, blur)
-        regression_loss = F.mse_loss(sharp, init)
-        loss = denoiser_loss + 1. * regression_loss
+        regression_loss = n * F.mse_loss(sharp, init)
+        loss = denoiser_loss + regression_loss
         print('epoch: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, denoiser_loss.item(), loss.item(), regression_loss.item()))
         loss_.append(loss.item())
 
