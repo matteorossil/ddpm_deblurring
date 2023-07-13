@@ -313,7 +313,7 @@ class Trainer():
         # Make the gradients zero
         self.optimizer.zero_grad()
 
-        if self.step < 500:
+        if self.step < 200:
             n = 1.
         else:
             n = 0.
