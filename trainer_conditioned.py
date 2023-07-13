@@ -314,8 +314,10 @@ class Trainer():
         self.optimizer.zero_grad()
 
         # Calculate loss
-        loss = self.diffusion.loss(residual, blur) + 0.2 * F.mse_loss(sharp, init)
-        print(f"epoch: {self.step}, loss: {loss.item()}")
+        denoiser_loss = self.diffusion.loss(residual, blur)
+        regression_loss = F.mse_loss(sharp, init)
+        loss = denoiser_loss + 0.2 * regression_loss
+        print(f"epoch: {self.step}, tot_loss: {loss.item()}, denoiser_loss: {denoiser_loss.item()}, regression_loss: {regression_loss.item()}")
         loss_.append(loss.item())
 
         # Compute gradients
@@ -372,8 +374,8 @@ class Trainer():
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
-                plot_metrics(sample_steps, ylabel="PSNR", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
-                plot_metrics(sample_steps, ylabel="SSIM", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
