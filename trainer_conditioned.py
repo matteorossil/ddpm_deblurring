@@ -93,7 +93,7 @@ class Trainer():
     # Batch size
     batch_size: int = 4
     # Learning rate
-    learning_rate: float = 1e-4
+    learning_rate: float = 2e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -316,7 +316,7 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 1_000:
+        if self.step < 2_000:
             n = 1.
         else:
             n = 0.
