@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 8
+    batch_size: int = 4
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -101,7 +101,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 8
+    n_samples: int = 4
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -185,8 +185,10 @@ class Trainer():
         self.params_init = list(self.initP.parameters())
         self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
-        params = self.params_denoiser + self.params_init
-        self.optimizer = torch.optim.AdamW(params, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        #params = self.params_denoiser + self.params_init
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-5, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
@@ -312,8 +314,9 @@ class Trainer():
 
         # Make the gradients zero
         self.optimizer.zero_grad()
+        self.optimizer2.zero_grad()
 
-        if self.step < 200:
+        if self.step < 500:
             n = 1.
         else:
             n = 0.
@@ -333,11 +336,12 @@ class Trainer():
         #print(self.init_predictor.module.final.bias.grad)
 
         # clip gradients
-        nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-        nn.utils.clip_grad_norm_(self.params_init, 0.01)
+        #nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+        #nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
         # Take an optimization step
         self.optimizer.step()
+        self.optimizer2.step()
 
         # Track the loss with WANDB
         if self.wandb and self.gpu_id == 0:
