@@ -208,8 +208,7 @@ class Trainer():
 
             # compute initial predictor
             init = self.diffusion.predictor(blur)
-            print("init:", F.mse_loss(sharp, init).item())
-            print("blur:", F.mse_loss(sharp, blur).item())
+
             # get true residual
             X_true = sharp - init
 
