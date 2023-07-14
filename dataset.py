@@ -56,7 +56,11 @@ class Data(Dataset):
         
         if self.mode == 'train':
             return self.transform_train(sharp, blur)
-        else: # do not apply trainsfomation to validation set
+        elif self.mode == 'train2':
+            return self.transform_train2(sharp, blur)
+        elif self.mode == 'val':
+            return self.transform_val(sharp, blur)
+        else: # val2
             return self.transform_val2(sharp, blur)
 
     def transform_train(self, sharp, blur):
@@ -86,6 +90,10 @@ class Data(Dataset):
 
     def transform_train2(self, sharp, blur):
 
+        # Center crop
+        sharp = transforms.functional.center_crop(sharp, output_size=self.size)
+        blur = transforms.functional.center_crop(blur, output_size=self.size)
+
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     
     def transform_val(self, sharp, blur):
@@ -95,10 +103,9 @@ class Data(Dataset):
     
     def transform_val2(self, sharp, blur):
 
-        # Random crop
-        i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        sharp = TF.crop(sharp, i, j, h, w)
-        blur = TF.crop(blur, i, j, h, w)
+        # Center crop
+        sharp = transforms.functional.center_crop(sharp, output_size=self.size)
+        blur = transforms.functional.center_crop(blur, output_size=self.size)
 
         # convert to tensors
         return TF.to_tensor(sharp), TF.to_tensor(blur)
