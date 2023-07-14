@@ -320,7 +320,7 @@ class Trainer():
             self.optimizer2.zero_grad()
 
             #if self.step < 2_000:
-            if epoch < 50:
+            if epoch < 100:
                 n = 1.
             else:
                 n = 0.
@@ -340,8 +340,8 @@ class Trainer():
             #print(self.init_predictor.module.final.bias.grad)
 
             # clip gradients
-            #nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-            #nn.utils.clip_grad_norm_(self.params_init, 0.01)
+            nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+            nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
             # Take an optimization step
             self.optimizer.step()
