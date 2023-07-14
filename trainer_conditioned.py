@@ -76,7 +76,7 @@ class Trainer():
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
-    image_size: int = 128
+    image_size: int = 64
     # Number of channels in the initial feature map
     n_channels: int = 32
     # The list of channel numbers at each resolution.
@@ -188,7 +188,7 @@ class Trainer():
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
 
-        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-3, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
@@ -227,7 +227,7 @@ class Trainer():
                 # take one denoising step
                 X = self.diffusion.p_sample(X, blur, t_vec)
 
-            if epoch == 0:
+            if epoch == -1:
                 # save images blur and sharp image pairs
                 save_image(sharp, os.path.join(self.exp_path, f'sharp_val.png'))
                 save_image(blur, os.path.join(self.exp_path, f'blur_val.png'))
@@ -274,78 +274,78 @@ class Trainer():
         """
         # Iterate through the dataset
 
-        # Increment global step
-        self.step += 1
-
         # Iterate through the dataset
-        #for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
-        sharp, blur = next(iter(self.dataloader_train))
+        for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
+        #sharp, blur = next(iter(self.dataloader_train))
 
-        # Move data to device
-        sharp = sharp.to(self.gpu_id)
-        blur = blur.to(self.gpu_id)
+            # Increment global step
+            self.step += 1
 
-        if epoch == 0:
-            # save images blur and sharp image pairs
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
-            save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-            # get avg channels for blur dataset
-            ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
+            # Move data to device
+            sharp = sharp.to(self.gpu_id)
+            blur = blur.to(self.gpu_id)
 
-        # get initial prediction
-        init = self.diffusion.predictor(blur)
+            if epoch == 0:
+                # save images blur and sharp image pairs
+                save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
+                save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
+                # get avg channels for blur dataset
+                ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
 
-        # compute residual
-        residual = sharp - init
+            # get initial prediction
+            init = self.diffusion.predictor(blur)
 
-        # store mean value of channels (RED, GREEN, BLUE)
-        steps.append(self.step)
+            # compute residual
+            residual = sharp - init
 
-        r = torch.mean(init[:,0,:,:])
-        R.append(r.item())
+            # store mean value of channels (RED, GREEN, BLUE)
+            steps.append(self.step)
 
-        g = torch.mean(init[:,1,:,:])
-        G.append(g.item())
+            r = torch.mean(init[:,0,:,:])
+            R.append(r.item())
 
-        b = torch.mean(init[:,2,:,:])
-        B.append(b.item())
+            g = torch.mean(init[:,1,:,:])
+            G.append(g.item())
 
-        # Make the gradients zero
-        self.optimizer.zero_grad()
-        self.optimizer2.zero_grad()
+            b = torch.mean(init[:,2,:,:])
+            B.append(b.item())
 
-        if self.step < 2_000:
-            n = 1.
-        else:
-            n = 0.
+            # Make the gradients zero
+            self.optimizer.zero_grad()
+            self.optimizer2.zero_grad()
 
-        # Calculate loss
-        denoiser_loss = self.diffusion.loss(residual, blur)
-        regression_loss = n * F.mse_loss(sharp, init)
-        loss = denoiser_loss + regression_loss
-        print('epoch: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
-        loss_.append(loss.item())
+            if self.step < 2_000:
+                n = 1.
+            else:
+                n = 0.
 
-        # Compute gradients
-        loss.backward()
+            # Calculate loss
+            denoiser_loss = self.diffusion.loss(residual, blur)
+            regression_loss = n * F.mse_loss(sharp, init)
+            loss = denoiser_loss + regression_loss
+            print('epoch: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
+            loss_.append(loss.item())
 
-        #print("############ GRAD OUTPUT ############")
-        #print(self.denoiser.module.final.bias.grad)
-        #print(self.init_predictor.module.final.bias.grad)
+            # Compute gradients
+            loss.backward()
 
-        # clip gradients
-        nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-        nn.utils.clip_grad_norm_(self.params_init, 0.01)
+            #print("############ GRAD OUTPUT ############")
+            #print(self.denoiser.module.final.bias.grad)
+            #print(self.init_predictor.module.final.bias.grad)
 
-        # Take an optimization step
-        self.optimizer.step()
-        self.optimizer2.step()
+            # clip gradients
+            nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+            nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
-        # Track the loss with WANDB
-        if self.wandb and self.gpu_id == 0:
-            wandb.log({'loss': loss}, step=self.step)
+            # Take an optimization step
+            self.optimizer.step()
+            self.optimizer2.step()
+
+            # Track the loss with WANDB
+            if self.wandb and self.gpu_id == 0:
+                wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
 
