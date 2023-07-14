@@ -287,14 +287,14 @@ class Trainer():
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
 
-            #if self.step == 1:
-            # save images blur and sharp image pairs
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_train_{self.step}.png'))
-            save_image(blur, os.path.join(self.exp_path, f'blur_train_{self.step}.png'))
-            # get avg channels for blur dataset
-            ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
+            if self.step == 1:
+                # save images blur and sharp image pairs
+                save_image(sharp, os.path.join(self.exp_path, f'sharp_train_{self.step}.png'))
+                save_image(blur, os.path.join(self.exp_path, f'blur_train_{self.step}.png'))
+                # get avg channels for blur dataset
+                ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
 
             # get initial prediction
             init = self.diffusion.predictor(blur)
