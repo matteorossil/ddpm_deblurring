@@ -326,11 +326,8 @@ class Trainer():
         # Calculate loss
         R = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
         print(R)
-        mean = torch.mean(R)
-        print(mean)
-        std = torch.std(mean)
-        print(std)
-        print("std:", std)
+        std = torch.std(R)
+        print("std:", std.item())
 
         denoiser_loss = self.diffusion.loss(residual, blur) + std
         regression_loss = alpha * F.mse_loss(sharp, init)
