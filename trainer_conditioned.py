@@ -190,7 +190,7 @@ class Trainer():
 
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
-        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-3, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
@@ -290,8 +290,8 @@ class Trainer():
 
             if self.step == 1:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'sharp_train_{self.step}.png'))
-                save_image(blur, os.path.join(self.exp_path, f'blur_train_{self.step}.png'))
+                #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_{self.step}.png'))
+                #save_image(blur, os.path.join(self.exp_path, f'blur_train_{self.step}.png'))
                 # get avg channels for blur dataset
                 ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
                 ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
@@ -322,13 +322,11 @@ class Trainer():
             #if self.step < 2_000:
             if epoch < 100:
                 n = 1.
-                e = 0.1
             else:
-                n = 0.1
-                e = 1.
+                n = 0.
 
             # Calculate loss
-            denoiser_loss = e * self.diffusion.loss(residual, blur)
+            denoiser_loss = self.diffusion.loss(residual, blur)
             regression_loss = n * F.mse_loss(sharp, init)
             loss = denoiser_loss + regression_loss
             print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
@@ -373,8 +371,7 @@ class Trainer():
 
             # sample at epoch 0
             if (epoch == 0) and (self.gpu_id == 0):
-                pass
-                #self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
