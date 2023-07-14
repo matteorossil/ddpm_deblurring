@@ -2,6 +2,7 @@
 
 # Modules
 from dataset import Data
+from dataset import Data2
 from metrics import psnr, ssim
 from eps_models.unet_conditioned import UNet as Denoiser
 from eps_models.init_predictor_new import UNet as Init
@@ -109,6 +110,7 @@ class Trainer():
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     # dataset path
     dataset: str = '/home/mr6744/gopro/'
+    dataset_eval: str = '/home/mr6744/gopro_128/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
@@ -159,9 +161,9 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        self.eval = "train2"
+        self.eval = "train"
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode=self.eval, size=(self.image_size,self.image_size))
+        dataset_val = Data2(path=self.dataset_eval, mode=self.eval, size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
