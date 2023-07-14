@@ -161,7 +161,7 @@ class Trainer():
 
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset_eval, mode="val", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
