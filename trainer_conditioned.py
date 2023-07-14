@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 16
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 3e-4
@@ -370,8 +370,8 @@ class Trainer():
 
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
-                pass 
-                #self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                #pass 
+                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
