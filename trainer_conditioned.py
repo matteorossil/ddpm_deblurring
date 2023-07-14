@@ -163,7 +163,7 @@ class Trainer():
         # Create dataloader (shuffle False for validation)
         self.eval = "train"
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode=self.eval, size=(self.image_size,self.image_size))
+        dataset_val = Data2(path=self.dataset_eval, mode=self.eval, size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -191,7 +191,7 @@ class Trainer():
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
 
-        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=5e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
