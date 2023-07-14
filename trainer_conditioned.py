@@ -51,11 +51,11 @@ def plot_channels(steps, R, G, B, path, title, epoch):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_avgs_epoch{epoch}.png')
+    plt.savefig(path + f'/channel_avgs_steps{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
-def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title, epoch):
+def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title):
 
     plt.plot(steps, metric_init, label=label_init, color='b')
     plt.plot(steps, metric_deblur, label=label_deblur, color='r')
@@ -65,7 +65,7 @@ def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_de
     plt.legend()
     plt.title(title + ylabel)
     #plt.show()
-    plt.savefig(path + f'/{ylabel}_epoch{epoch}.png')
+    plt.savefig(path + f'/{ylabel}_steps{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -279,18 +279,16 @@ class Trainer():
         for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
         #sharp, blur = next(iter(self.dataloader_train))
 
-            # Increment global step
-            self.step += 1
-
             # Move data to device
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
 
-            if self.step == 1:
-                # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'sharp_train_epoch{epoch}.png'))
-                save_image(blur, os.path.join(self.exp_path, f'blur_train_epoch{epoch}.png'))
-                # get avg channels for blur dataset
+
+            # save images blur and sharp image pairs
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_train_steps{self.step}.png'))
+            save_image(blur, os.path.join(self.exp_path, f'blur_train_steps{self.step}.png'))
+            # get avg channels for blur dataset
+            if self.step == 0:
                 ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
                 ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
                 ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
@@ -317,8 +315,7 @@ class Trainer():
             self.optimizer.zero_grad()
             self.optimizer2.zero_grad()
 
-            #if self.step < 2_000:
-            if epoch < 10:
+            if self.step < 1_000:
                 n = 1.
             else:
                 n = 0.
@@ -345,6 +342,9 @@ class Trainer():
             self.optimizer.step()
             self.optimizer2.step()
 
+            # Increment global step
+            self.step += 1
+
             # Track the loss with WANDB
             if self.wandb and self.gpu_id == 0:
                 wandb.log({'loss': loss}, step=self.step)
@@ -368,21 +368,22 @@ class Trainer():
         for epoch in range(self.epochs):
 
             # sample at epoch 0
-            if (epoch == 0) and (self.gpu_id == 0):
+            if (self.step == 0) and (self.gpu_id == 0):
                 self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
-            if (self.gpu_id == 0):
+            if (self.step % 1 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, LR_D:{'{:.0e}'.format(self.learning_rate)}, LR_G:{'{:.0e}'.format(self.learning_rate_init)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
-                plot_channels(steps, R, G, B, self.exp_path, title=title, epoch=epoch+1)
+                plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
-                self.sample(epoch+1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+            if (self.step % 10 == 0) and (self.gpu_id == 0):
+                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"eval:train, metric:"
-                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title, epoch=epoch+1)
-                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title, epoch=epoch+1)
+                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
      
