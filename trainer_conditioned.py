@@ -331,7 +331,7 @@ class Trainer():
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
         loss = denoiser_loss + regression_loss + std
-        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularized: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), std.item()))
+        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularizer: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), std.item()))
         loss_.append(loss.item())
 
         # Compute gradients
