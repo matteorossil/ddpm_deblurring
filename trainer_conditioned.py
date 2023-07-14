@@ -51,7 +51,7 @@ def plot_channels(steps, R, G, B, path, title):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_steps{steps[-1]}.png')
+    plt.savefig(path + f'/channel_step{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -65,7 +65,7 @@ def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_de
     plt.legend()
     plt.title(title + ylabel)
     #plt.show()
-    plt.savefig(path + f'/{ylabel}_steps{steps[-1]}.png')
+    plt.savefig(path + f'/{ylabel}_step{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -231,8 +231,8 @@ class Trainer():
 
             if epoch == 0:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'sharp_val.png'))
-                save_image(blur, os.path.join(self.exp_path, f'blur_val.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'val_sharp.png'))
+                save_image(blur, os.path.join(self.exp_path, f'val_blur.png'))
                 
                 # compute metrics for blur sharp pairs
                 psnr_sharp_blur = psnr(sharp, blur)
@@ -370,13 +370,14 @@ class Trainer():
 
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
-                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                pass 
+                #self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             if (self.step % 2 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, Batch:{self.batch_size}, Ch:{ch_blur}"
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
