@@ -40,7 +40,7 @@ def get_exp_path(path=''):
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
-def plot_channels(steps, R, G, B, path, title, epoch):
+def plot_channels(steps, R, G, B, path, title):
 
     plt.plot(steps, R, label='red', color='r')
     plt.plot(steps, G, label='green', color='g')
@@ -359,7 +359,7 @@ class Trainer():
         loss_ = []
         ch_blur = []
 
-        sample_steps= []
+        sample_steps= [] # stores the step at which you sample
         psnr_init = []
         ssim_init = []
         psnr_deblur = []
