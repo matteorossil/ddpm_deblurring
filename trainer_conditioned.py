@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 8
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -164,7 +164,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=0, # os.cpu_count() // 4,
+                                            num_workers=2, # os.cpu_count() // 4,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
@@ -188,7 +188,7 @@ class Trainer():
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
 
-        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=1e-3, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
@@ -325,7 +325,7 @@ class Trainer():
             denoiser_loss = self.diffusion.loss(residual, blur)
             regression_loss = n * F.mse_loss(sharp, init)
             loss = denoiser_loss + regression_loss
-            print('epoch: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
+            print('step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
             loss_.append(loss.item())
 
             # Compute gradients
