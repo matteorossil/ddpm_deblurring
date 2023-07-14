@@ -2,7 +2,6 @@
 
 # Modules
 from dataset import Data
-from dataset import Data2
 from metrics import psnr, ssim
 from eps_models.unet_conditioned import UNet as Denoiser
 from eps_models.init_predictor_new import UNet as Init
@@ -95,6 +94,7 @@ class Trainer():
     batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
+    learning_rate_init: float = 3e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -102,15 +102,14 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 8
+    n_samples: int = 16
     # Use wandb
     wandb: bool = False
     # checkpoints path
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro/'
-    dataset_eval: str = '/home/mr6744/gopro_128/'
+    dataset: str = '/home/mr6744/gopro_small/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
@@ -161,9 +160,8 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        self.eval = "train"
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data2(path=self.dataset_eval, mode=self.eval, size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset_eval, mode="val", size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -190,7 +188,7 @@ class Trainer():
 
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
-        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer2 = torch.optim.AdamW(self.params_init, lr=self.learning_rate_init, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
         self.step = 0
@@ -320,7 +318,7 @@ class Trainer():
             self.optimizer2.zero_grad()
 
             #if self.step < 2_000:
-            if epoch < 100:
+            if epoch < 10:
                 n = 1.
             else:
                 n = 0.
@@ -377,12 +375,12 @@ class Trainer():
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             if (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, LR_D:{'{:.0e}'.format(self.learning_rate)}, LR_G:{'{:.0e}'.format(self.learning_rate_init)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, epoch=epoch+1)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
                 self.sample(epoch+1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
-                title = f"eval:{self.eval}, metric:"
+                title = f"eval:train, metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title, epoch=epoch+1)
                 plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title, epoch=epoch+1)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
