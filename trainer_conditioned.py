@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 8
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     # Weight decay rate
@@ -101,7 +101,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 32
+    n_samples: int = 8
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -168,7 +168,7 @@ class Trainer():
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
-                                            sampler=DistributedSampler(dataset_train, shuffle=False))
+                                            sampler=DistributedSampler(dataset_train, shuffle=True))
         
         self.dataloader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
@@ -316,7 +316,8 @@ class Trainer():
             self.optimizer.zero_grad()
             self.optimizer2.zero_grad()
 
-            if self.step < 2_000:
+            #if self.step < 2_000:
+            if epoch < 2:
                 n = 1.
             else:
                 n = 0.
@@ -325,7 +326,7 @@ class Trainer():
             denoiser_loss = self.diffusion.loss(residual, blur)
             regression_loss = n * F.mse_loss(sharp, init)
             loss = denoiser_loss + regression_loss
-            print('step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
+            print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
             loss_.append(loss.item())
 
             # Compute gradients
@@ -366,20 +367,20 @@ class Trainer():
         for epoch in range(self.epochs):
 
             # sample at epoch 0
-            if (epoch == 0) and (self.gpu_id == 0):
+            if (self.step == 0) and (self.gpu_id == 0):
                 self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             # plot graph every 20 epochs
-            if ((epoch + 1) % 50 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 1 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
-            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 2 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
