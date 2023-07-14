@@ -285,8 +285,8 @@ class Trainer():
 
 
             # save images blur and sharp image pairs
-            #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_steps{self.step}.png'))
-            #save_image(blur, os.path.join(self.exp_path, f'blur_train_steps{self.step}.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_train_steps{self.step}.png'))
+            save_image(blur, os.path.join(self.exp_path, f'blur_train_steps{self.step}.png'))
 
             # get avg channels for blur dataset
             if self.step == 0:
