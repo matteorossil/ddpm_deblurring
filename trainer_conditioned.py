@@ -325,7 +325,7 @@ class Trainer():
 
         # Calculate loss
         rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
-        std = torch.std(rgb)
+        std = torch.std(rgb) * 10
         #std = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         denoiser_loss = self.diffusion.loss(residual, blur)
