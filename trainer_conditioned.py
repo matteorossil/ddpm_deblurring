@@ -189,8 +189,7 @@ class Trainer():
         self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
         #params = self.params_denoiser + self.params_init
-        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=1e-5, weight_decay= self.weight_decay_rate, betas=self.betas)
-
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
@@ -321,13 +320,15 @@ class Trainer():
             self.optimizer2.zero_grad()
 
             #if self.step < 2_000:
-            if epoch < 20:
+            if epoch < 100:
                 n = 1.
+                e = 0.1
             else:
-                n = 0.
+                n = 0.1
+                e = 1.
 
             # Calculate loss
-            denoiser_loss = self.diffusion.loss(residual, blur)
+            denoiser_loss = e * self.diffusion.loss(residual, blur)
             regression_loss = n * F.mse_loss(sharp, init)
             loss = denoiser_loss + regression_loss
             print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
@@ -341,8 +342,8 @@ class Trainer():
             #print(self.init_predictor.module.final.bias.grad)
 
             # clip gradients
-            nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-            nn.utils.clip_grad_norm_(self.params_init, 0.1)
+            nn.utils.clip_grad_norm_(self.params_denoiser, 0.02)
+            nn.utils.clip_grad_norm_(self.params_init, 0.02)
 
             # Take an optimization step
             self.optimizer.step()
