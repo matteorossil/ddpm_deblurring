@@ -55,7 +55,7 @@ class Data(Dataset):
         blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('RGB')
         
         if self.mode == 'train':
-            return self.transform_train(sharp, blur)
+            return self.transform_train2(sharp, blur)
         else:
             return self.transform_val(sharp, blur)
 
@@ -81,6 +81,10 @@ class Data(Dataset):
             angle = random.choice(self.angles)
             sharp = TF.rotate(sharp, angle)
             blur = TF.rotate(blur, angle)
+
+        return TF.to_tensor(sharp), TF.to_tensor(blur)
+
+    def transform_train2(self, sharp, blur):
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     
