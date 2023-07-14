@@ -51,7 +51,7 @@ def plot_channels(steps, R, G, B, path, title):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_avgs_steps{steps[-1]}.png')
+    plt.savefig(path + f'/channel_steps{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 16
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 3e-4
@@ -243,27 +243,27 @@ class Trainer():
                 #savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
 
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'init_epoch{epoch}.png'))
+            save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
             # save true residual
-            save_image(X_true, os.path.join(self.exp_path, f'residual_true_epoch{epoch}.png'))
+            save_image(X_true, os.path.join(self.exp_path, f'residual_true_step{self.step}.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'residual_sampled_epoch{epoch}.png'))
+            save_image(X, os.path.join(self.exp_path, f'residual_sampled_step{self.step}.png'))
             # save sampled deblurred
-            save_image(init + X, os.path.join(self.exp_path, f'deblurred_epoch{epoch}.png'))
+            save_image(init + X, os.path.join(self.exp_path, f'deblurred_step{self.step}.png'))
 
             # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
             ssim_sharp_init = ssim(sharp, init)
-            savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_init)]))
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_init)]))
+            savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_init)]))
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_init)]))
             psnr_init.append(np.mean(psnr_sharp_init))
             ssim_init.append(np.mean(ssim_sharp_init))
 
             # compute metrics (sharp, deblurred)
             psnr_sharp_deblurred = psnr(sharp, init + X)
             ssim_sharp_deblurred = ssim(sharp, init + X)
-            savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_epoch{epoch}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
+            savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
+            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
             psnr_deblur.append(np.mean(psnr_sharp_deblurred))
             ssim_deblur.append(np.mean(ssim_sharp_deblurred))
 
@@ -285,8 +285,9 @@ class Trainer():
 
 
             # save images blur and sharp image pairs
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_train_steps{self.step}.png'))
-            save_image(blur, os.path.join(self.exp_path, f'blur_train_steps{self.step}.png'))
+            #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_steps{self.step}.png'))
+            #save_image(blur, os.path.join(self.exp_path, f'blur_train_steps{self.step}.png'))
+
             # get avg channels for blur dataset
             if self.step == 0:
                 ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
@@ -315,7 +316,7 @@ class Trainer():
             self.optimizer.zero_grad()
             self.optimizer2.zero_grad()
 
-            if self.step < 1_000:
+            if self.step < 100:
                 n = 1.
             else:
                 n = 0.
@@ -374,8 +375,8 @@ class Trainer():
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
-            if (self.step % 1 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, LR_D:{'{:.0e}'.format(self.learning_rate)}, LR_G:{'{:.0e}'.format(self.learning_rate_init)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
+            if (self.step % 2 == 0) and (self.gpu_id == 0):
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, Batch:{self.batch_size}, Ch:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
