@@ -76,7 +76,7 @@ class Trainer():
     # Number of channels in the image. $3$ for RGB.
     image_channels: int = 3
     # Image size
-    image_size: int = 64
+    image_size: int = 128
     # Number of channels in the initial feature map
     n_channels: int = 32
     # The list of channel numbers at each resolution.
@@ -101,7 +101,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 8
+    n_samples: int = 16
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -285,7 +285,7 @@ class Trainer():
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
 
-            if epoch == -1:
+            if self.step == 1:
                 # save images blur and sharp image pairs
                 save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
                 save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
@@ -317,7 +317,7 @@ class Trainer():
             self.optimizer2.zero_grad()
 
             #if self.step < 2_000:
-            if epoch < 2:
+            if epoch < 10:
                 n = 1.
             else:
                 n = 0.
@@ -380,7 +380,7 @@ class Trainer():
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
-            if ((epoch + 1) % 2 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 1 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
