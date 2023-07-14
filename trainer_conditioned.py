@@ -318,21 +318,19 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 1_000:
+        if self.step < 2_000:
             alpha = 1.
         else:
             alpha = 0.
 
         # Calculate loss
-        R = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
-        print(R)
-        std = torch.std(R) * 10
-        print("std:", std.item())
+        rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
+        std = torch.std(rgb)
 
-        denoiser_loss = self.diffusion.loss(residual, blur) + std
+        denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
-        loss = denoiser_loss + regression_loss
-        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
+        loss = denoiser_loss + regression_loss + std
+        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularized: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), std.item()))
         loss_.append(loss.item())
 
         # Compute gradients
