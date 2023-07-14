@@ -189,7 +189,7 @@ class Trainer():
         self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
         #params = self.params_denoiser + self.params_init
-        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=1e-5, weight_decay= self.weight_decay_rate, betas=self.betas)
 
         self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
         
@@ -372,7 +372,8 @@ class Trainer():
 
             # sample at epoch 0
             if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                pass
+                #self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
