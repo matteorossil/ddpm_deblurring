@@ -318,7 +318,7 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 2_000:
+        if self.step < 1_000:
             alpha = 1.
         else:
             alpha = 0.
@@ -326,7 +326,7 @@ class Trainer():
         # Calculate loss
         R = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
         print(R)
-        std = torch.std(R)
+        std = torch.std(R) * 10
         print("std:", std.item())
 
         denoiser_loss = self.diffusion.loss(residual, blur) + std
@@ -381,7 +381,7 @@ class Trainer():
                 self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
-            self.train(epoch, steps, R, G, B, loss_, ch_blur)
+            self.train(epoch+1, steps, R, G, B, loss_, ch_blur)
 
             if (self.step % 100 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
