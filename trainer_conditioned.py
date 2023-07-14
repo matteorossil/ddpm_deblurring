@@ -326,7 +326,7 @@ class Trainer():
                 n = 0.
 
             # Calculate loss
-            denoiser_loss = self.diffusion.loss(residual, blur)
+            denoiser_loss = 0 * self.diffusion.loss(residual, blur)
             regression_loss = n * F.mse_loss(sharp, init)
             loss = denoiser_loss + regression_loss
             print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
