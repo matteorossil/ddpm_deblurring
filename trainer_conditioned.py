@@ -373,13 +373,13 @@ class Trainer():
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
 
             # plot graph every 20 epochs
-            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 50 == 0) and (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             # sample at 2000's epoch
-            if ((epoch + 1) % 500 == 0) and (self.gpu_id == 0):
+            if ((epoch + 1) % 100 == 0) and (self.gpu_id == 0):
                 # Save the eps model
                 self.sample(self.ckpt_denoiser_epoch + epoch + 1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"Distortion Metric:"
