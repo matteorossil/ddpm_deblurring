@@ -228,11 +228,8 @@ class Trainer():
 
                 # take one denoising step
                 X = self.diffusion.p_sample(X, blur, t_vec)
-            
-            save_image(sharp, os.path.join(self.exp_path, f'val_sharp_step{self.step}.png'))
-            save_image(blur, os.path.join(self.exp_path, f'val_blur_step{self.step}.png'))
 
-            if epoch == 0:
+            if self.step == 0:
                 # save images blur and sharp image pairs
                 save_image(sharp, os.path.join(self.exp_path, f'val_sharp.png'))
                 save_image(blur, os.path.join(self.exp_path, f'val_blur.png'))
@@ -288,11 +285,14 @@ class Trainer():
 
 
         # save images blur and sharp image pairs
-        save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
-        save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
+        #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
+        #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
 
         # get avg channels for blur dataset
         if self.step == 0:
+            # save images blur and sharp image pairs
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
+            save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
             ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
             ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
             ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
