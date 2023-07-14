@@ -380,9 +380,10 @@ class Trainer():
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
+
             if (self.gpu_id == 0):
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
-                plot_channels(steps, R, G, B, self.exp_path, title=title)
+                plot_channels(steps, R, G, B, self.exp_path, title=title, epoch=epoch+1)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
      
 def ddp_setup(rank, world_size):
