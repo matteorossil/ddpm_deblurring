@@ -324,7 +324,7 @@ class Trainer():
             alpha = 0.
 
         # Calculate loss
-        R = torch.Tensor([r, g, b], device=self.gpu_id, requires_grad=True)
+        R = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
         mean = torch.mean(R)
         std = torch.std(mean)
         print("std:", std)
