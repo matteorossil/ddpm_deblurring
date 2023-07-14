@@ -163,7 +163,7 @@ class Trainer():
         # Create dataloader (shuffle False for validation)
         self.eval = "train"
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data2(path=self.dataset_eval, mode=self.eval, size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset_eval, mode=self.eval, size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -212,6 +212,7 @@ class Trainer():
             # compute initial predictor
             init = self.diffusion.predictor(blur)
             print(F.mse_loss(sharp, init))
+            print(F.mse_loss(sharp, blur))
             # get true residual
             X_true = sharp - init
 
@@ -370,13 +371,8 @@ class Trainer():
         for epoch in range(self.epochs):
 
             # sample at epoch 0
-            if (self.gpu_id == 0):
+            if (epoch == 0) and (self.gpu_id == 0):
                 self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
-                title = f"eval:{self.eval}, metric:"
-                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title, epoch=epoch)
-                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title, epoch=epoch)
-                #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
-                #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
@@ -385,6 +381,13 @@ class Trainer():
                 title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, G_pre:No, Lr:{'{:.0e}'.format(self.learning_rate)}, Tr_set:{self.batch_size}, Ch_blur:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, epoch=epoch+1)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
+
+                self.sample(epoch+1, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                title = f"eval:{self.eval}, metric:"
+                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title, epoch=epoch+1)
+                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title, epoch=epoch+1)
+                #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
+                #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
      
 def ddp_setup(rank, world_size):
     """
