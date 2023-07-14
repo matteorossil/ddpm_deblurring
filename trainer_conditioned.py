@@ -189,7 +189,7 @@ class Trainer():
         self.num_params_init = sum(p.numel() for p in self.params_init if p.requires_grad)
 
         #params = self.params_denoiser + self.params_init
-        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=5e-5, weight_decay= self.weight_decay_rate, betas=self.betas)
+        self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.optimizer2 = torch.optim.AdamW(self.params_init, lr=3e-4, weight_decay= self.weight_decay_rate, betas=self.betas)
         
         # path 
@@ -340,8 +340,8 @@ class Trainer():
             #print(self.init_predictor.module.final.bias.grad)
 
             # clip gradients
-            nn.utils.clip_grad_norm_(self.params_denoiser, 0.02)
-            nn.utils.clip_grad_norm_(self.params_init, 0.02)
+            nn.utils.clip_grad_norm_(self.params_denoiser, 0.1)
+            nn.utils.clip_grad_norm_(self.params_init, 0.1)
 
             # Take an optimization step
             self.optimizer.step()
