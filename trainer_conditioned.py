@@ -161,7 +161,7 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        self.eval = "train"
+        self.eval = "val"
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         dataset_val = Data2(path=self.dataset_eval, mode=self.eval, size=(self.image_size,self.image_size))
 
@@ -400,7 +400,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12356" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
