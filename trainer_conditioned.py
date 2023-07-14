@@ -51,7 +51,7 @@ def plot_channels(steps, R, G, B, path, title):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_step{steps[-1]}.png')
+    plt.savefig(path + f'/channel_step{steps[-1]+1}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -65,7 +65,7 @@ def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_de
     plt.legend()
     plt.title(title + ylabel)
     #plt.show()
-    plt.savefig(path + f'/{ylabel}_step{steps[-1]}.png')
+    plt.savefig(path + f'/{ylabel}_step{steps[-1]+1}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -197,7 +197,7 @@ class Trainer():
         #sigmoid
         self.sigmoid = nn.Sigmoid()
 
-    def sample(self, epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample(self, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         with torch.no_grad():
 
@@ -322,7 +322,7 @@ class Trainer():
         if self.step < 2_000:
             alpha = 1.
         else:
-            alpha = 0.
+            alpha = 0.2
 
         # Calculate loss
         denoiser_loss = self.diffusion.loss(residual, blur)
@@ -339,8 +339,8 @@ class Trainer():
         #print(self.init_predictor.module.final.bias.grad)
 
         # clip gradients
-        nn.utils.clip_grad_norm_(self.params_denoiser, 0.02)
-        nn.utils.clip_grad_norm_(self.params_init, 0.02)
+        nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+        nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
         # Take an optimization step
         self.optimizer.step()
@@ -374,7 +374,7 @@ class Trainer():
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
                 #pass 
-                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
             self.train(epoch, steps, R, G, B, loss_, ch_blur)
@@ -385,7 +385,7 @@ class Trainer():
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             if (self.step % 100 == 0) and (self.gpu_id == 0):
-                self.sample(epoch, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"eval:train, metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
                 plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
