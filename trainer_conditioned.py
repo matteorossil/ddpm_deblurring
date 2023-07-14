@@ -324,7 +324,12 @@ class Trainer():
             alpha = 0.
 
         # Calculate loss
-        denoiser_loss = self.diffusion.loss(residual, blur)
+        R = torch.Tensor([r, g, b])
+        mean = torch.mean(R)
+        std = torch.std(mean)
+        print("std:", std)
+
+        denoiser_loss = self.diffusion.loss(residual, blur) + std
         regression_loss = alpha * F.mse_loss(sharp, init)
         loss = denoiser_loss + regression_loss
         print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
