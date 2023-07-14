@@ -321,7 +321,7 @@ class Trainer():
         if self.step < 2_000:
             alpha = 1.
         else:
-            alpha = 0.
+            alpha = 0.01
 
         # Calculate loss
         rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
@@ -404,7 +404,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12357" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
