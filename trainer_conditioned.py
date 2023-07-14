@@ -320,13 +320,13 @@ class Trainer():
             self.optimizer2.zero_grad()
 
             #if self.step < 2_000:
-            if epoch < 100:
+            if epoch < 50:
                 n = 1.
             else:
                 n = 0.
 
             # Calculate loss
-            denoiser_loss = 0 * self.diffusion.loss(residual, blur)
+            denoiser_loss = self.diffusion.loss(residual, blur)
             regression_loss = n * F.mse_loss(sharp, init)
             loss = denoiser_loss + regression_loss
             print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
@@ -340,8 +340,8 @@ class Trainer():
             #print(self.init_predictor.module.final.bias.grad)
 
             # clip gradients
-            nn.utils.clip_grad_norm_(self.params_denoiser, 0.1)
-            nn.utils.clip_grad_norm_(self.params_init, 0.1)
+            #nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+            #nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
             # Take an optimization step
             self.optimizer.step()
