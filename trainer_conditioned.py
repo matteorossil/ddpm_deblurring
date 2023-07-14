@@ -275,7 +275,7 @@ class Trainer():
         # Iterate through the dataset
 
         # Iterate through the dataset
-        for batch_idx, (sharp, blur) in enumerate(self.data_loader_train):
+        for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
         #sharp, blur = next(iter(self.dataloader_train))
 
             # Increment global step
@@ -285,7 +285,7 @@ class Trainer():
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
 
-            if epoch == 0:
+            if epoch == -1:
                 # save images blur and sharp image pairs
                 save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
                 save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
