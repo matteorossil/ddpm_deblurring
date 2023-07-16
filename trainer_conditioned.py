@@ -321,7 +321,7 @@ class Trainer():
         if self.step < 10_000:
             alpha = 1.
         else:
-            alpha = 0. #0.01
+            alpha = 0.01
 
         # Calculate st dev regularizer loss
         #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
