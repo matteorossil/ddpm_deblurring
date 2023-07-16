@@ -100,7 +100,7 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 100_000
+    epochs: int = 10_000
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
@@ -236,10 +236,10 @@ class Trainer():
                 # compute metrics for blur sharp pairs
                 psnr_sharp_blur = psnr(sharp, blur)
                 ssim_sharp_blur = ssim(sharp, blur)
-                savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_avg.txt"), np.array([np.mean(psnr_sharp_blur)]))
-                savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_avg.txt"), np.array([np.mean(ssim_sharp_blur)]))
-                #savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_epoch{epoch}.txt"), psnr_sharp_blur)
-                #savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
+                #savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_avg.txt"), np.array([np.mean(psnr_sharp_blur)]))
+                #savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_avg.txt"), np.array([np.mean(ssim_sharp_blur)]))
+                # savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_epoch{epoch}.txt"), psnr_sharp_blur)
+                # savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
 
             # save initial predictor
             save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
@@ -253,16 +253,16 @@ class Trainer():
             # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
             ssim_sharp_init = ssim(sharp, init)
-            savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_init)]))
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_init)]))
+            #savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_init)]))
+            #savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_init)]))
             psnr_init.append(np.mean(psnr_sharp_init))
             ssim_init.append(np.mean(ssim_sharp_init))
 
             # compute metrics (sharp, deblurred)
             psnr_sharp_deblurred = psnr(sharp, init + X)
             ssim_sharp_deblurred = ssim(sharp, init + X)
-            savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
-            savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
+            #savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
+            #savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
             psnr_deblur.append(np.mean(psnr_sharp_deblurred))
             ssim_deblur.append(np.mean(ssim_sharp_deblurred))
 
@@ -324,9 +324,9 @@ class Trainer():
             alpha = 0.01
 
         # Calculate loss
-        rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
-        std = torch.std(rgb) * 10
-        #std = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
+        #std = torch.std(rgb) * 10
+        std = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
