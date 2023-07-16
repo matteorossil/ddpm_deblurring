@@ -100,7 +100,7 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 10_000
+    epochs: int = 20_000
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
@@ -318,7 +318,7 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 5_000:
+        if self.step < 10_000:
             alpha = 1.
         else:
             alpha = 0. #0.01
