@@ -321,17 +321,23 @@ class Trainer():
         if self.step < 2_000:
             alpha = 1.
         else:
-            alpha = 0.01
+            alpha = 0. #0.01
 
-        # Calculate loss
+        # Calculate st dev regularizer loss
         #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
-        #std = torch.std(rgb) * 10
-        std = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        #regularizer = torch.std(rgb) * 10
+        #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+
+        # Calculate mean regularizer loss
+        r_blur = torch.mean(blur[:,0,:,:])
+        g_blur = torch.mean(blur[:,1,:,:])
+        b_blur = torch.mean(blur[:,2,:,:])
+        regularizer = F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur)
 
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
-        loss = denoiser_loss + regression_loss + std
-        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularizer: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), std.item()))
+        loss = denoiser_loss + regression_loss + regularizer
+        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularizer: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer.item()))
         loss_.append(loss.item())
 
         # Compute gradients
