@@ -320,10 +320,8 @@ class Trainer():
 
         if self.step < 200:
             alpha = 0. #1.
-            temp = 1. # hyperparam
         else:
             alpha = 0. #0.01
-            temp = 0.001 # hyperparam
 
         # Compute regularizer 1 (std dev)
         #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
@@ -334,7 +332,9 @@ class Trainer():
         r_blur = torch.mean(blur[:,0,:,:])
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
-        regularizer = temp * (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+        regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+        regularizer = F.threshold(regularizer, 0.001, 0.)
+
 
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
@@ -346,9 +346,9 @@ class Trainer():
         loss.backward()
 
         #print("############ GRAD OUTPUT ############")
-        print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
-        print("Grad bias init:", self.initP.module.final.bias.grad)
-        print()
+        #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
+        #print("Grad bias init:", self.initP.module.final.bias.grad)
+        #print()
 
         # clip gradients
         nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
@@ -413,7 +413,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12356" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
