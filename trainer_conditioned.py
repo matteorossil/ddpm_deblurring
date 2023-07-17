@@ -348,6 +348,7 @@ class Trainer():
         #print("############ GRAD OUTPUT ############")
         print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
         print("Grad bias init:", self.initP.module.final.bias.grad)
+        print()
 
         # clip gradients
         nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
