@@ -333,7 +333,7 @@ class Trainer():
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
         regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-        regularizer = F.threshold(regularizer, 0.001, 0.)
+        regularizer = F.threshold(regularizer, 0.1, 0.)
 
 
         denoiser_loss = self.diffusion.loss(residual, blur)
