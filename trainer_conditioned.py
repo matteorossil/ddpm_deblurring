@@ -318,21 +318,23 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 500:
+        if self.step < 200:
             alpha = 0. #1.
+            temp = 1. # hyperparam
         else:
             alpha = 0. #0.01
+            temp = 0.001 # hyperparam
 
-        # Calculate st dev regularizer loss
+        # Compute regularizer 1 (std dev)
         #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
         #regularizer = torch.std(rgb) * 10
         #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-        # Calculate mean regularizer loss
+        # Compute regularizer 2 (diff blur/init means)
         r_blur = torch.mean(blur[:,0,:,:])
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
-        regularizer = 0.001 * (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+        regularizer = temp * (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
 
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
@@ -344,8 +346,8 @@ class Trainer():
         loss.backward()
 
         #print("############ GRAD OUTPUT ############")
-        #print(self.denoiser.module.final.bias.grad)
-        #print(self.init_predictor.module.final.bias.grad)
+        print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
+        print("Grad bias init:", self.initP.module.final.bias.grad)
 
         # clip gradients
         nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
@@ -410,7 +412,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12356" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 

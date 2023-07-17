@@ -135,26 +135,6 @@ class DenoiseDiffusion:
         if noise is None:
             noise = torch.randn_like(sharp)
 
-        # compute residual
-        #### init = self.predictor(blur)
-
-        #### residual = sharp - init  # or residual = sharp - blur
-
-        #print("############ PARAMS ############")
-        #print(list(self.predictor.grad()))
-        #print("############ SHARP ############")
-        #print(sharp[0])
-        #print("############ BLUR ############")
-        #print(blur[0])
-        #print("############ INIT ############")
-        #print(init[0])
-        #print("############ RESIDUAL ############")
-        #print(residual[0])
-
-        # generate q_sample from residual
-        #### xt = self.q_sample(residual, t, eps=noise)
-        #print("############ XT ############")
-        #print(xt)
         xt = self.q_sample(sharp, t, eps=noise)
 
         # concatenate channel wise for conditioning
@@ -162,6 +142,10 @@ class DenoiseDiffusion:
 
         # predict noise
         eps_theta = self.eps_model(xt_, t)
+
+        print("R:", torch.mean(eps_theta[:,0,:,:]))
+        print("G:", torch.mean(eps_theta[:,1,:,:]))
+        print("B:", torch.mean(eps_theta[:,2,:,:]))
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
