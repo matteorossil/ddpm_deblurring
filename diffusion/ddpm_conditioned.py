@@ -143,9 +143,9 @@ class DenoiseDiffusion:
         # predict noise
         eps_theta = self.eps_model(xt_, t)
 
-        print("R:", torch.mean(eps_theta[:,0,:,:]))
-        print("G:", torch.mean(eps_theta[:,1,:,:]))
-        print("B:", torch.mean(eps_theta[:,2,:,:]))
+        print("R:", torch.mean(eps_theta[:,0,:,:]).item())
+        print("G:", torch.mean(eps_theta[:,1,:,:]).item())
+        print("B:", torch.mean(eps_theta[:,2,:,:]).item())
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
