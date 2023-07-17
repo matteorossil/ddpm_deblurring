@@ -333,7 +333,7 @@ class Trainer():
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
         regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-        regularizer = F.threshold(regularizer, 0.1, 0.)
+        regularizer = F.threshold(regularizer, 0.01, 0.)
 
 
         denoiser_loss = self.diffusion.loss(residual, blur)
@@ -413,7 +413,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12356" # any free port on machine
+    os.environ["MASTER_PORT"] = "12359" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
