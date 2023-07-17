@@ -12,13 +12,15 @@ import torch
 
 class Data(Dataset):
 
-    def __init__(self, path, mode='train', size=(128,128)):
+    def __init__(self, path, mode='train', size=(128,128), channels='RGB'):
 
         # only for validation
         #if mode == 'val':
         #torch.manual_seed(0)
         #torch.cuda.manual_seed_all(0)
         #random.seed(0)
+
+        self.channels = channels
 
         self.dataset_name = {
             'train': path + "train",
@@ -51,8 +53,8 @@ class Data(Dataset):
     
     def __getitem__(self, idx):
 
-        sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert('L') #.convert('RGB')
-        blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert('L') #.convert('RGB')
+        sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert(self.channels)
+        blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert(self.channels)
         
         if self.mode == 'train':
             return self.transform_train2(sharp, blur)

@@ -40,11 +40,9 @@ def get_exp_path(path=''):
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
-def plot_channels(steps, R, G, B, path, title):
+def plot_channels(steps, L, path, title):
 
-    plt.plot(steps, R, label='red', color='r')
-    plt.plot(steps, G, label='green', color='g')
-    plt.plot(steps, B, label='blu', color='b')
+    plt.plot(steps, L, label='channel avg', color='g')
 
     plt.xlabel("training steps")
     plt.ylabel("channel average")
@@ -74,7 +72,7 @@ class Trainer():
     ## Configurations
     """
     # Number of channels in the image. $3$ for RGB.
-    image_channels: int = 3
+    image_channels: int = 1
     # Image size
     image_size: int = 128
     # Number of channels in the initial feature map
@@ -160,8 +158,8 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_train = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size), channels='L')
+        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size), channels='L')
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -268,7 +266,7 @@ class Trainer():
 
             sample_steps.append(self.step)
 
-    def train(self, epoch, steps, R, G, B, loss_, ch_blur):
+    def train(self, epoch, steps, L, loss_, ch_blur):
         """
         ### Train
         """
@@ -293,8 +291,6 @@ class Trainer():
             save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
             ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
@@ -305,14 +301,8 @@ class Trainer():
         # store mean value of channels (RED, GREEN, BLUE)
         steps.append(self.step)
 
-        r = torch.mean(init[:,0,:,:])
-        R.append(r.item())
-
-        g = torch.mean(init[:,1,:,:])
-        G.append(g.item())
-
-        b = torch.mean(init[:,2,:,:])
-        B.append(b.item())
+        l = torch.mean(init[:,0,:,:])
+        L.append(l.item())
 
         # Make the gradients zero
         self.optimizer.zero_grad()
@@ -326,10 +316,8 @@ class Trainer():
         #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         # Compute regularizer 2 (diff blur/init means)
-        r_blur = torch.mean(blur[:,0,:,:])
-        g_blur = torch.mean(blur[:,1,:,:])
-        b_blur = torch.mean(blur[:,2,:,:])
-        regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+        l_blur = torch.mean(blur[:,0,:,:])
+        regularizer = F.l1_loss(l, l_blur)
         regularizer = F.threshold(regularizer, 0.02, 0.)
         regularizer = 0.
 
@@ -376,9 +364,7 @@ class Trainer():
     def run(self):
 
         # used to plot channel averages
-        R = []
-        G = []
-        B = []
+        L = []
         steps = []
         loss_ = []
         ch_blur = []
@@ -397,11 +383,11 @@ class Trainer():
                 self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
-            self.train(epoch+1, steps, R, G, B, loss_, ch_blur)
+            self.train(epoch+1, steps, L, loss_, ch_blur)
 
             if (self.step % 100 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
-                plot_channels(steps, R, G, B, self.exp_path, title=title)
+                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, L:{ch_blur}"
+                plot_channels(steps, L, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             if (self.step % 200 == 0) and (self.gpu_id == 0):
