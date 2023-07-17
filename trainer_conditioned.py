@@ -292,9 +292,12 @@ class Trainer():
             # save images blur and sharp image pairs
             save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-            ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-            ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
+            if self.image_channels > 1:
+                ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
+            else: # grayscale
+                ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
