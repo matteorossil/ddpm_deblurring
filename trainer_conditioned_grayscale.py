@@ -323,8 +323,8 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.
-        #if self.step < 200: alpha = 0. #1.
-        #else: alpha = 0. #0.01
+        if self.step < 2_000: alpha = 1. #1.
+        else: alpha = 0. #0.01
 
         # denoiser loss
         denoiser_loss = self.diffusion.loss(residual, blur)
