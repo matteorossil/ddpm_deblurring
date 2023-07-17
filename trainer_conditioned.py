@@ -318,7 +318,7 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 2_000:
+        if self.step < 1_000:
             alpha = 1.
         else:
             alpha = 0. #0.01
