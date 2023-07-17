@@ -331,7 +331,6 @@ class Trainer():
         b_blur = torch.mean(blur[:,2,:,:])
         regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
         regularizer = F.threshold(regularizer, 0.02, 0.)
-        regularizer = 0.
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.

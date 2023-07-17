@@ -319,7 +319,7 @@ class Trainer():
         l_blur = torch.mean(blur[:,0,:,:])
         regularizer = F.l1_loss(l, l_blur)
         regularizer = F.threshold(regularizer, 0.02, 0.)
-        regularizer = 0.
+        regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.
