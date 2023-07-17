@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 16
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 3e-4
@@ -100,9 +100,9 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 20_000
+    epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 1
+    n_samples: int = 16
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -234,8 +234,8 @@ class Trainer():
                 save_image(blur, os.path.join(self.exp_path, f'val_blur.png'))
                 
                 # compute metrics for blur sharp pairs
-                psnr_sharp_blur = psnr(sharp, blur)
-                ssim_sharp_blur = ssim(sharp, blur)
+                #psnr_sharp_blur = psnr(sharp, blur)
+                #ssim_sharp_blur = ssim(sharp, blur)
                 #savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_avg.txt"), np.array([np.mean(psnr_sharp_blur)]))
                 #savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_avg.txt"), np.array([np.mean(ssim_sharp_blur)]))
                 # savetxt(os.path.join(self.exp_path, f"psnr_sharp_blur_epoch{epoch}.txt"), psnr_sharp_blur)
@@ -333,7 +333,7 @@ class Trainer():
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
         regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-        regularizer = F.threshold(regularizer, 0.01, 0.)
+        regularizer = F.threshold(regularizer, 0.02, 0.)
 
 
         denoiser_loss = self.diffusion.loss(residual, blur)
