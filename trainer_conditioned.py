@@ -319,7 +319,7 @@ class Trainer():
         self.optimizer2.zero_grad()
 
         if self.step < 10_000:
-            alpha = 0. #1.
+            alpha = 1.
         else:
             alpha = 0. #0.01
 
@@ -332,7 +332,7 @@ class Trainer():
         r_blur = torch.mean(blur[:,0,:,:])
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
-        regularizer = F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur)
+        regularizer = 0.01 * F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur)
 
         denoiser_loss = self.diffusion.loss(residual, blur)
         regression_loss = alpha * F.mse_loss(sharp, init)
