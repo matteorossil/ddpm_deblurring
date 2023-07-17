@@ -74,7 +74,7 @@ class Trainer():
     ## Configurations
     """
     # Number of channels in the image. $3$ for RGB.
-    image_channels: int = 3
+    image_channels: int = 1
     # Image size
     image_size: int = 128
     # Number of channels in the initial feature map
@@ -91,7 +91,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 3e-4
@@ -102,7 +102,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 100_000
     # Number of samples (evaluation)
-    n_samples: int = 32
+    n_samples: int = 1
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -318,10 +318,7 @@ class Trainer():
         self.optimizer.zero_grad()
         self.optimizer2.zero_grad()
 
-        if self.step < 200:
-            alpha = 0. #1.
-        else:
-            alpha = 0. #0.01
+        #### REGULARIZER ####
 
         # Compute regularizer 1 (std dev)
         #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
@@ -334,11 +331,22 @@ class Trainer():
         b_blur = torch.mean(blur[:,2,:,:])
         regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
         regularizer = F.threshold(regularizer, 0.02, 0.)
+        regularizer = 0.
 
+        #### REGRESSION LOSS INIT ####
+        alpha = 0.
+        #if self.step < 200: alpha = 0. #1.
+        #else: alpha = 0. #0.01
 
+        # denoiser loss
         denoiser_loss = self.diffusion.loss(residual, blur)
+
+        # initial predictor loss
         regression_loss = alpha * F.mse_loss(sharp, init)
+
+        # final loss
         loss = denoiser_loss + regression_loss + regularizer
+
         print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularizer: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer.item()))
         loss_.append(loss.item())
 
@@ -413,7 +421,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12359" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
