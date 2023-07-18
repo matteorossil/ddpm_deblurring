@@ -55,19 +55,6 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
     plt.figure().clear()
     plt.close('all')
 
-def plot_time(steps, T, path, title):
-
-    plt.plot(steps, T, label='time', color='b')
-
-    plt.xlabel("training steps")
-    plt.ylabel("sampled time")
-    plt.legend()
-    plt.title(title)
-    #plt.show()
-    plt.savefig(path + f'/time{steps[-1]+1}.png')
-    plt.figure().clear()
-    plt.close('all')
-
 def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title):
 
     plt.plot(steps, metric_init, label=label_init, color='b')
@@ -416,10 +403,9 @@ class Trainer():
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 title = f"Denoiser - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="denoiser_")
-                title = f"Noise Sampled, B:{self.batch_size}"
+                title = f"Noise, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title, ext="noise_")
-                title = f"Time Sampled, B:{self.batch_size}"
-                plot_time(steps, self.diffusion.T_noise, self.exp_path, title=title)
+                print("Time:", self.diffusion.T_noise)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             if (self.step % 200 == 0) and (self.gpu_id == 0):
