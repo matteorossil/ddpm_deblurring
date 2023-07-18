@@ -51,6 +51,11 @@ class DenoiseDiffusion:
         self.R_noise = []
         self.G_noise = []
         self.B_noise = []
+
+        self.R_xt = []
+        self.G_xt = []
+        self.B_xt = []
+
         self.T_noise = []
 
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -150,6 +155,10 @@ class DenoiseDiffusion:
         self.T_noise.append(t.item())
 
         xt = self.q_sample(sharp, t, eps=noise)
+
+        self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
+        self.G_xt.append(torch.mean(xt[:,1,:,:]).item())
+        self.B_xt.append(torch.mean(xt[:,2,:,:]).item())
 
         # concatenate channel wise for conditioning
         xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
