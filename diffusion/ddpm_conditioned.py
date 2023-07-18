@@ -152,7 +152,6 @@ class DenoiseDiffusion:
         self.R_noise.append(torch.mean(noise[:,0,:,:]).item())
         self.G_noise.append(torch.mean(noise[:,1,:,:]).item())
         self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
-        self.T_noise.append(t.item())
 
         xt = self.q_sample(sharp, t, eps=noise)
 
