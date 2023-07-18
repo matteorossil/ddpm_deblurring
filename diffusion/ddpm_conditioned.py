@@ -44,6 +44,10 @@ class DenoiseDiffusion:
         self.sigma2 = self.beta
         self.has_copy = False
 
+        self.R = []
+        self.G = []
+        self.B = []
+
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         #### Get $q(x_t|x_0)$ distribution
@@ -143,9 +147,9 @@ class DenoiseDiffusion:
         # predict noise
         eps_theta = self.eps_model(xt_, t)
 
-        #print("R:", torch.mean(eps_theta[:,0,:,:]).item())
-        #print("G:", torch.mean(eps_theta[:,1,:,:]).item())
-        #print("B:", torch.mean(eps_theta[:,2,:,:]).item())
+        self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
+        self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
+        self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
