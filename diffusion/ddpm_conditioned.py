@@ -48,6 +48,11 @@ class DenoiseDiffusion:
         self.G = []
         self.B = []
 
+        self.R_noise = []
+        self.G_noise = []
+        self.B_noise = []
+        self.T_noise = []
+
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         #### Get $q(x_t|x_0)$ distribution
@@ -138,6 +143,11 @@ class DenoiseDiffusion:
         # generate noise if None
         if noise is None:
             noise = torch.randn_like(sharp)
+
+        self.R_noise.append(torch.mean(noise[:,0,:,:]).item())
+        self.G_noise.append(torch.mean(noise[:,1,:,:]).item())
+        self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
+        self.T_noise.append(t.item())
 
         xt = self.q_sample(sharp, t, eps=noise)
 

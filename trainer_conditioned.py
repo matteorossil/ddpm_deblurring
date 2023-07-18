@@ -40,7 +40,7 @@ def get_exp_path(path=''):
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
 
-def plot_channels(steps, R, G, B, path, title):
+def plot_channels(steps, R, G, B, path, title, ext=""):
 
     plt.plot(steps, R, label='red', color='r')
     plt.plot(steps, G, label='green', color='g')
@@ -51,22 +51,20 @@ def plot_channels(steps, R, G, B, path, title):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_step{steps[-1]+1}.png')
+    plt.savefig(path + f'/channel_{ext}step{steps[-1]+1}.png')
     plt.figure().clear()
     plt.close('all')
 
-def plot_channels2(steps, R, G, B, path, title):
+def plot_time(steps, T, path, title):
 
-    plt.plot(steps, R, label='red', color='r')
-    plt.plot(steps, G, label='green', color='g')
-    plt.plot(steps, B, label='blu', color='b')
+    plt.plot(steps, T, label='time', color='b')
 
     plt.xlabel("training steps")
-    plt.ylabel("channel average")
+    plt.ylabel("sampled time")
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_denoiser_step{steps[-1]+1}.png')
+    plt.savefig(path + f'/time{steps[-1]+1}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -109,7 +107,7 @@ class Trainer():
     batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
-    learning_rate_init: float = 3e-4
+    learning_rate_init: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -297,7 +295,6 @@ class Trainer():
         sharp = sharp.to(self.gpu_id)
         blur = blur.to(self.gpu_id)
 
-
         # save images blur and sharp image pairs
         #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
         #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
@@ -418,7 +415,11 @@ class Trainer():
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 title = f"Denoiser - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                plot_channels2(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title)
+                plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="denoiser_")
+                title = f"Noise Sampled, B:{self.batch_size}"
+                plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title, ext="noise_")
+                title = f"Time Sampled, B:{self.batch_size}"
+                plot_time(steps, self.diffusion.T_noise, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             if (self.step % 200 == 0) and (self.gpu_id == 0):
@@ -438,7 +439,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12354" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
