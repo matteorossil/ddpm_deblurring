@@ -55,6 +55,21 @@ def plot_channels(steps, R, G, B, path, title):
     plt.figure().clear()
     plt.close('all')
 
+def plot_channels2(steps, R, G, B, path, title):
+
+    plt.plot(steps, R, label='red', color='r')
+    plt.plot(steps, G, label='green', color='g')
+    plt.plot(steps, B, label='blu', color='b')
+
+    plt.xlabel("training steps")
+    plt.ylabel("channel average")
+    plt.legend()
+    plt.title(title)
+    #plt.show()
+    plt.savefig(path + f'/channel_denoiser_step{steps[-1]+1}.png')
+    plt.figure().clear()
+    plt.close('all')
+
 def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title):
 
     plt.plot(steps, metric_init, label=label_init, color='b')
@@ -100,7 +115,7 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 100_000
+    epochs: int = 10_000
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
@@ -399,10 +414,10 @@ class Trainer():
             self.train(epoch+1, steps, R, G, B, loss_, ch_blur)
 
             if (self.step % 100 == 0) and (self.gpu_id == 0):
-                title = f"D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
+                title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title)
                 title = f"Denoiser - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title)
+                plot_channels2(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
             if (self.step % 200 == 0) and (self.gpu_id == 0):
