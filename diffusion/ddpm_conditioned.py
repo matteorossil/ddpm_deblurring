@@ -70,7 +70,7 @@ class DenoiseDiffusion:
         """
         # compute mean
         mean = gather(self.alpha_bar, t) ** 0.5 * x0
-        #save_image(x0, os.path.join(self.path, f'x0_{self.t_step}_{t.item()}.png'))
+        save_image(x0, os.path.join(self.path, f'x0_{self.t_step}_{t.item()}.png'))
         #save_image(mean, os.path.join(self.path, f'mean_{self.t_step}_{t.item()}.png'))
 
         # compute variance
@@ -163,6 +163,7 @@ class DenoiseDiffusion:
 
         # predict noise
         eps_theta = self.eps_model(xt_, t)
+        save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
 
         self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
         self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
