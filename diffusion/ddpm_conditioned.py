@@ -77,31 +77,21 @@ class DenoiseDiffusion:
         var = 1 - gather(self.alpha_bar, t)
         return mean, var
 
-    def q_sample(self, x0: torch.Tensor, t: torch.Tensor, eps: Optional[torch.Tensor] = None):
+    def q_sample(self, x0: torch.Tensor, t: torch.Tensor, eps: Optional[torch.Tensor]):
         """
         #### Sample from $q(x_t|x_0)$
         """
-
-        if eps is None:
-            eps = torch.randn_like(x0)
-
         # get q(x_t|x_0)
         mean, var = self.q_xt_x0(x0, t)
+
+        save_image((var ** 0.5) * eps, os.path.join(self.path, f'scaled_noise_{self.t_step}_{t.item()}.png'))
 
         # Sample from q(x_t|x_0)
         return mean + (var ** 0.5) * eps
 
     def p_sample(self, xt: torch.Tensor, blur: torch.Tensor, t: torch.Tensor):
         """
-        #### Sample from $\textcolor{lightgreen}{p_\theta}(x_{t-1}|x_t)$
-
-        \begin{align}
-        \textcolor{lightgreen}{p_\theta}(x_{t-1} | x_t) &= \mathcal{N}\big(x_{t-1};
-        \textcolor{lightgreen}{\mu_\theta}(x_t, t), \sigma_t^2 \mathbf{I} \big) \\
-        \textcolor{lightgreen}{\mu_\theta}(x_t, t)
-          &= \frac{1}{\sqrt{\alpha_t}} \Big(x_t -
-            \frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\textcolor{lightgreen}{\epsilon_\theta}(x_t, t) \Big)
-        \end{align}
+        #### Sample from p_theta(x_t-1|x_t)
         """
 
         # $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$
@@ -172,8 +162,8 @@ class DenoiseDiffusion:
         self.t_step += 1
 
         # Compute MSE loss
-        #return F.mse_loss(noise, eps_theta)
-        return F.l1_loss(noise, eps_theta)
+        return F.mse_loss(noise, eps_theta)
+        #return F.l1_loss(noise, eps_theta)
 
     def save_model_copy(self):
         with torch.no_grad():
