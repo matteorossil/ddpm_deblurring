@@ -300,11 +300,11 @@ class Trainer():
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
-        save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
+        #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
         # compute residual
         residual = sharp - init
-        save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
+        #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
 
         # store mean value of channels (RED, GREEN, BLUE)
         steps.append(self.step)
@@ -335,7 +335,7 @@ class Trainer():
         b_blur = torch.mean(blur[:,2,:,:])
         regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
         regularizer = F.threshold(regularizer, 0.02, 0.)
-        regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.

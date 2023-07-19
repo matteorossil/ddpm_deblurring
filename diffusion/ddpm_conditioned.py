@@ -68,13 +68,12 @@ class DenoiseDiffusion:
         """
         #### Get q(x_t|x_0) distribution
         """
-
-        # $\alpha_t$ and compute $\sqrt{\bar\alpha_t} x_0$
+        # compute mean
         mean = gather(self.alpha_bar, t) ** 0.5 * x0
-        save_image(x0, os.path.join(self.path, f'x0_{self.t_step}_{t.item()}.png'))
-        save_image(mean, os.path.join(self.path, f'mean_{self.t_step}_{t.item()}.png'))
+        #save_image(x0, os.path.join(self.path, f'x0_{self.t_step}_{t.item()}.png'))
+        #save_image(mean, os.path.join(self.path, f'mean_{self.t_step}_{t.item()}.png'))
 
-        # $(1-\bar\alpha_t) \mathbf{I}$
+        # compute variance
         var = 1 - gather(self.alpha_bar, t)
         return mean, var
 
