@@ -160,8 +160,8 @@ class DenoiseDiffusion:
         self.t_step += 1
 
         # Compute MSE loss
-        return F.mse_loss(noise, eps_theta)
-        #return F.l1_loss(noise, eps_theta)
+        #return F.mse_loss(noise, eps_theta)
+        return F.l1_loss(noise, eps_theta)
 
     def save_model_copy(self):
         with torch.no_grad():
