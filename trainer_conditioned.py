@@ -300,9 +300,11 @@ class Trainer():
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
+        save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
         # compute residual
         residual = sharp - init
+        save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
 
         # store mean value of channels (RED, GREEN, BLUE)
         steps.append(self.step)
