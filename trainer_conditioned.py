@@ -408,8 +408,8 @@ class Trainer():
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
                 title = f"Denoiser - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title, ext="denoiser_")
-                #title = f"Noise, B:{self.batch_size}"
-                #plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
+                title = f"Noise, B:{self.batch_size}"
+                plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
                 title = f"Xt, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
                 #print("Time:", self.diffusion.T_noise)

@@ -84,8 +84,6 @@ class DenoiseDiffusion:
         # get q(x_t|x_0)
         mean, var = self.q_xt_x0(x0, t)
 
-        save_image((var ** 0.5) * eps, os.path.join(self.path, f'scaled_noise_{self.t_step}_{t.item()}.png'))
-
         # Sample from q(x_t|x_0)
         return mean + (var ** 0.5) * eps
 
