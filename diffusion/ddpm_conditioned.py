@@ -160,6 +160,7 @@ class DenoiseDiffusion:
 
         xt = self.q_sample(sharp, t, eps=noise)
         save_image(xt, os.path.join(self.path, f'xt_{self.t_step}_{t.item()}.png'))
+        save_image(noise, os.path.join(self.path, f'noise_{self.t_step}_{t.item()}.png'))
 
         self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
         self.G_xt.append(torch.mean(xt[:,1,:,:]).item())
