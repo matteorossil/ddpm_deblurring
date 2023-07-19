@@ -156,7 +156,8 @@ class Trainer():
             n_steps=self.n_steps,
             beta_0=self.beta_0,
             beta_T=self.beta_T,
-            device=self.gpu_id
+            device=self.gpu_id,
+            path=self.exp_path
         )
 
         # Create dataloader (shuffle False for validation)

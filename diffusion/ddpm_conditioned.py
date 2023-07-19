@@ -18,13 +18,16 @@ class DenoiseDiffusion:
     ## Denoise Diffusion
     """
 
-    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device, beta_0: float, beta_T: float):
+    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device, beta_0: float, beta_T: float, path: str):
         """
         * `eps_model` is $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$ model
         * `n_steps` is $t$
         * `device` is the device to place constants on
         """
         super().__init__()
+
+        # store path
+        self.path = path
 
         # denoiser model
         self.eps_model = eps_model
@@ -144,7 +147,7 @@ class DenoiseDiffusion:
 
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=sharp.device, dtype=torch.long)
-        print("sampled time", t)
+        print("sampled time:", t.item())
 
         # generate noise if None
         if noise is None:
@@ -155,7 +158,7 @@ class DenoiseDiffusion:
         self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
 
         xt = self.q_sample(sharp, t, eps=noise)
-        save_image(xt, os.path.join(self.exp_path, f'xt_{t.item()}.png'))
+        save_image(xt, os.path.join(self.path, f'xt_{t.item()}.png'))
 
         self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
         self.G_xt.append(torch.mean(xt[:,1,:,:]).item())
