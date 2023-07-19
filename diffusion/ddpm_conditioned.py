@@ -6,6 +6,7 @@ import torch.utils.data
 from torch import nn
 from copy import deepcopy
 from torchvision.utils import save_image
+import os
 
 from utils import gather # Used for Image Data
 # from utils import gather2d as gather # Used for Gaussian 2D Data
@@ -143,7 +144,7 @@ class DenoiseDiffusion:
 
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=sharp.device, dtype=torch.long)
-        #print("sampled time", t)
+        print("sampled time", t)
 
         # generate noise if None
         if noise is None:
@@ -154,6 +155,7 @@ class DenoiseDiffusion:
         self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
 
         xt = self.q_sample(sharp, t, eps=noise)
+        save_image(xt, os.path.join(self.exp_path, f'xt_{t.item()}.png'))
 
         self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
         self.G_xt.append(torch.mean(xt[:,1,:,:]).item())
