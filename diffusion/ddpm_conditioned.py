@@ -66,15 +66,12 @@ class DenoiseDiffusion:
 
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        #### Get $q(x_t|x_0)$ distribution
-
-        \begin{align}
-        q(x_t|x_0) &= \mathcal{N} \Big(x_t; \sqrt{\bar\alpha_t} x_0, (1-\bar\alpha_t) \mathbf{I} \Big)
-        \end{align}
+        #### Get q(x_t|x_0) distribution
         """
 
         # $\alpha_t$ and compute $\sqrt{\bar\alpha_t} x_0$
         mean = gather(self.alpha_bar, t) ** 0.5 * x0
+        save_image(mean, os.path.join(self.path, f'mean_{self.t_step}_{t.item()}.png'))
 
         # $(1-\bar\alpha_t) \mathbf{I}$
         var = 1 - gather(self.alpha_bar, t)
@@ -83,20 +80,15 @@ class DenoiseDiffusion:
     def q_sample(self, x0: torch.Tensor, t: torch.Tensor, eps: Optional[torch.Tensor] = None):
         """
         #### Sample from $q(x_t|x_0)$
-
-        \begin{align}
-        q(x_t|x_0) &= \mathcal{N} \Big(x_t; \sqrt{\bar\alpha_t} x_0, (1-\bar\alpha_t) \mathbf{I} \Big)
-        \end{align}
         """
-        
-        # $\epsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
+
         if eps is None:
             eps = torch.randn_like(x0)
 
-        # get $q(x_t|x_0)$
+        # get q(x_t|x_0)
         mean, var = self.q_xt_x0(x0, t)
-        # Sample from $q(x_t|x_0)$
 
+        # Sample from q(x_t|x_0)
         return mean + (var ** 0.5) * eps
 
     def p_sample(self, xt: torch.Tensor, blur: torch.Tensor, t: torch.Tensor):
