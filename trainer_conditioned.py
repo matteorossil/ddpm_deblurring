@@ -363,8 +363,8 @@ class Trainer():
         #print()
 
         # clip gradients
-        nn.utils.clip_grad_norm_(self.params_denoiser, 0.001)
-        nn.utils.clip_grad_norm_(self.params_init, 0.001)
+        nn.utils.clip_grad_norm_(self.params_denoiser, 0.0001)
+        nn.utils.clip_grad_norm_(self.params_init, 0.0001)
 
         # Take an optimization step
         self.optimizer.step()
