@@ -149,6 +149,9 @@ class Trainer():
             checkpoint_i = torch.load(self.ckpt_init)
             self.initP.module.load_state_dict(checkpoint_i)
 
+        # path
+        self.exp_path = get_exp_path(path=self.store_checkpoints)
+
         # Create DDPM class
         self.diffusion = DenoiseDiffusion(
             eps_model=self.denoiser,
@@ -190,10 +193,9 @@ class Trainer():
         #params = self.params_denoiser + self.params_init
         self.optimizer = torch.optim.AdamW(self.params_denoiser, lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.optimizer2 = torch.optim.AdamW(self.params_init, lr=self.learning_rate_init, weight_decay= self.weight_decay_rate, betas=self.betas)
-        
-        # path 
+
+        # training steps
         self.step = 0
-        self.exp_path = get_exp_path(path=self.store_checkpoints)
 
         #sigmoid
         self.sigmoid = nn.Sigmoid()
