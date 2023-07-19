@@ -62,6 +62,8 @@ class DenoiseDiffusion:
 
         self.T_noise = []
 
+        self.t_step = 0
+
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         #### Get $q(x_t|x_0)$ distribution
@@ -141,7 +143,6 @@ class DenoiseDiffusion:
         \epsilon - \textcolor{lightgreen}{\epsilon_\theta}(\sqrt{\bar\alpha_t} x_0 + \sqrt{1-\bar\alpha_t}\epsilon, t)
         \bigg\Vert^2 \Bigg]$$
         """
-
         # Get batch size
         batch_size = sharp.shape[0]
 
@@ -158,7 +159,7 @@ class DenoiseDiffusion:
         self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
 
         xt = self.q_sample(sharp, t, eps=noise)
-        save_image(xt, os.path.join(self.path, f'xt_{t.item()}.png'))
+        save_image(xt, os.path.join(self.path, f'xt_{self.t_step}_{t.item()}.png'))
 
         self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
         self.G_xt.append(torch.mean(xt[:,1,:,:]).item())
@@ -173,6 +174,8 @@ class DenoiseDiffusion:
         self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
         self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
         self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
+
+        self.t_step += 1
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta)
