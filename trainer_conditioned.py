@@ -338,9 +338,9 @@ class Trainer():
         regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         #### REGRESSION LOSS INIT ####
-        alpha = 0.
-        #if self.step < 200: alpha = 1. #1.
-        #else: alpha = 0. #0.01
+        #alpha = 0.
+        if self.step < 200: alpha = 1. #1.
+        else: alpha = 0. #0.01
 
         # denoiser loss
         denoiser_loss = self.diffusion.loss(residual, blur)
