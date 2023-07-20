@@ -343,7 +343,7 @@ class Trainer():
         #else: alpha = 0. #0.01
 
         # denoiser loss
-        denoiser_loss = self.diffusion.loss(residual, blur)
+        denoiser_loss = self.diffusion.loss(residual, blur) * 0.1
 
         # initial predictor loss
         regression_loss = alpha * F.mse_loss(sharp, init)
