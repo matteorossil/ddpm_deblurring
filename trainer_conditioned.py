@@ -339,8 +339,8 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.
-        if self.step < 200: alpha = 1. #1.
-        else: alpha = 0. #0.01
+        #if self.step < 200: alpha = 1. #1.
+        #else: alpha = 0. #0.01
 
         # denoiser loss
         denoiser_loss = self.diffusion.loss(residual, blur)
@@ -364,7 +364,7 @@ class Trainer():
 
         # clip gradients
         nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-        nn.utils.clip_grad_norm_(self.params_init, 0.0001)
+        nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
         # Take an optimization step
         self.optimizer.step()
