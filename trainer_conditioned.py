@@ -100,7 +100,7 @@ class Trainer():
     # ema decay
     betas = (0.9, 0.999)
     # Number of training epochs
-    epochs: int = 10_000
+    epochs: int = 1_000_000
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
@@ -339,7 +339,7 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.
-        if self.step < 200: alpha = 1. #1.
+        if self.step < 1_000: alpha = 1. #1.
         else: alpha = 0. #0.01
 
         # denoiser loss
