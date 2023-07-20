@@ -164,17 +164,13 @@ class DenoiseDiffusion:
         self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
         self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
         self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
-        print("R:", self.R[-1])
-        print("G:", self.G[-1])
-        print("B:", self.B[-1])
-        print()
 
         self.t_step += 1
 
         r_eps_theta = torch.mean(eps_theta[:,0,:,:])
         g_eps_theta= torch.mean(eps_theta[:,1,:,:])
         b_eps_theta = torch.mean(eps_theta[:,2,:,:])
-        regularizer = 10 * (torch.abs(r_eps_theta) + torch.abs(g_eps_theta) + torch.abs(b_eps_theta))
+        regularizer = (torch.abs(r_eps_theta) + torch.abs(g_eps_theta) + torch.abs(b_eps_theta))
         #regularizer = F.threshold(regularizer, 0.02, 0.)
         #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
