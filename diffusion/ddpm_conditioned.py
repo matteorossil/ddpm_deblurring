@@ -150,12 +150,12 @@ class DenoiseDiffusion:
         xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
 
         # predict noise
-        eps_theta = self.eps_model(xt_, t)
+        eps_theta = self.eps_model(xt_, t) * 0.001
         save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
 
-        self.R.append(torch.mean(eps_theta[:,0,:,:] * 0.0001).item())
-        self.G.append(torch.mean(eps_theta[:,1,:,:] * 0.0001).item())
-        self.B.append(torch.mean(eps_theta[:,2,:,:] * 0.0001).item())
+        self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
+        self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
+        self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
 
         self.t_step += 1
 
