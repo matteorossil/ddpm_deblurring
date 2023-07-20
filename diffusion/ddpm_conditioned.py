@@ -174,7 +174,7 @@ class DenoiseDiffusion:
         r_eps_theta = torch.mean(eps_theta[:,0,:,:])
         g_eps_theta= torch.mean(eps_theta[:,1,:,:])
         b_eps_theta = torch.mean(eps_theta[:,2,:,:])
-        regularizer = (F.l1_loss(0., r_eps_theta) + F.l1_loss(0., g_eps_theta)+ F.l1_loss(0., b_eps_theta))
+        regularizer = r_eps_theta + g_eps_theta + b_eps_theta
         regularizer = F.threshold(regularizer, 0.02, 0.)
         #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
