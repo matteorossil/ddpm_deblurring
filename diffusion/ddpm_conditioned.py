@@ -52,6 +52,10 @@ class DenoiseDiffusion:
         self.G = []
         self.B = []
 
+        self.R_std = []
+        self.G_std = []
+        self.B_std = []
+
         self.R_noise = []
         self.G_noise = []
         self.B_noise = []
@@ -164,6 +168,10 @@ class DenoiseDiffusion:
         self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
         self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
         self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
+
+        self.R_std.append(torch.std(eps_theta[:,0,:,:]).item())
+        self.G_std.append(torch.std(eps_theta[:,1,:,:]).item())
+        self.B_std.append(torch.std(eps_theta[:,2,:,:]).item())
 
         self.t_step += 1
 
