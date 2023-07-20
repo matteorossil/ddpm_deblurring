@@ -164,6 +164,10 @@ class DenoiseDiffusion:
         self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
         self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
         self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
+        print("R:", self.R[-1])
+        print("G:", self.G[-1])
+        print("B:", self.B[-1])
+        print()
 
         self.t_step += 1
 
