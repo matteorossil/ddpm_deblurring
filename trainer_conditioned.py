@@ -339,7 +339,7 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         alpha = 0.
-        if self.step < 100: alpha = 1. #1.
+        if self.step < 200: alpha = 1. #1.
         else: alpha = 0. #0.01
 
         # denoiser loss
