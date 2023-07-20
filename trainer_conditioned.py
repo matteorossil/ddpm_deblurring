@@ -411,7 +411,9 @@ class Trainer():
                 title = f"Noise, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
                 title = f"Xt, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
+                plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="residual_with_noise_")
+                title = f"X0, B:{self.batch_size}"
+                plot_channels(steps, self.diffusion.R_x0, self.diffusion.G_x0, self.diffusion.B_x0, self.exp_path, title=title, ext="residual_")
                 #print("Time:", self.diffusion.T_noise)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 

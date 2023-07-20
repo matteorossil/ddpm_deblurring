@@ -60,6 +60,10 @@ class DenoiseDiffusion:
         self.G_xt = []
         self.B_xt = []
 
+        self.R_x0 = []
+        self.G_x0 = []
+        self.B_x0 = []
+
         self.T_noise = []
 
         self.t_step = 0
@@ -125,6 +129,10 @@ class DenoiseDiffusion:
         """
         # Get batch size
         batch_size = sharp.shape[0]
+
+        self.R_x0.append(torch.mean(sharp[:,0,:,:]).item())
+        self.G_x0.append(torch.mean(sharp[:,1,:,:]).item())
+        self.B_x0.append(torch.mean(sharp[:,2,:,:]).item())
 
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=sharp.device, dtype=torch.long)
