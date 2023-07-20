@@ -94,7 +94,7 @@ class Trainer():
     batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
-    learning_rate_init: float = 1e-5
+    learning_rate_init: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -364,7 +364,7 @@ class Trainer():
 
         # clip gradients
         nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-        nn.utils.clip_grad_norm_(self.params_init, 0.01)
+        nn.utils.clip_grad_norm_(self.params_init, 0.0001)
 
         # Take an optimization step
         self.optimizer.step()
