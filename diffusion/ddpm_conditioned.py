@@ -154,9 +154,16 @@ class DenoiseDiffusion:
         std_g = torch.std(eps_theta[:,1,:,:])
         std_b = torch.std(eps_theta[:,2,:,:])
 
-        self.means.append(torch.std(torch.cat((mean_r.reshape(1), mean_g.reshape(1), mean_b.reshape(1)))).item())
-        self.stds.append(torch.std(torch.cat((std_r.reshape(1), std_g.reshape(1), std_b.reshape(1)))).item())
-
+        # compute variance of means and stds
+        means = torch.cat((mean_r.reshape(1), mean_g.reshape(1), mean_b.reshape(1)))
+        stds = torch.cat((std_r.reshape(1), std_g.reshape(1), std_b.reshape(1)))
+        if self.means == []:
+            self.means.append(torch.std(means).item())
+            self.stds.append(torch.std(stds).item())
+        else:
+            self.means.append((self.means[-1] * len(self.means) + torch.std(means).item()) / (len(self.means) + 1))
+            self.stds.append((self.stds[-1] * len(self.stds) + torch.std(stds).item()) / (len(self.stds) + 1))
+            
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
         #return F.l1_loss(noise, eps_theta)
