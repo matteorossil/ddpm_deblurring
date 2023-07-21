@@ -167,7 +167,7 @@ class DenoiseDiffusion:
         self.means_green.append(mean_g.item())
         self.means_blue.append(mean_b.item())
 
-        self.diff.append(F.mse_loss(torch.mean(noise[:,0,:,:]), mean_r).item())
+        self.diff.append(F.mse_loss(noise[:,0,:,:], eps_theta[:,0,:,:]).item())
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
