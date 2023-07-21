@@ -56,8 +56,9 @@ class DenoiseDiffusion:
         self.means = []
         self.stds = []
 
-        self.means_blue = []
         self.means_red = []
+        self.means_greene = []
+        self.means_blue = []
 
         self.t_step = 0
 
@@ -163,6 +164,8 @@ class DenoiseDiffusion:
         # compute variance of means and stds
         means = torch.cat((mean_r.reshape(1), mean_g.reshape(1), mean_b.reshape(1)))
         stds = torch.cat((std_r.reshape(1), std_g.reshape(1), std_b.reshape(1)))
+
+        self.means_red.append(mean_g.item())
 
         if self.means == []:
             self.var_means.append(torch.std(means).item())

@@ -352,7 +352,7 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         #alpha = 1.
-        if self.step < 5_000: alpha = 1. #1.
+        if self.step < 1_000: alpha = 1. #1.
         else: alpha = 0. #0.01
 
         # denoiser loss
@@ -420,21 +420,25 @@ class Trainer():
             if (self.step % 100 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
-                title = f"Variance of Means, B:{self.batch_size}"
-                plot(steps, self.diffusion.var_means, self.exp_path, title=title, ext="variance_means")
-                title = f"Variance of Stds, B:{self.batch_size}"
-                plot(steps, self.diffusion.var_stds, self.exp_path, title=title, ext="variance_stds")
+                
+                #title = f"Variance of Means, B:{self.batch_size}"
+                #plot(steps, self.diffusion.var_means, self.exp_path, title=title, ext="variance_means")
+                #title = f"Variance of Stds, B:{self.batch_size}"
+                #plot(steps, self.diffusion.var_stds, self.exp_path, title=title, ext="variance_stds")
 
-                title = f"Average of Means, B:{self.batch_size}"
-                plot(steps, self.diffusion.means, self.exp_path, title=title, ext="average_means")
-                title = f"Average of Stds, B:{self.batch_size}"
-                plot(steps, self.diffusion.stds, self.exp_path, title=title, ext="average_stds")
+                #title = f"Average of Means, B:{self.batch_size}"
+                #plot(steps, self.diffusion.means, self.exp_path, title=title, ext="average_means")
+                #title = f"Average of Stds, B:{self.batch_size}"
+                #plot(steps, self.diffusion.stds, self.exp_path, title=title, ext="average_stds")
 
                 title = f"Average of Mean Blue, B:{self.batch_size}"
                 plot(steps, self.diffusion.means_blue, self.exp_path, title=title, ext="average_blue")
 
                 title = f"Average of Mean Red, B:{self.batch_size}"
                 plot(steps, self.diffusion.means_red, self.exp_path, title=title, ext="average_red")
+
+                title = f"Average of Mean Greene, B:{self.batch_size}"
+                plot(steps, self.diffusion.means_greene, self.exp_path, title=title, ext="average_greene")
 
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
