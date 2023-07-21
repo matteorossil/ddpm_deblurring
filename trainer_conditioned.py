@@ -438,7 +438,7 @@ class Trainer():
                 title = f"Variance of Means & Stds, B:{self.batch_size}"
                 plot(steps, self.diffusion.var_means, self.diffusion.var_stds, self.exp_path, title=title)
                 title = f"Average of Means % Stds, B:{self.batch_size}"
-                plot(steps, self.diffusion.means, self.diffusion.stds, self.exp_path, title=title)
+                plot2(steps, self.diffusion.means, self.diffusion.stds, self.exp_path, title=title)
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
                 #title = f"X0, B:{self.batch_size}"
