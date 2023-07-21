@@ -119,11 +119,11 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    store_checkpoints: str = '/home/mr6744/ckpts/'
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/checkpoints_conditioned/'
+    #store_checkpoints: str = '/home/mr6744/ckpts/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro_small/'
-    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
+    #dataset: str = '/home/mr6744/gopro_small/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
     ckpt_initP_epoch: int = 0
@@ -185,14 +185,14 @@ class Trainer():
                                             num_workers=16, # os.cpu_count() // 4,
                                             drop_last=True, 
                                             shuffle=False, 
-                                            pin_memory=True,
+                                            pin_memory=False,
                                             sampler=DistributedSampler(dataset_train))
         
         self.dataloader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
                                           num_workers=0, # os.cpu_count() // 4,
                                           drop_last=True, 
-                                          shuffle=False, 
+                                          shuffle=False,
                                           pin_memory=False,
                                           sampler=DistributedSampler(dataset_val, shuffle=False))
 
@@ -432,7 +432,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12356" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -466,6 +466,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    world_size = 1
+    world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    #world_size = 1
     mp.spawn(main, args=(world_size,), nprocs=world_size)
