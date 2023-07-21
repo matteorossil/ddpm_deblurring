@@ -431,14 +431,14 @@ class Trainer():
                 #title = f"Average of Stds, B:{self.batch_size}"
                 #plot(steps, self.diffusion.stds, self.exp_path, title=title, ext="average_stds")
 
-                title = f"Blue, B:{self.batch_size}"
-                plot(steps, self.diffusion.means_blue, self.exp_path, title=title, ext="blue")
+                #title = f"Blue, B:{self.batch_size}"
+                #plot(steps, self.diffusion.means_blue, self.exp_path, title=title, ext="blue")
 
-                title = f"Red, B:{self.batch_size}"
-                plot(steps, self.diffusion.means_red, self.exp_path, title=title, ext="red")
+                #title = f"Red, B:{self.batch_size}"
+                #plot(steps, self.diffusion.means_red, self.exp_path, title=title, ext="red")
 
-                title = f"Average of Mean Greene, B:{self.batch_size}"
-                plot(steps, self.diffusion.means_green, self.exp_path, title=title, ext="green")
+                #title = f"Average of Mean Greene, B:{self.batch_size}"
+                #plot(steps, self.diffusion.means_green, self.exp_path, title=title, ext="green")
 
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
