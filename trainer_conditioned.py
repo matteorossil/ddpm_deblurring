@@ -55,31 +55,16 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
     plt.figure().clear()
     plt.close('all')
 
-def plot(steps, M, V, path, title, ext=""):
+def plot(steps, Y, path, title, ext=""):
 
-    plt.plot(steps, M, label="means", color='r')
-    plt.plot(steps, V, label="stds", color='b')
+    plt.plot(steps, Y, label="means", color='r')
 
     plt.xlabel("training steps")
-    plt.ylabel("variance")
+    plt.ylabel(ext)
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/variance_step{steps[-1]+1}.png')
-    plt.figure().clear()
-    plt.close('all')
-
-def plot2(steps, M, V, path, title, ext=""):
-
-    plt.plot(steps, M, label="means", color='r')
-    plt.plot(steps, V, label="stds", color='b')
-
-    plt.xlabel("training steps")
-    plt.ylabel("means")
-    plt.legend()
-    plt.title(title)
-    #plt.show()
-    plt.savefig(path + f'/means_step{steps[-1]+1}.png')
+    plt.savefig(path + f'/{ext}_step{steps[-1]+1}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -435,10 +420,16 @@ class Trainer():
             if (self.step % 100 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
-                title = f"Variance of Means & Stds, B:{self.batch_size}"
-                plot(steps, self.diffusion.var_means, self.diffusion.var_stds, self.exp_path, title=title)
-                title = f"Average of Means % Stds, B:{self.batch_size}"
-                plot2(steps, self.diffusion.means, self.diffusion.stds, self.exp_path, title=title)
+                title = f"Variance of Means, B:{self.batch_size}"
+                plot(steps, self.diffusion.var_means, self.exp_path, title=title, ext="variance_means")
+                title = f"Variance of Stds, B:{self.batch_size}"
+                plot(steps, self.diffusion.var_stds, self.exp_path, title=title, ext="variance_stds")
+
+                title = f"Average of Means, B:{self.batch_size}"
+                plot(steps, self.diffusion.means, self.exp_path, title=title, ext="average_means")
+                title = f"Average of Stds, B:{self.batch_size}"
+                plot(steps, self.diffusion.stds, self.exp_path, title=title, ext="average_stds")
+
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
                 #title = f"X0, B:{self.batch_size}"
