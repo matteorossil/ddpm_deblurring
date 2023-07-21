@@ -55,6 +55,19 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
     plt.figure().clear()
     plt.close('all')
 
+def plot(steps, Y, path, title, ext=""):
+
+    plt.plot(steps, Y, label='red', color='r')
+
+    plt.xlabel("training steps")
+    plt.ylabel("variance")
+    plt.legend()
+    plt.title(title)
+    #plt.show()
+    plt.savefig(path + f'/variance_{ext}step{steps[-1]+1}.png')
+    plt.figure().clear()
+    plt.close('all')
+
 def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title):
 
     plt.plot(steps, metric_init, label=label_init, color='b')
@@ -339,7 +352,7 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         #alpha = 1.
-        if self.step < 6_000: alpha = 1. #1.
+        if self.step < 5_000: alpha = 1. #1.
         else: alpha = 0. #0.01
 
         # denoiser loss
@@ -407,12 +420,10 @@ class Trainer():
             if (self.step % 100 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
-                title = f"Denoiser - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title, ext="denoiser_")
-                #title = f"Denoiser Std - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                #plot_channels(steps, self.diffusion.R_std, self.diffusion.G_std, self.diffusion.B_std, self.exp_path, title=title, ext="denoiser_std_")
-                #title = f"Noise, B:{self.batch_size}"
-                #plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
+                title = f"Variance Means, B:{self.batch_size}"
+                plot(steps, self.diffusion.means, self.exp_path, title=title, ext="means_")
+                title = f"Variance Stds, B:{self.batch_size}"
+                plot(steps, self.diffusion.stds, self.exp_path, title=title, ext="stds_")
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
                 #title = f"X0, B:{self.batch_size}"

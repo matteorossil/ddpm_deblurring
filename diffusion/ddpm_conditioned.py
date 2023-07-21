@@ -50,27 +50,8 @@ class DenoiseDiffusion:
         self.sigma2 = self.beta
         self.has_copy = False
 
-        self.R = []
-        self.G = []
-        self.B = []
-
-        self.R_std = []
-        self.G_std = []
-        self.B_std = []
-
-        self.R_noise = []
-        self.G_noise = []
-        self.B_noise = []
-
-        self.R_xt = []
-        self.G_xt = []
-        self.B_xt = []
-
-        self.R_x0 = []
-        self.G_x0 = []
-        self.B_x0 = []
-
-        self.T_noise = []
+        self.means = []
+        self.stds = []
 
         self.t_step = 0
 
@@ -136,10 +117,6 @@ class DenoiseDiffusion:
         # Get batch size
         batch_size = sharp.shape[0]
 
-        self.R_x0.append(torch.mean(sharp[:,0,:,:]).item())
-        self.G_x0.append(torch.mean(sharp[:,1,:,:]).item())
-        self.B_x0.append(torch.mean(sharp[:,2,:,:]).item())
-
         # Get random $t$ for each sample in the batch
         t = torch.randint(0, self.n_steps, (batch_size,), device=sharp.device, dtype=torch.long)
         #print("sampled time:", t.item())
@@ -148,17 +125,9 @@ class DenoiseDiffusion:
         if noise is None:
             noise = torch.randn_like(sharp)
 
-        self.R_noise.append(torch.mean(noise[:,0,:,:]).item())
-        self.G_noise.append(torch.mean(noise[:,1,:,:]).item())
-        self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
-
         xt = self.q_sample(sharp, t, eps=noise)
         #save_image(xt, os.path.join(self.path, f'xt_{self.t_step}_{t.item()}.png'))
         #save_image(noise, os.path.join(self.path, f'noise_{self.t_step}_{t.item()}.png'))
-
-        self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
-        self.G_xt.append(torch.mean(xt[:,1,:,:]).item())
-        self.B_xt.append(torch.mean(xt[:,2,:,:]).item())
 
         # concatenate channel wise for conditioning
         xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
@@ -166,14 +135,6 @@ class DenoiseDiffusion:
         # predict noise
         eps_theta = self.eps_model(xt_, t)
         #save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
-
-        self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
-        self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
-        self.B.append(torch.mean(eps_theta[:,2,:,:]).item())
-
-        self.R_std.append(torch.std(eps_theta[:,0,:,:]).item())
-        self.G_std.append(torch.std(eps_theta[:,1,:,:]).item())
-        self.B_std.append(torch.std(eps_theta[:,2,:,:]).item())
 
         self.t_step += 1
 
@@ -185,16 +146,19 @@ class DenoiseDiffusion:
         regularizer_mean = torch.tensor([0.], device=self.device, requires_grad=False)
         regularizer_std = torch.tensor([0.], device=self.device, requires_grad=False)
 
-        mean_r = torch.mean(eps_theta[:,0,:,:]).item()
-        mean_g = torch.mean(eps_theta[:,1,:,:]).item()
-        mean_b = torch.mean(eps_theta[:,2,:,:]).item()
+        mean_r = torch.mean(eps_theta[:,0,:,:])
+        mean_g = torch.mean(eps_theta[:,1,:,:])
+        mean_b = torch.mean(eps_theta[:,2,:,:])
 
-        std_r = torch.std(eps_theta[:,0,:,:]).item()
-        std_g = torch.std(eps_theta[:,1,:,:]).item()
-        std_b = torch.std(eps_theta[:,2,:,:]).item()
+        std_r = torch.std(eps_theta[:,0,:,:])
+        std_g = torch.std(eps_theta[:,1,:,:])
+        std_b = torch.std(eps_theta[:,2,:,:])
+
+        self.means.append(torch.std(torch.concat((mean_r, mean_g, mean_b))).item())
+        self.stds.append(torch.std(torch.concat((std_r, std_g, std_b))).item())
 
         # Compute MSE loss
-        return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r, mean_g, mean_b, std_r, std_g, std_b
+        return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
         #return F.l1_loss(noise, eps_theta)
 
     def save_model_copy(self):
