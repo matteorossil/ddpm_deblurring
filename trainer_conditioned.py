@@ -349,7 +349,7 @@ class Trainer():
         regression_loss = alpha * F.mse_loss(sharp, init)
 
         # final loss
-        loss = denoiser_loss + regression_loss + regularizer_init + regularizer_denoiser_mean + regularizer_denoiser_std
+        loss = denoiser_loss + regression_loss #+ regularizer_init + regularizer_denoiser_mean + regularizer_denoiser_std
 
         print('epoch: {:4d}, step: {:4d}, tot_loss: {:.4f}, denoiser_loss: {:.4f}, regression_loss: {:.4f}, regularizer_init: {:.4f}, regularizer_denoiser_mean: {:.4f}, regularizer_denoiser_std: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), regularizer_denoiser_mean.item(), regularizer_denoiser_std.item()))
         loss_.append(loss.item())
@@ -410,12 +410,12 @@ class Trainer():
                 plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title, ext="denoiser_")
                 title = f"Denoiser Std - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R_std, self.diffusion.G_std, self.diffusion.B_std, self.exp_path, title=title, ext="denoiser_std_")
-                title = f"Noise, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
+                #title = f"Noise, B:{self.batch_size}"
+                #plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
                 title = f"Xt, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="residual_with_noise_")
-                title = f"X0, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R_x0, self.diffusion.G_x0, self.diffusion.B_x0, self.exp_path, title=title, ext="residual_")
+                plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
+                #title = f"X0, B:{self.batch_size}"
+                #plot_channels(steps, self.diffusion.R_x0, self.diffusion.G_x0, self.diffusion.B_x0, self.exp_path, title=title, ext="x0_")
                 #print("Time:", self.diffusion.T_noise)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
