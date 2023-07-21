@@ -300,7 +300,7 @@ class Trainer():
 
         # get initial prediction
         init = self.diffusion.predictor(blur)
-        save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
+        #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
         # compute residual
         residual = sharp - init

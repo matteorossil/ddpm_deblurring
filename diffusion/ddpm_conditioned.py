@@ -78,7 +78,7 @@ class DenoiseDiffusion:
         """
         # compute mean
         mean = gather(self.alpha_bar, t) ** 0.5 * x0
-        save_image(x0, os.path.join(self.path, f'x0_{self.t_step}_{t.item()}.png'))
+        #save_image(x0, os.path.join(self.path, f'x0_{self.t_step}_{t.item()}.png'))
         #save_image(mean, os.path.join(self.path, f'mean_{self.t_step}_{t.item()}.png'))
 
         # compute variance
