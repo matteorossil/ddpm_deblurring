@@ -35,6 +35,8 @@ class DenoiseDiffusion:
         # initial predictor
         self.predictor = predictor
 
+        self.device = device
+
         # Create linearly increasing variance schedule
         self.beta = torch.linspace(beta_0, beta_T, n_steps).to(device)
 
@@ -180,8 +182,8 @@ class DenoiseDiffusion:
         regularizer_mean = torch.abs(eps_theta_mean)
         regularizer_std = torch.abs(1. - eps_theta_std)
         #regularizer = F.threshold(regularizer, 0.02, 0.)
-        regularizer_mean = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
-        regularizer_std = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        regularizer_mean = torch.tensor([0.], device=self.device, requires_grad=False)
+        regularizer_std = torch.tensor([0.], device=self.device, requires_grad=False)
 
         mean_r = torch.mean(eps_theta[:,0,:,:].item())
         mean_g = torch.mean(eps_theta[:,1,:,:].item())
