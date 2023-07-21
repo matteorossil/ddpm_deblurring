@@ -104,7 +104,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 1
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 1e-4
@@ -185,7 +185,7 @@ class Trainer():
                                             num_workers=16, # os.cpu_count() // 4,
                                             drop_last=True, 
                                             shuffle=False, 
-                                            pin_memory=False,
+                                            pin_memory=True,
                                             sampler=DistributedSampler(dataset_train))
         
         self.dataloader_val = DataLoader(dataset=dataset_val, 
@@ -194,7 +194,7 @@ class Trainer():
                                           drop_last=True, 
                                           shuffle=False, 
                                           pin_memory=False,
-                                          sampler=DistributedSampler(dataset_val))
+                                          sampler=DistributedSampler(dataset_val, shuffle=False))
 
         # Create optimizer
         self.params_denoiser = list(self.denoiser.parameters())
@@ -209,9 +209,6 @@ class Trainer():
 
         # training steps
         self.step = 0
-
-        #sigmoid
-        self.sigmoid = nn.Sigmoid()
 
     def sample(self, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
@@ -284,7 +281,7 @@ class Trainer():
 
             sample_steps.append(self.step)
 
-    def train(self, epoch, steps, R, G, B, loss_, ch_blur):
+    def train(self, epoch, steps, R, G, B, ch_blur):
         """
         ### Train
         """
@@ -365,8 +362,6 @@ class Trainer():
             loss = denoiser_loss + regression_loss #+ regularizer_init + regularizer_denoiser_mean + regularizer_denoiser_std
 
             print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r, mean_g, mean_b, std_r, std_g, std_b))
-            
-            loss_.append(loss.item())
 
             # Compute gradients
             loss.backward()
@@ -374,7 +369,6 @@ class Trainer():
             #print("############ GRAD OUTPUT ############")
             #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
             #print("Grad bias init:", self.initP.module.final.bias.grad)
-            #print()
 
             # clip gradients
             nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
@@ -398,7 +392,7 @@ class Trainer():
         G = []
         B = []
         steps = []
-        loss_ = []
+
         ch_blur = []
 
         sample_steps= [] # stores the step at which you sample
@@ -411,11 +405,11 @@ class Trainer():
 
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
-                #pass 
-                self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                pass 
+                #self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
 
             # train
-            self.train(epoch+1, steps, R, G, B, loss_, ch_blur)
+            self.train(epoch+1, steps, R, G, B, ch_blur)
 
             if (self.step % 500 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
