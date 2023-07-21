@@ -42,9 +42,9 @@ def get_exp_path(path=''):
 
 def plot_channels(steps, R, G, B, path, title, ext=""):
 
-    plt.plot(steps[-50:], R[-50:], label='red', color='r')
-    plt.plot(steps[-50:], G[-50:], label='green', color='g')
-    plt.plot(steps[-50:], B[-50:], label='blu', color='b')
+    plt.plot(steps, R, label='red', color='r')
+    plt.plot(steps, G, label='green', color='g')
+    plt.plot(steps, B, label='blu', color='b')
 
     plt.xlabel("training steps")
     plt.ylabel("channel average")
@@ -57,7 +57,7 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
 
 def plot(steps, Y, path, title, ext=""):
 
-    plt.plot(steps[-50:], Y[-50:], label="means", color='r')
+    plt.plot(steps, Y, label="means", color='r')
 
     plt.xlabel("training steps")
     plt.ylabel(ext)
