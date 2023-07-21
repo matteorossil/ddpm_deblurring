@@ -56,6 +56,8 @@ class DenoiseDiffusion:
         self.means = []
         self.stds = []
 
+        self.means_blue = []
+
         self.t_step = 0
 
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -167,12 +169,17 @@ class DenoiseDiffusion:
 
             self.means.append(torch.mean(means).item())
             self.stds.append(torch.mean(stds).item())
+
+            self.means_blue.append(mean_b.item())
+
         else:
             self.var_means.append((self.var_means[-1] * len(self.var_means) + torch.std(means).item()) / (len(self.var_means) + 1))
             self.var_stds.append((self.var_stds[-1] * len(self.var_stds) + torch.std(stds).item()) / (len(self.var_stds) + 1))
 
             self.means.append((self.means[-1] * len(self.means) + torch.mean(means).item()) / (len(self.means) + 1))
             self.stds.append((self.stds[-1] * len(self.stds) + torch.mean(stds).item()) / (len(self.stds) + 1))
+
+            self.means_blue.append((self.means_blue[-1] * len(self.means_blue) + mean_b.item()) / (len(self.means_blue) + 1))
             
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
