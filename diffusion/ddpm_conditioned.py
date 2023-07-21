@@ -50,18 +50,6 @@ class DenoiseDiffusion:
         self.sigma2 = self.beta
         self.has_copy = False
 
-        self.var_means = []
-        self.var_stds = []
-
-        self.means = []
-        self.stds = []
-
-        self.means_red = []
-        self.means_green = []
-        self.means_blue = []
-
-        self.diff = []
-
         self.t_step = 0
 
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -139,7 +127,7 @@ class DenoiseDiffusion:
         #save_image(noise, os.path.join(self.path, f'noise_{self.t_step}_{t.item()}.png'))
 
         # concatenate channel wise for conditioning
-        xt_ = torch.cat((xt, self.predictor(blur)), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
+        xt_ = torch.cat((xt, blur), dim=1) # or xt_ = torch.cat((xt, init), dim=1), different conditioning
 
         # predict noise
         eps_theta = self.eps_model(xt_, t)
@@ -162,10 +150,6 @@ class DenoiseDiffusion:
         std_r = torch.std(eps_theta[:,0,:,:])
         std_g = torch.std(eps_theta[:,1,:,:])
         std_b = torch.std(eps_theta[:,2,:,:])
-
-        self.means_red.append(mean_r.item())
-        self.means_green.append(mean_g.item())
-        self.means_blue.append(mean_b.item())
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
