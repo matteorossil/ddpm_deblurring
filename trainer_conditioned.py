@@ -351,7 +351,7 @@ class Trainer():
         # final loss
         loss = denoiser_loss + regression_loss #+ regularizer_init + regularizer_denoiser_mean + regularizer_denoiser_std
 
-        print('epoch: {:4d}, step: {:4d}, tot_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:.2f}, D_mean_g: {:.2f}, D_mean_b: {:.2f}, D_std_r: {:.2f}, D_std_r: {:.2f}, denoiser_std_r: {:.2f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r, mean_g, mean_b, std_r, std_g, std_b))
+        print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:.4f}, D_mean_g: {:.4f}, D_mean_b: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r, mean_g, mean_b, std_r, std_g, std_b))
         
         loss_.append(loss.item())
 
