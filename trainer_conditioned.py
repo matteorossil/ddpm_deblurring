@@ -42,9 +42,9 @@ def get_exp_path(path=''):
 
 def plot_channels(steps, R, G, B, path, title, ext=""):
 
-    plt.plot(steps[-100:], R[-100:], label='red', color='r')
-    plt.plot(steps[-100:], G[-100:], label='green', color='g')
-    plt.plot(steps[-100:], B[-100:], label='blu', color='b')
+    plt.plot(steps[-50:], R[-50:], label='red', color='r')
+    plt.plot(steps[-50:], G[-50:], label='green', color='g')
+    plt.plot(steps[-50:], B[-50:], label='blu', color='b')
 
     plt.xlabel("training steps")
     plt.ylabel("channel average")
@@ -57,7 +57,7 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
 
 def plot(steps, Y, path, title, ext=""):
 
-    plt.plot(steps[-100:], Y[-100:], label="means", color='r')
+    plt.plot(steps[-50:], Y[-50:], label="means", color='r')
 
     plt.xlabel("training steps")
     plt.ylabel(ext)
@@ -352,7 +352,7 @@ class Trainer():
 
         #### REGRESSION LOSS INIT ####
         #alpha = 1.
-        if self.step < 1_000: alpha = 1. #1.
+        if self.step < 500: alpha = 1. #1.
         else: alpha = 0. #0.01
 
         # denoiser loss
@@ -438,7 +438,10 @@ class Trainer():
                 plot(steps, self.diffusion.means_red, self.exp_path, title=title, ext="average_red")
 
                 title = f"Average of Mean Greene, B:{self.batch_size}"
-                plot(steps, self.diffusion.means_greene, self.exp_path, title=title, ext="average_greene")
+                plot(steps, self.diffusion.means_green, self.exp_path, title=title, ext="average_greene")
+
+                title = f"Diff Red Channel, B:{self.batch_size}"
+                plot(steps, self.diffusion.diff, self.exp_path, title=title, ext="diff_red")
 
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")

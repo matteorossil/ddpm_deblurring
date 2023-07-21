@@ -57,8 +57,10 @@ class DenoiseDiffusion:
         self.stds = []
 
         self.means_red = []
-        self.means_greene = []
+        self.means_green = []
         self.means_blue = []
+
+        self.diff = []
 
         self.t_step = 0
 
@@ -161,32 +163,12 @@ class DenoiseDiffusion:
         std_g = torch.std(eps_theta[:,1,:,:])
         std_b = torch.std(eps_theta[:,2,:,:])
 
-        # compute variance of means and stds
-        means = torch.cat((mean_r.reshape(1), mean_g.reshape(1), mean_b.reshape(1)))
-        stds = torch.cat((std_r.reshape(1), std_g.reshape(1), std_b.reshape(1)))
+        self.means_red.append(mean_r.item())
+        self.means_green.append(mean_g.item())
+        self.means_blue.append(mean_b.item())
 
-        self.means_greene.append(mean_g.item())
+        self.diff.append(torch.mean(noise[:,0,:,:]).item() - mean_r.item())
 
-        if self.means == []:
-            self.var_means.append(torch.std(means).item())
-            self.var_stds.append(torch.std(stds).item())
-
-            self.means.append(torch.mean(means).item())
-            self.stds.append(torch.mean(stds).item())
-
-            self.means_blue.append(mean_b.item())
-            self.means_red.append(mean_r.item())
-
-        else:
-            self.var_means.append((self.var_means[-1] * len(self.var_means) + torch.std(means).item()) / (len(self.var_means) + 1))
-            self.var_stds.append((self.var_stds[-1] * len(self.var_stds) + torch.std(stds).item()) / (len(self.var_stds) + 1))
-
-            self.means.append((self.means[-1] * len(self.means) + torch.mean(means).item()) / (len(self.means) + 1))
-            self.stds.append((self.stds[-1] * len(self.stds) + torch.mean(stds).item()) / (len(self.stds) + 1))
-
-            self.means_blue.append((self.means_blue[-1] * len(self.means_blue) + mean_b.item()) / (len(self.means_blue) + 1))
-            self.means_red.append((self.means_red[-1] * len(self.means_red) + mean_r.item()) / (len(self.means_red) + 1))
-            
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
         #return F.l1_loss(noise, eps_theta)
