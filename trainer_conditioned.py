@@ -419,7 +419,7 @@ class Trainer():
                 #print("Time:", self.diffusion.T_noise)
                 #plot_loss(steps, ylabel="loss", metric=loss_, path=self.exp_path, title=title)
 
-            if (self.step % 1000 == 0) and (self.gpu_id == 0):
+            if (self.step % 500 == 0) and (self.gpu_id == 0):
                 self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
                 title = f"eval:train, metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)

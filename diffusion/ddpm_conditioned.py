@@ -151,7 +151,7 @@ class DenoiseDiffusion:
         self.B_noise.append(torch.mean(noise[:,2,:,:]).item())
 
         xt = self.q_sample(sharp, t, eps=noise)
-        save_image(xt, os.path.join(self.path, f'xt_{self.t_step}_{t.item()}.png'))
+        #save_image(xt, os.path.join(self.path, f'xt_{self.t_step}_{t.item()}.png'))
         #save_image(noise, os.path.join(self.path, f'noise_{self.t_step}_{t.item()}.png'))
 
         self.R_xt.append(torch.mean(xt[:,0,:,:]).item())
@@ -163,7 +163,7 @@ class DenoiseDiffusion:
 
         # predict noise
         eps_theta = self.eps_model(xt_, t)
-        save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
+        #save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
 
         self.R.append(torch.mean(eps_theta[:,0,:,:]).item())
         self.G.append(torch.mean(eps_theta[:,1,:,:]).item())
