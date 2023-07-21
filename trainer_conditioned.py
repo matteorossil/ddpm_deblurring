@@ -417,7 +417,7 @@ class Trainer():
             # train
             self.train(epoch+1, steps, R, G, B, loss_, ch_blur)
 
-            if (self.step % 100 == 0) and (self.gpu_id == 0):
+            if (self.step % 500 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
@@ -448,13 +448,6 @@ def main(rank: int, world_size:int):
     trainer.init(rank) # initialize trainer class
     #print(trainer.init_predictor)
 
-    if rank == 0:
-        print("Denoiser params:", trainer.num_params_denoiser)
-        print("Initial Predictor params:", trainer.num_params_init)
-        print("Learning rate:", trainer.learning_rate)
-        print("Channel multipliers", trainer.channel_multipliers)
-        print()
-
     #### Track Hyperparameters with WANDB####
     if trainer.wandb and rank == 0:
         
@@ -464,7 +457,14 @@ def main(rank: int, world_size:int):
             config=
             {
             "GPUs": world_size,
-            "GPU Type": torch.cuda.get_device_name(rank)
+            "GPU Type": torch.cuda.get_device_name(rank),
+            "Denoiser params": trainer.num_params_denoiser,
+            "Initial Predictor params": trainer.num_params_init,
+            "Denoiser LR": trainer.learning_rate,
+            "Init Predictor LR": trainer.learning_rate_init,
+            "Batch size": trainer.batch_size,
+            "L2 Loss": False,
+            "Regularizer": True
             }
         )
     ##### ####
