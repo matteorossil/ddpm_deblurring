@@ -57,7 +57,7 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
 
 def plot(steps, Y, path, title, ext=""):
 
-    plt.plot(steps, Y, label="means", color='r')
+    plt.plot(steps[-50:], Y[-50:], label="means", color='r')
 
     plt.xlabel("training steps")
     plt.ylabel(ext)
