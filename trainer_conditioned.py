@@ -338,12 +338,12 @@ class Trainer():
         regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         #### REGRESSION LOSS INIT ####
-        alpha = 1.
-        #if self.step < 1_000: alpha = 1. #1.
-        #else: alpha = 0. #0.01
+        #alpha = 1.
+        if self.step < 6_000: alpha = 1. #1.
+        else: alpha = 0. #0.01
 
         # denoiser loss
-        denoiser_loss, regularizer_denoiser_mean, regularizer_denoiser_std = self.diffusion.loss(residual, blur)
+        denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
 
         # initial predictor loss
         regression_loss = alpha * F.mse_loss(sharp, init)
@@ -351,7 +351,11 @@ class Trainer():
         # final loss
         loss = denoiser_loss + regression_loss #+ regularizer_init + regularizer_denoiser_mean + regularizer_denoiser_std
 
-        print('epoch: {:4d}, step: {:4d}, tot_loss: {:.4f}, denoiser_loss: {:.4f}, regression_loss: {:.4f}, regularizer_init: {:.4f}, regularizer_denoiser_mean: {:.4f}, regularizer_denoiser_std: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), regularizer_denoiser_mean.item(), regularizer_denoiser_std.item()))
+        print('epoch: {:4d}, step: {:4d}, tot_loss: {:.4f}, denoiser_loss: {:.4f}, regression_loss: {:.4f}, reg_init: {:.4f}, reg_denoiser_mean: {:.4f}, \
+              reg_denoiser_std: {:.4f}, denoiser_mean_r: {:.2f}, denoiser_mean_g: {:.2f}, denoiser_mean_b: {:.2f}, denoiser_std_r: {:.2f}, denoiser_std_r: {:.2f}, \
+              denoiser_std_r: {:.2f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), \
+              reg_denoiser_std.item(), mean_r, mean_g, mean_b, std_r, std_g, std_b))
+        
         loss_.append(loss.item())
 
         # Compute gradients
@@ -408,12 +412,12 @@ class Trainer():
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
                 title = f"Denoiser - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 plot_channels(steps, self.diffusion.R, self.diffusion.G, self.diffusion.B, self.exp_path, title=title, ext="denoiser_")
-                title = f"Denoiser Std - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R_std, self.diffusion.G_std, self.diffusion.B_std, self.exp_path, title=title, ext="denoiser_std_")
+                #title = f"Denoiser Std - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
+                #plot_channels(steps, self.diffusion.R_std, self.diffusion.G_std, self.diffusion.B_std, self.exp_path, title=title, ext="denoiser_std_")
                 #title = f"Noise, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_noise, self.diffusion.G_noise, self.diffusion.B_noise, self.exp_path, title=title, ext="noise_")
-                title = f"Xt, B:{self.batch_size}"
-                plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
+                #title = f"Xt, B:{self.batch_size}"
+                #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")
                 #title = f"X0, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_x0, self.diffusion.G_x0, self.diffusion.B_x0, self.exp_path, title=title, ext="x0_")
                 #print("Time:", self.diffusion.T_noise)
