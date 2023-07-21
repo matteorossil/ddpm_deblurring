@@ -333,25 +333,25 @@ class Trainer():
         r_blur = torch.mean(blur[:,0,:,:])
         g_blur = torch.mean(blur[:,1,:,:])
         b_blur = torch.mean(blur[:,2,:,:])
-        regularizer = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-        regularizer = F.threshold(regularizer, 0.02, 0.)
-        regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+        regularizer_init = F.threshold(regularizer_init, 0.02, 0.)
+        regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         #### REGRESSION LOSS INIT ####
-        alpha = 0.
-        if self.step < 1_000: alpha = 1. #1.
-        else: alpha = 0. #0.01
+        alpha = 1.
+        #if self.step < 1_000: alpha = 1. #1.
+        #else: alpha = 0. #0.01
 
         # denoiser loss
-        denoiser_loss = self.diffusion.loss(residual, blur)
+        denoiser_loss, regularizer_denoiser_mean, regularizer_denoiser_std = self.diffusion.loss(residual, blur)
 
         # initial predictor loss
         regression_loss = alpha * F.mse_loss(sharp, init)
 
         # final loss
-        loss = denoiser_loss + regression_loss + regularizer
+        loss = denoiser_loss + regression_loss + regularizer_init + regularizer_denoiser_mean + regularizer_denoiser_std
 
-        print('epoch: {:6d}, step: {:6d}, tot_loss: {:.6f}, denoiser_loss: {:.6f}, regression_loss: {:.6f}, regularizer: {:.6f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer.item()))
+        print('epoch: {:4d}, step: {:4d}, tot_loss: {:.4f}, denoiser_loss: {:.4f}, regression_loss: {:.4f}, regularizer_init: {:.4f}, regularizer_denoiser_mean: {:.4f}, regularizer_denoiser_std: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), regularizer_denoiser_mean.item(), regularizer_denoiser_std.item()))
         loss_.append(loss.item())
 
         # Compute gradients

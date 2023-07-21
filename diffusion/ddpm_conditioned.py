@@ -175,15 +175,15 @@ class DenoiseDiffusion:
 
         self.t_step += 1
 
-        r_eps_theta = torch.mean(eps_theta[:,0,:,:])
-        g_eps_theta= torch.mean(eps_theta[:,1,:,:])
-        b_eps_theta = torch.mean(eps_theta[:,2,:,:])
-        regularizer = 10 * (torch.abs(r_eps_theta) + torch.abs(g_eps_theta) + torch.abs(b_eps_theta))
+        eps_theta_mean = torch.mean(eps_theta)
+        eps_theta_std = torch.std(eps_theta)
+        regularizer_mean = 10 * torch.abs(eps_theta_mean)
+        regularizer_std = torch.abs(1. - eps_theta_std)
         #regularizer = F.threshold(regularizer, 0.02, 0.)
         #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
         # Compute MSE loss
-        return F.mse_loss(noise, eps_theta) + regularizer
+        return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std
         #return F.l1_loss(noise, eps_theta)
 
     def save_model_copy(self):
