@@ -185,13 +185,13 @@ class DenoiseDiffusion:
         regularizer_mean = torch.tensor([0.], device=self.device, requires_grad=False)
         regularizer_std = torch.tensor([0.], device=self.device, requires_grad=False)
 
-        mean_r = torch.mean(eps_theta[:,0,:,:].item())
-        mean_g = torch.mean(eps_theta[:,1,:,:].item())
-        mean_b = torch.mean(eps_theta[:,2,:,:].item())
+        mean_r = torch.mean(eps_theta[:,0,:,:]).item()
+        mean_g = torch.mean(eps_theta[:,1,:,:]).item()
+        mean_b = torch.mean(eps_theta[:,2,:,:]).item()
 
-        std_r = torch.std(eps_theta[:,0,:,:].item())
-        std_g = torch.std(eps_theta[:,1,:,:].item())
-        std_b = torch.std(eps_theta[:,2,:,:].item())
+        std_r = torch.std(eps_theta[:,0,:,:]).item()
+        std_g = torch.std(eps_theta[:,1,:,:]).item()
+        std_b = torch.std(eps_theta[:,2,:,:]).item()
 
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r, mean_g, mean_b, std_r, std_g, std_b
