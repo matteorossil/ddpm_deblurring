@@ -42,9 +42,9 @@ def get_exp_path(path=''):
 
 def plot_channels(steps, R, G, B, path, title, ext=""):
 
-    plt.plot(steps, R, label='red', color='r')
-    plt.plot(steps, G, label='green', color='g')
-    plt.plot(steps, B, label='blu', color='b')
+    plt.plot(steps[-100:], R[-100:], label='red', color='r')
+    plt.plot(steps[-100:], G[-100:], label='green', color='g')
+    plt.plot(steps[-100:], B[-100:], label='blu', color='b')
 
     plt.xlabel("training steps")
     plt.ylabel("channel average")
@@ -57,7 +57,7 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
 
 def plot(steps, Y, path, title, ext=""):
 
-    plt.plot(steps[-50:], Y[-50:], label="means", color='r')
+    plt.plot(steps[-100:], Y[-100:], label="means", color='r')
 
     plt.xlabel("training steps")
     plt.ylabel(ext)
@@ -432,6 +432,9 @@ class Trainer():
 
                 title = f"Average of Mean Blue, B:{self.batch_size}"
                 plot(steps, self.diffusion.means_blue, self.exp_path, title=title, ext="average_blue")
+
+                title = f"Average of Mean Red, B:{self.batch_size}"
+                plot(steps, self.diffusion.means_red, self.exp_path, title=title, ext="average_red")
 
                 #title = f"Xt, B:{self.batch_size}"
                 #plot_channels(steps, self.diffusion.R_xt, self.diffusion.G_xt, self.diffusion.B_xt, self.exp_path, title=title, ext="xt_")

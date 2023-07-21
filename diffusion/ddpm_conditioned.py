@@ -57,6 +57,7 @@ class DenoiseDiffusion:
         self.stds = []
 
         self.means_blue = []
+        self.means_red = []
 
         self.t_step = 0
 
@@ -171,6 +172,7 @@ class DenoiseDiffusion:
             self.stds.append(torch.mean(stds).item())
 
             self.means_blue.append(mean_b.item())
+            self.means_red.append(mean_r.item())
 
         else:
             self.var_means.append((self.var_means[-1] * len(self.var_means) + torch.std(means).item()) / (len(self.var_means) + 1))
@@ -180,6 +182,7 @@ class DenoiseDiffusion:
             self.stds.append((self.stds[-1] * len(self.stds) + torch.mean(stds).item()) / (len(self.stds) + 1))
 
             self.means_blue.append((self.means_blue[-1] * len(self.means_blue) + mean_b.item()) / (len(self.means_blue) + 1))
+            self.means_red.append((self.means_red[-1] * len(self.means_red) + mean_r.item()) / (len(self.means_red) + 1))
             
         # Compute MSE loss
         return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
