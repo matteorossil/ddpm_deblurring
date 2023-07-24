@@ -193,7 +193,7 @@ class Trainer():
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
-                                            sampler=DistributedSampler(dataset_train))
+                                            sampler=DistributedSampler(dataset_train, shuffle=False))
         
         self.dataloader_train2 = DataLoader(dataset=dataset_train2, 
                                           batch_size=self.n_samples, 
@@ -201,7 +201,7 @@ class Trainer():
                                           drop_last=True, 
                                           shuffle=False,
                                           pin_memory=False,
-                                          sampler=DistributedSampler(dataset_val, shuffle=False))
+                                          sampler=DistributedSampler(dataset_train2, shuffle=False))
         
         self.dataloader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
