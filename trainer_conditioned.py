@@ -121,7 +121,7 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 8
     # Use wandb
-    wandb: bool = True
+    wandb: bool = False
     # checkpoints path
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
@@ -424,10 +424,10 @@ class Trainer():
 
             # sample at epoch 0
             if (epoch == 0) and (self.gpu_id == 0):
-                #pass 
-                self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step)
+                pass 
+                #self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                #self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                #sample_steps.append(self.step)
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
