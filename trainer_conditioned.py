@@ -192,7 +192,7 @@ class Trainer():
                                             num_workers=os.cpu_count() // 2,
                                             drop_last=True, 
                                             shuffle=False, 
-                                            pin_memory=False,
+                                            pin_memory=True,
                                             sampler=DistributedSampler(dataset_train))
         
         self.dataloader_train2 = DataLoader(dataset=dataset_train2, 
@@ -380,6 +380,8 @@ class Trainer():
 
             # Compute gradients
             loss.backward()
+
+            del loss
 
             #print("############ GRAD OUTPUT ############")
             #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
