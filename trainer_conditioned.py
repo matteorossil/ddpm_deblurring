@@ -433,10 +433,10 @@ class Trainer():
             #self.train(epoch, steps, R, G, B, ch_blur)
             self.train(epoch)
 
-            if ((epoch+1) % 10 == 0) and (self.gpu_id == 0):
+            #if ((epoch+1) % 10 == 0) and (self.gpu_id == 0):
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
-                title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
+                #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
+                #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
             if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
                 self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
