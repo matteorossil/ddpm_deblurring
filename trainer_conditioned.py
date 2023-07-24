@@ -189,7 +189,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=os.cpu_count() // 2,
+                                            num_workers=0, # os.cpu_count() // 2
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
@@ -377,7 +377,7 @@ class Trainer():
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
 
             #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
-            print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}'.format(epoch, self.step+1, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
+            print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}'.format(epoch+1, self.step+1, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
 
             # Compute gradients
             loss.backward()
