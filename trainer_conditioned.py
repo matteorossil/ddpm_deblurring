@@ -104,7 +104,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 8
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 1e-4
@@ -115,7 +115,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000_000
     # Number of samples (evaluation)
-    n_samples: int = 8
+    n_samples: int = 32
     # Use wandb
     wandb: bool = True
     # checkpoints path
@@ -466,6 +466,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    #world_size = 1
+    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    world_size = 1
     mp.spawn(main, args=(world_size,), nprocs=world_size)
