@@ -69,6 +69,8 @@ class Data(Dataset):
         sharp = TF.crop(sharp, i, j, h, w)
         blur = TF.crop(blur, i, j, h, w)
 
+        """""
+
          # random horizontal flip
         if random.random() > 0.5:
             sharp = TF.hflip(sharp)
@@ -84,6 +86,7 @@ class Data(Dataset):
             angle = random.choice(self.angles)
             sharp = TF.rotate(sharp, angle)
             blur = TF.rotate(blur, angle)
+        """
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
 
