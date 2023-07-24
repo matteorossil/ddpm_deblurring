@@ -50,8 +50,6 @@ class DenoiseDiffusion:
         self.sigma2 = self.beta
         self.has_copy = False
 
-        self.t_step = 0
-
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         #### Get q(x_t|x_0) distribution
@@ -133,7 +131,7 @@ class DenoiseDiffusion:
         eps_theta = self.eps_model(xt_, t)
         #save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
 
-        self.t_step += 1
+        """
 
         eps_theta_mean = torch.mean(eps_theta)
         eps_theta_std = torch.std(eps_theta)
@@ -150,10 +148,11 @@ class DenoiseDiffusion:
         std_r = torch.std(eps_theta[:,0,:,:])
         std_g = torch.std(eps_theta[:,1,:,:])
         std_b = torch.std(eps_theta[:,2,:,:])
+        """
 
         # Compute MSE loss
-        return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()
-        #return F.l1_loss(noise, eps_theta)
+        #return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r, mean_g, mean_b, std_r, std_g, std_b
+        return F.mse_loss(noise, eps_theta)
 
     def save_model_copy(self):
         with torch.no_grad():
