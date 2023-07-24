@@ -105,6 +105,8 @@ class Trainer():
     beta_T = 1e-2 # 0.01
     # Batch size
     batch_size: int = 32
+    # Threshold Regularizer
+    threshold = 0.01
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 1e-4
@@ -182,7 +184,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=0, # os.cpu_count() // 4,
+                                            num_workers=os.cpu_count() // 4,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
@@ -344,7 +346,7 @@ class Trainer():
             g_blur = torch.mean(blur[:,1,:,:])
             b_blur = torch.mean(blur[:,2,:,:])
             regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-            regularizer_init = F.threshold(regularizer_init, 0.01, 0.)
+            regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
             #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             #### REGRESSION LOSS INIT ####
@@ -458,7 +460,8 @@ def main(rank: int, world_size:int):
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
             "L2 Loss": False,
-            "Regularizer": True
+            "Regularizer": True,
+            "Regularizer Threshold": trainer.threshold
             }
         )
     ##### ####
