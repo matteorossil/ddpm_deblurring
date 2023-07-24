@@ -72,8 +72,8 @@ def plot_metrics(steps, ylabel, label_init_t, label_deblur_t, label_init_v, labe
 
     plt.plot(steps, metric_init_t, label=label_init_t, color='b')
     plt.plot(steps, metric_deblur_t, label=label_deblur_t, color='r')
-    plt.plot(steps, metric_init_v, label=label_init_v, color='b')
-    plt.plot(steps, metric_deblur_v, label=label_deblur_v, color='r')
+    plt.plot(steps, metric_init_v, label=label_init_v, color='b', linestyle='dashed')
+    plt.plot(steps, metric_deblur_v, label=label_deblur_v, color='r', linestyle='dashed')
 
     plt.xlabel("training steps")
     plt.ylabel(ylabel)
@@ -121,15 +121,15 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # checkpoints path
-    store_checkpoints: str = '/home/mr6744/ckpts/'
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    #store_checkpoints: str = '/home/mr6744/ckpts/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro_small/'
-    #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
-    dataset2: str = '/home/mr6744/gopro_small_val/'
-    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
+    #dataset: str = '/home/mr6744/gopro_small/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
+    #dataset2: str = '/home/mr6744/gopro_small_val/'
+    dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
     ckpt_initP_epoch: int = 0
