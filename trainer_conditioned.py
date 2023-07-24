@@ -104,7 +104,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 8
+    batch_size: int = 32
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 1e-4
