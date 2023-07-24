@@ -313,8 +313,8 @@ class Trainer():
             #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
 
             # get avg channels for blur dataset
-            if self.step == 0:
-                pass
+            #if self.step == 0:
+                #pass
                 # save images blur and sharp image pairs
                 #save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
                 #save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
@@ -333,13 +333,13 @@ class Trainer():
             # store mean value of channels (RED, GREEN, BLUE)
             #steps.append(self.step)
 
-            r = torch.mean(init[:,0,:,:])
+            #r = torch.mean(init[:,0,:,:])
             #R.append(r.item())
 
-            g = torch.mean(init[:,1,:,:])
+            #g = torch.mean(init[:,1,:,:])
             #G.append(g.item())
 
-            b = torch.mean(init[:,2,:,:])
+            #b = torch.mean(init[:,2,:,:])
             #B.append(b.item())
 
             # Make the gradients zero
@@ -354,24 +354,29 @@ class Trainer():
             #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # Compute regularizer 2 (diff blur/init means)
-            r_blur = torch.mean(blur[:,0,:,:])
-            g_blur = torch.mean(blur[:,1,:,:])
-            b_blur = torch.mean(blur[:,2,:,:])
-            regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-            regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
-            #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            #r_blur = torch.mean(blur[:,0,:,:])
+            #g_blur = torch.mean(blur[:,1,:,:])
+            #b_blur = torch.mean(blur[:,2,:,:])
+            #regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+            #regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
+            regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+
+
+            # denoiser loss
+            #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
+            denoiser_loss = self.diffusion.loss(residual, blur)
+
 
             #### REGRESSION LOSS INIT ####
             alpha = 0.
             #if self.step < 500: alpha = 1. #1.
             #else: alpha = 0. #0.01
 
-            # denoiser loss
-            #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
-            denoiser_loss = self.diffusion.loss(residual, blur)
-
             # initial predictor loss
-            regression_loss = alpha * F.mse_loss(sharp, init)
+            if alpha != 0:
+                regression_loss = alpha * F.mse_loss(sharp, init)
+            else:
+                regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
