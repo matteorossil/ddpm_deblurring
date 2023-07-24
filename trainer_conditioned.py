@@ -123,13 +123,13 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    #store_checkpoints: str = '/home/mr6744/ckpts/'
-    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    store_checkpoints: str = '/home/mr6744/ckpts/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    #dataset: str = '/home/mr6744/gopro_small/'
-    dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
-    #dataset2: str = '/home/mr6744/gopro_small_val/'
-    dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
+    dataset: str = '/home/mr6744/gopro_small/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
+    dataset2: str = '/home/mr6744/gopro_small_val/'
+    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
     ckpt_initP_epoch: int = 0
@@ -317,8 +317,8 @@ class Trainer():
             # get avg channels for blur dataset
             if self.step == 0:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
-                save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
+                #save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
+                #save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
                 ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
                 ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
                 ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
