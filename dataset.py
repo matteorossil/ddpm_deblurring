@@ -48,9 +48,9 @@ class Data(Dataset):
 
         assert len(self.sharp_imgs) == len(self.blur_imgs)
 
-    def __len__(self):
-        assert len(self.sharp_imgs) == len(self.blur_imgs)
-        return len(self.sharp_imgs)
+    #def __len__(self):
+        #assert len(self.sharp_imgs) == len(self.blur_imgs)
+        #return len(self.sharp_imgs)
     
     def __getitem__(self, idx):
 
