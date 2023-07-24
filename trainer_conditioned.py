@@ -225,7 +225,7 @@ class Trainer():
         # training steps
         self.step = 0
 
-    def sample(self, dataloader, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample(self, type, dataloader, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         with torch.no_grad():
 
@@ -258,8 +258,8 @@ class Trainer():
 
             if self.step == 0:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'val_sharp.png'))
-                save_image(blur, os.path.join(self.exp_path, f'val_blur.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'{type}_sharp.png'))
+                save_image(blur, os.path.join(self.exp_path, f'{type}_blur.png'))
                 
                 # compute metrics for blur sharp pairs
                 #psnr_sharp_blur = psnr(sharp, blur)
@@ -270,13 +270,13 @@ class Trainer():
                 # savetxt(os.path.join(self.exp_path, f"ssim_sharp_blur_epoch{epoch}.txt"), ssim_sharp_blur)
 
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
+            save_image(init, os.path.join(self.exp_path, f'{type}_init_step{self.step}.png'))
             # save true residual
-            save_image(X_true, os.path.join(self.exp_path, f'residual_true_step{self.step}.png'))
+            save_image(X_true, os.path.join(self.exp_path, f'{type}_residual_true_step{self.step}.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'residual_sampled_step{self.step}.png'))
+            save_image(X, os.path.join(self.exp_path, f'{type}_residual_sampled_step{self.step}.png'))
             # save sampled deblurred
-            save_image(init + X, os.path.join(self.exp_path, f'deblurred_step{self.step}.png'))
+            save_image(init + X, os.path.join(self.exp_path, f'{type}_deblurred_step{self.step}.png'))
 
             # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
@@ -426,8 +426,8 @@ class Trainer():
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
                 #pass 
-                self.sample(self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample(self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                self.sample("train", self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
 
             # train
             self.train(epoch+1, steps, R, G, B, ch_blur)
@@ -437,8 +437,8 @@ class Trainer():
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
             if (self.step % 200 == 0) and (self.gpu_id == 0):
-                self.sample(self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample(self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                self.sample("train", self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 title = f"eval:train,eval, metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
