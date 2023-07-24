@@ -185,7 +185,7 @@ class Trainer():
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         dataset_train2 = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset2, mode="val", size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
@@ -376,7 +376,7 @@ class Trainer():
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
 
             #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
-            print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}'.format(epoch, self.step+1, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
+            print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}'.format(epoch+1, self.step+1, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
 
             # Compute gradients
             loss.backward()
@@ -429,13 +429,13 @@ class Trainer():
                 sample_steps.append(self.step)
 
             # train
-            self.train(epoch+1, steps, R, G, B, ch_blur)
+            self.train(epoch, steps, R, G, B, ch_blur)
 
-            if (epoch % 2 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) % 2 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            if (epoch % 2 == 0) and (self.gpu_id == 0):
+            if ((epoch+1) == 0) and (self.gpu_id == 0):
                 self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step)
