@@ -123,13 +123,13 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    #store_checkpoints: str = '/home/mr6744/ckpts/'
-    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    store_checkpoints: str = '/home/mr6744/ckpts/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    #dataset: str = '/home/mr6744/gopro_small/'
-    dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
-    #dataset2: str = '/home/mr6744/gopro_small_val/'
-    dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
+    dataset: str = '/home/mr6744/gopro_small/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
+    dataset2: str = '/home/mr6744/gopro_small_val/'
+    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
     ckpt_initP_epoch: int = 0
@@ -432,11 +432,11 @@ class Trainer():
             # train
             self.train(epoch+1, steps, R, G, B, ch_blur)
 
-            if (self.step % 500 == 0) and (self.gpu_id == 0):
+            if (self.step % 100 == 0) and (self.gpu_id == 0):
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            if (self.step % 1000 == 0) and (self.gpu_id == 0):
+            if (self.step % 200 == 0) and (self.gpu_id == 0):
                 self.sample(self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample(self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 title = f"eval:train,eval, metric:"
