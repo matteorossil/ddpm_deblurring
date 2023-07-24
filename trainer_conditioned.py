@@ -106,7 +106,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 1
     # Threshold Regularizer
     threshold = 0.01
     # Learning rate
@@ -119,17 +119,17 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000_000
     # Number of samples (evaluation)
-    n_samples: int = 8
+    n_samples: int = 1
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    store_checkpoints: str = '/home/mr6744/ckpts/'
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    #store_checkpoints: str = '/home/mr6744/ckpts/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro_small/'
-    #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
-    dataset2: str = '/home/mr6744/gopro_small_val/'
-    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
+    #dataset: str = '/home/mr6744/gopro_small/'
+    dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
+    #dataset2: str = '/home/mr6744/gopro_small_val/'
+    dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
     ckpt_initP_epoch: int = 0
@@ -193,7 +193,7 @@ class Trainer():
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
-                                            sampler=DistributedSampler(dataset_train, shuffle=False))
+                                            sampler=DistributedSampler(dataset_train))
         
         self.dataloader_train2 = DataLoader(dataset=dataset_train2, 
                                           batch_size=self.n_samples, 
@@ -333,13 +333,13 @@ class Trainer():
             # store mean value of channels (RED, GREEN, BLUE)
             #steps.append(self.step)
 
-            #r = torch.mean(init[:,0,:,:])
+            r = torch.mean(init[:,0,:,:])
             #R.append(r.item())
 
-            #g = torch.mean(init[:,1,:,:])
+            g = torch.mean(init[:,1,:,:])
             #G.append(g.item())
 
-            #b = torch.mean(init[:,2,:,:])
+            b = torch.mean(init[:,2,:,:])
             #B.append(b.item())
 
             # Make the gradients zero
@@ -353,19 +353,17 @@ class Trainer():
             #regularizer = torch.std(rgb) * 10
             #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-            # Compute regularizer 2 (diff blur/init means)
-            #r_blur = torch.mean(blur[:,0,:,:])
-            #g_blur = torch.mean(blur[:,1,:,:])
-            #b_blur = torch.mean(blur[:,2,:,:])
-            #regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-            #regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
-            regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            #### REGULARIZER INIT ####
+            r_blur = torch.mean(blur[:,0,:,:])
+            g_blur = torch.mean(blur[:,1,:,:])
+            b_blur = torch.mean(blur[:,2,:,:])
+            regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+            regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
+            #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-
-            # denoiser loss
+            #### DENOISER LOSS ####
             #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
             denoiser_loss = self.diffusion.loss(residual, blur)
-
 
             #### REGRESSION LOSS INIT ####
             alpha = 0.
