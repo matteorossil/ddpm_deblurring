@@ -121,7 +121,7 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
-    wandb: bool = True
+    wandb: bool = False
     # checkpoints path
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
@@ -225,7 +225,7 @@ class Trainer():
         # training steps
         self.step = 0
 
-    def sample(self, type, dataloader, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample(self, type, dataloader, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         with torch.no_grad():
 
@@ -293,8 +293,6 @@ class Trainer():
             #savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
             psnr_deblur.append(np.mean(psnr_sharp_deblurred))
             ssim_deblur.append(np.mean(ssim_sharp_deblurred))
-
-            sample_steps.append(self.step)
 
     def train(self, epoch, steps, R, G, B, ch_blur):
         """
@@ -378,7 +376,7 @@ class Trainer():
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
 
             #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
-            print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
+            print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}'.format(epoch, self.step+1, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
 
             # Compute gradients
             loss.backward()
@@ -426,8 +424,9 @@ class Trainer():
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
                 #pass 
-                self.sample("train", self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                sample_steps.append(self.step)
 
             # train
             self.train(epoch+1, steps, R, G, B, ch_blur)
@@ -437,9 +436,10 @@ class Trainer():
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
             if (self.step % 200 == 0) and (self.gpu_id == 0):
-                self.sample("train", self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                title = f"eval:train,eval, metric:"
+                self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                sample_steps.append(self.step)
+                title = f"eval:train,eval - metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
