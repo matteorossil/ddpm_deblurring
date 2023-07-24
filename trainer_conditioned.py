@@ -104,7 +104,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 8
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 1e-4
@@ -179,11 +179,10 @@ class Trainer():
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
-        print(len(dataset_val))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=20, # os.cpu_count() // 4,
+                                            num_workers=0, # os.cpu_count() // 4,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
