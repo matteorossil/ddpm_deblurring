@@ -68,10 +68,12 @@ def plot(steps, Y, path, title, ext=""):
     plt.figure().clear()
     plt.close('all')
 
-def plot_metrics(steps, ylabel, label_init, label_deblur, metric_init, metric_deblur, path, title):
+def plot_metrics(steps, ylabel, label_init_t, label_deblur_t, label_init_v, label_deblur_v, metric_init_t, metric_deblur_t, metric_init_v, metric_deblur_v, path, title):
 
-    plt.plot(steps, metric_init, label=label_init, color='b')
-    plt.plot(steps, metric_deblur, label=label_deblur, color='r')
+    plt.plot(steps, metric_init_t, label=label_init_t, color='b')
+    plt.plot(steps, metric_deblur_t, label=label_deblur_t, color='r')
+    plt.plot(steps, metric_init_v, label=label_init_v, color='b')
+    plt.plot(steps, metric_deblur_v, label=label_deblur_v, color='r')
 
     plt.xlabel("training steps")
     plt.ylabel(ylabel)
@@ -126,6 +128,8 @@ class Trainer():
     # dataset path
     dataset: str = '/home/mr6744/gopro_small/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
+    dataset2: str = '/home/mr6744/gopro_small_val/'
+    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
     # load from a checkpoint
     ckpt_denoiser_epoch: int = 0
     ckpt_initP_epoch: int = 0
@@ -180,15 +184,24 @@ class Trainer():
 
         # Create dataloader (shuffle False for validation)
         dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
+        dataset_train2 = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
         dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=os.cpu_count() // 4,
+                                            num_workers=os.cpu_count() // 2,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
                                             sampler=DistributedSampler(dataset_train))
+        
+        self.dataloader_train2 = DataLoader(dataset=dataset_train2, 
+                                          batch_size=self.n_samples, 
+                                          num_workers=0, # os.cpu_count() // 4,
+                                          drop_last=True, 
+                                          shuffle=False,
+                                          pin_memory=False,
+                                          sampler=DistributedSampler(dataset_val, shuffle=False))
         
         self.dataloader_val = DataLoader(dataset=dataset_val, 
                                           batch_size=self.n_samples, 
@@ -212,11 +225,11 @@ class Trainer():
         # training steps
         self.step = 0
 
-    def sample(self, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample(self, dataloader, sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         with torch.no_grad():
 
-            sharp, blur = next(iter(self.dataloader_val))
+            sharp, blur = next(iter(dataloader))
             
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
@@ -398,17 +411,23 @@ class Trainer():
         ch_blur = []
 
         sample_steps= [] # stores the step at which you sample
-        psnr_init = []
-        ssim_init = []
-        psnr_deblur = []
-        ssim_deblur = []
+        psnr_init_t = []
+        ssim_init_t = []
+        psnr_deblur_t = []
+        ssim_deblur_t = []
+
+        psnr_init_v = []
+        ssim_init_v = []
+        psnr_deblur_v = []
+        ssim_deblur_v = []
 
         for epoch in range(self.epochs):
 
             # sample at epoch 0
             if (self.step == 0) and (self.gpu_id == 0):
                 #pass 
-                self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
+                self.sample(self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample(self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
 
             # train
             self.train(epoch+1, steps, R, G, B, ch_blur)
@@ -418,10 +437,11 @@ class Trainer():
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
             if (self.step % 1000 == 0) and (self.gpu_id == 0):
-                self.sample(sample_steps, psnr_init, ssim_init, psnr_deblur, ssim_deblur)
-                title = f"eval:train, metric:"
-                plot_metrics(sample_steps, ylabel="psnr", label_init="init", label_deblur="deblur", metric_init=psnr_init, metric_deblur=psnr_deblur, path=self.exp_path, title=title)
-                plot_metrics(sample_steps, ylabel="ssim", label_init="init", label_deblur="deblur", metric_init=ssim_init, metric_deblur=ssim_deblur, path=self.exp_path, title=title)
+                self.sample(self.dataloader_train2, sample_steps, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample(self.dataloader_val, sample_steps, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                title = f"eval:train,eval, metric:"
+                plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
      
