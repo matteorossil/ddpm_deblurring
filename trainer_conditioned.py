@@ -432,6 +432,7 @@ class Trainer():
             self.train(epoch+1, steps, R, G, B, ch_blur)
 
             if (self.step % 100 == 0) and (self.gpu_id == 0):
+                print("enter", self.step)
                 title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
