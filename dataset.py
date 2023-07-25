@@ -40,7 +40,7 @@ class Data(Dataset):
         self.transform = transforms.Compose([transforms.RandomCrop(self.size),
                                              transforms.RandomHorizontalFlip(p=0.5),
                                              transforms.RandomVerticalFlip(p=0.5),
-                                             transforms.RandomRotation(self.angles),
+                                             #transforms.RandomRotation(self.angles),
                                              transforms.ToTensor()])
 
     def __len__(self):
