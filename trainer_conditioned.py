@@ -440,12 +440,13 @@ class Trainer():
                 #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
             if ((epoch+1) % 50 == 0) and (self.gpu_id == 0):
-                self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step)
-                title = f"eval:train,eval - metric:"
-                plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
-                plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
+                pass
+                ##self.sample("train", self.dataloader_train2, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                ##self.sample("val", self.dataloader_val, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                ##sample_steps.append(self.step)
+                ##title = f"eval:train,eval - metric:"
+                ##plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
+                ##plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 #### torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_denoiser_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
                 #### torch.save(self.init_predictor.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_initpr_{self.checkpoint_denoiser_epoch+epoch+1}.pt'))
      
