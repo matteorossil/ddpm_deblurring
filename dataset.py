@@ -25,7 +25,7 @@ class Data(Dataset):
         self.size = size
 
         # used in tranformations
-        self.angles = [90,180,270]
+        self.angles = [90.,180.,270.]
 
         # stores paths
         sharp_folder = os.path.join(path+mode, "sharp")
@@ -38,8 +38,10 @@ class Data(Dataset):
         self.blur_imgs = [os.path.join(blur_folder, img) for img in self.blur_imgs]
 
         self.transform = transforms.Compose([transforms.RandomCrop(self.size),
-                                             transforms.PILToTensor(), 
-                                             transforms.ConvertImageDtype(torch.float)])
+                                             transforms.RandomHorizontalFlip(p=0.5),
+                                             transforms.RandomVerticalFlip(p=0.5),
+                                             transforms.RandomRotation(self.angles),
+                                             transforms.ToTensor()])
 
     def __len__(self):
         return len(self.sharp_imgs)
