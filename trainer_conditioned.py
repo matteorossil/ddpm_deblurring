@@ -189,7 +189,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=0, #os.cpu_count() // 2,
+                                            num_workers=8, #os.cpu_count() // 2,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,

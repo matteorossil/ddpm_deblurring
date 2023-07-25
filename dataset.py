@@ -41,7 +41,6 @@ class Data(Dataset):
                                              transforms.PILToTensor(), 
                                              transforms.ConvertImageDtype(torch.float)])
 
-
     def __len__(self):
         return len(self.sharp_imgs)
     
