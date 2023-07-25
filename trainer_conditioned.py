@@ -126,7 +126,7 @@ class Trainer():
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro/'
+    dataset: str = '/home/mr6744/gopro_small/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
     dataset2: str = '/home/mr6744/gopro_small_val/'
     #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
