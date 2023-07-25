@@ -37,8 +37,9 @@ class Data(Dataset):
         self.blur_imgs = os.listdir(blur_folder)
         self.blur_imgs = [os.path.join(blur_folder, img) for img in self.blur_imgs]
 
-        self.transform = transforms.Compose([transforms.CenterCrop(self.size),
-                                             transforms.PILToTensor()])
+        self.transform = transforms.Compose([transforms.RandomCrop(self.size),
+                                             transforms.PILToTensor(), 
+                                             transforms.ConvertImageDtype(torch.float)])
 
 
     def __len__(self):
@@ -50,7 +51,8 @@ class Data(Dataset):
         blur = Image.open(self.blur_imgs[idx])
         
         if self.mode == 'train':
-            return self.transform_train(sharp, blur)
+            #return self.transform_train(sharp, blur)
+            return self.transform(sharp), self.transform(blur)
         else:
             return self.transform_val(sharp, blur)
 
@@ -84,7 +86,6 @@ class Data(Dataset):
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
         """
-        return self.transform(sharp), self.transform(blur)
 
 
     def transform_train2(self, sharp, blur):
