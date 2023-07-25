@@ -308,8 +308,6 @@ class Trainer():
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
 
-            print("sharp:", sharp.is_cuda)
-
             # save images blur and sharp image pairs
             #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
             #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
@@ -328,19 +326,14 @@ class Trainer():
             init = self.diffusion.predictor(blur)
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
-            print("init:", init.is_cuda)
-
             # compute residual
             residual = sharp - init
             #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
-
-            print("residual:", residual.is_cuda)
 
             # store mean value of channels (RED, GREEN, BLUE)
             #steps.append(self.step)
 
             r = torch.mean(init[:,0,:,:])
-            print("r:", r.is_cuda)
             #R.append(r.item())
 
             g = torch.mean(init[:,1,:,:])
@@ -367,13 +360,11 @@ class Trainer():
             b_blur = torch.mean(blur[:,2,:,:])
             regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
             regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
-            print("regularizer_init:", regularizer_init.is_cuda)
             #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             #### DENOISER LOSS ####
             #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
             denoiser_loss = self.diffusion.loss(residual, blur)
-            print("denoiser_loss:", denoiser_loss.is_cuda)
 
             #### REGRESSION LOSS INIT ####
             alpha = 0.
@@ -386,12 +377,8 @@ class Trainer():
             else:
                 regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-            print("regression_loss:", regression_loss.is_cuda)
-
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
-
-            print("loss:", loss.is_cuda)
 
             #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
             print(f'Epoch: {epoch+1}, Step: {self.step+1}, TOT_loss: {loss}, D_loss: {denoiser_loss}, G_loss: {regression_loss}, reg_G: {regularizer_init}')

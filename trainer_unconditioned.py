@@ -69,7 +69,7 @@ class Trainer():
     dataset: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset: str = '/home/mr6744/gopro/'
     # load from a checkpoint
-    checkpoint_epoch: int = 11740
+    checkpoint_epoch: int = 0
     checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_unconditioned/06292023_221044/checkpoint_{checkpoint_epoch}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_distributed/06092023_132041/checkpoint_{checkpoint_epoch}.pt'
 
