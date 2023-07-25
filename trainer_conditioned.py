@@ -106,7 +106,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 32
     # Threshold Regularizer
     threshold = 0.01
     # Learning rate
@@ -301,109 +301,109 @@ class Trainer():
         # Iterate through the dataset
 
         # Iterate through the dataset
-        for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
-        #sharp, blur = next(iter(self.dataloader_train))
+        #for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
+        sharp, blur = next(iter(self.dataloader_train))
 
-            # Move data to device
-            sharp = sharp.to(self.gpu_id)
-            blur = blur.to(self.gpu_id)
+        # Move data to device
+        sharp = sharp.to(self.gpu_id)
+        blur = blur.to(self.gpu_id)
 
+        # save images blur and sharp image pairs
+        #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
+        #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
+
+        # get avg channels for blur dataset
+        #if self.step == 0:
+            #pass
             # save images blur and sharp image pairs
-            #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
-            #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
+            #save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
+            #save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
+            #ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
+            #ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
+            #ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
 
-            # get avg channels for blur dataset
-            #if self.step == 0:
-                #pass
-                # save images blur and sharp image pairs
-                #save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
-                #save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-                #ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-                #ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-                #ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
+        # get initial prediction
+        ##init = self.diffusion.predictor(blur)
+        #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
-            # get initial prediction
-            ##init = self.diffusion.predictor(blur)
-            #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
+        # compute residual
+        ##residual = sharp - init
+        #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
 
-            # compute residual
-            ##residual = sharp - init
-            #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
+        # store mean value of channels (RED, GREEN, BLUE)
+        #steps.append(self.step)
 
-            # store mean value of channels (RED, GREEN, BLUE)
-            #steps.append(self.step)
+        ##r = torch.mean(init[:,0,:,:])
+        #R.append(r.item())
 
-            ##r = torch.mean(init[:,0,:,:])
-            #R.append(r.item())
+        ##g = torch.mean(init[:,1,:,:])
+        #G.append(g.item())
 
-            ##g = torch.mean(init[:,1,:,:])
-            #G.append(g.item())
+        ##b = torch.mean(init[:,2,:,:])
+        #B.append(b.item())
 
-            ##b = torch.mean(init[:,2,:,:])
-            #B.append(b.item())
+        # Make the gradients zero
+        self.optimizer.zero_grad()
+        self.optimizer2.zero_grad()
 
-            # Make the gradients zero
-            self.optimizer.zero_grad()
-            self.optimizer2.zero_grad()
+        #### REGULARIZER ####
 
-            #### REGULARIZER ####
+        # Compute regularizer 1 (std dev)
+        #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
+        #regularizer = torch.std(rgb) * 10
+        #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-            # Compute regularizer 1 (std dev)
-            #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
-            #regularizer = torch.std(rgb) * 10
-            #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        #### REGULARIZER INIT ####
+        ##r_blur = torch.mean(blur[:,0,:,:])
+        ##g_blur = torch.mean(blur[:,1,:,:])
+        ##b_blur = torch.mean(blur[:,2,:,:])
+        ##regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+        ##regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
+        #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-            #### REGULARIZER INIT ####
-            ##r_blur = torch.mean(blur[:,0,:,:])
-            ##g_blur = torch.mean(blur[:,1,:,:])
-            ##b_blur = torch.mean(blur[:,2,:,:])
-            ##regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-            ##regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
-            #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        #### DENOISER LOSS ####
+        #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
+        ##denoiser_loss = self.diffusion.loss(residual, blur)
+        loss = self.diffusion.loss(sharp, blur)
 
-            #### DENOISER LOSS ####
-            #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
-            ##denoiser_loss = self.diffusion.loss(residual, blur)
-            loss = self.diffusion.loss(sharp, blur)
+        #### REGRESSION LOSS INIT ####
+        ##alpha = 0.
+        #if self.step < 500: alpha = 1. #1.
+        #else: alpha = 0. #0.01
 
-            #### REGRESSION LOSS INIT ####
-            ##alpha = 0.
-            #if self.step < 500: alpha = 1. #1.
-            #else: alpha = 0. #0.01
+        # initial predictor loss
+        ##if alpha != 0:
+            ##regression_loss = alpha * F.mse_loss(sharp, init)
+        ##else:
+            ##regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
-            # initial predictor loss
-            ##if alpha != 0:
-                ##regression_loss = alpha * F.mse_loss(sharp, init)
-            ##else:
-                ##regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+        # final loss
+        ##loss = denoiser_loss #+ regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
 
-            # final loss
-            ##loss = denoiser_loss #+ regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
+        #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
+        ##print(f'Epoch: {epoch+1}, Step: {self.step+1}, TOT_loss: {loss}, D_loss: {denoiser_loss}, G_loss: {regression_loss}, reg_G: {regularizer_init}')
 
-            #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
-            ##print(f'Epoch: {epoch+1}, Step: {self.step+1}, TOT_loss: {loss}, D_loss: {denoiser_loss}, G_loss: {regression_loss}, reg_G: {regularizer_init}')
+        # Compute gradients
+        loss.backward()
 
-            # Compute gradients
-            loss.backward()
+        #print("############ GRAD OUTPUT ############")
+        #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
+        #print("Grad bias init:", self.initP.module.final.bias.grad)
 
-            #print("############ GRAD OUTPUT ############")
-            #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
-            #print("Grad bias init:", self.initP.module.final.bias.grad)
+        # clip gradients
+        nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+        nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
-            # clip gradients
-            nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-            nn.utils.clip_grad_norm_(self.params_init, 0.01)
+        # Take an optimization step
+        self.optimizer.step()
+        ##self.optimizer2.step()
 
-            # Take an optimization step
-            self.optimizer.step()
-            ##self.optimizer2.step()
+        # Increment global step
+        self.step += 1
 
-            # Increment global step
-            self.step += 1
-
-            # Track the loss with WANDB
-            if self.wandb and self.gpu_id == 0:
-                wandb.log({'loss': loss}, step=self.step)
+        # Track the loss with WANDB
+        if self.wandb and self.gpu_id == 0:
+            wandb.log({'loss': loss}, step=self.step)
 
     def run(self):
 
