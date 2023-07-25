@@ -57,9 +57,12 @@ class Data(Dataset):
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
         blur = TF.crop(blur, i, j, h, w)
-
         """
-         # random horizontal flip
+
+        sharp = TF.center_crop(sharp, output_size=self.size)
+        blur = TF.center_crop(blur, output_size=self.size)
+        
+        # random horizontal flip
         if random.random() > 0.5:
             sharp = TF.hflip(sharp)
             blur = TF.hflip(blur)
