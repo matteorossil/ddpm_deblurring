@@ -106,7 +106,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 1
     # Threshold Regularizer
     threshold = 0.01
     # Learning rate
