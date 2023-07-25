@@ -37,6 +37,10 @@ class Data(Dataset):
         self.blur_imgs = os.listdir(blur_folder)
         self.blur_imgs = [os.path.join(blur_folder, img) for img in self.blur_imgs]
 
+        self.transform = transforms.Compose([transforms.CenterCrop(self.size),
+                                             transforms.PILToTensor()])
+
+
     def __len__(self):
         return len(self.sharp_imgs)
     
@@ -57,11 +61,11 @@ class Data(Dataset):
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
         blur = TF.crop(blur, i, j, h, w)
-        """
+        
 
         sharp = TF.center_crop(sharp, output_size=self.size)
         blur = TF.center_crop(blur, output_size=self.size)
-        
+
         # random horizontal flip
         if random.random() > 0.5:
             sharp = TF.hflip(sharp)
@@ -79,6 +83,9 @@ class Data(Dataset):
             blur = TF.rotate(blur, angle)
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
+        """
+        return self.transform(sharp), self.transform(blur)
+
 
     def transform_train2(self, sharp, blur):
 
