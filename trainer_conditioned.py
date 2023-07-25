@@ -126,7 +126,7 @@ class Trainer():
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset: str = '/home/mr6744/gopro_small/'
+    dataset: str = '/home/mr6744/gopro/'
     #dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
     dataset2: str = '/home/mr6744/gopro_small_val/'
     #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
@@ -189,7 +189,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size, 
-                                            num_workers=20, #os.cpu_count() // 2,
+                                            num_workers=0, #os.cpu_count() // 2,
                                             drop_last=True, 
                                             shuffle=False, 
                                             pin_memory=False,
@@ -212,8 +212,10 @@ class Trainer():
                                             sampler=DistributedSampler(dataset_val, shuffle=False))
 
         # Num params of models
-        self.num_params_denoiser = sum(p.numel() for p in list(self.denoiser.parameters()) if p.requires_grad)
-        self.num_params_init = sum(p.numel() for p in list(self.initP.parameters()) if p.requires_grad)
+        params_denoiser = list(self.denoiser.parameters())
+        params_init = list(self.initP.parameters())
+        self.num_params_denoiser = sum(p.numel() for p in params_denoiser if p.requires_grad)
+        self.num_params_init = sum(p.numel() for p in params_init if p.requires_grad)
 
         # Create optimizers
         self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
