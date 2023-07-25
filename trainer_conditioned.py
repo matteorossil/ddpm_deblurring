@@ -323,11 +323,11 @@ class Trainer():
                 #ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
 
             # get initial prediction
-            init = self.diffusion.predictor(blur)
+            ##init = self.diffusion.predictor(blur)
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
             # compute residual
-            residual = sharp - init
+            ##residual = sharp - init
             #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
 
             # store mean value of channels (RED, GREEN, BLUE)
@@ -363,7 +363,8 @@ class Trainer():
 
             #### DENOISER LOSS ####
             #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
-            denoiser_loss = self.diffusion.loss(residual, blur)
+            ##denoiser_loss = self.diffusion.loss(residual, blur)
+            denoiser_loss = self.diffusion.loss(sharp, blur)
 
             #### REGRESSION LOSS INIT ####
             ##alpha = 0.
@@ -390,12 +391,12 @@ class Trainer():
             #print("Grad bias init:", self.initP.module.final.bias.grad)
 
             # clip gradients
-            nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-            nn.utils.clip_grad_norm_(self.params_init, 0.01)
+            ##nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+            ##nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
             # Take an optimization step
             self.optimizer.step()
-            self.optimizer2.step()
+            ##self.optimizer2.step()
 
             # Increment global step
             self.step += 1
