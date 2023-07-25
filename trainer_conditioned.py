@@ -414,8 +414,6 @@ class Trainer():
             # Increment global step
             self.step += 1
 
-            print("self.step:", self.step.is_cuda)
-
             # Track the loss with WANDB
             if self.wandb and self.gpu_id == 0:
                 wandb.log({'loss': loss}, step=self.step)
