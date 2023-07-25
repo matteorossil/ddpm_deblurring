@@ -46,7 +46,7 @@ class Data(Dataset):
         blur = Image.open(self.blur_imgs[idx])
         
         if self.mode == 'train':
-            return self.transform_train(sharp, blur)
+            return self.transform_val(sharp, blur)
         else:
             return self.transform_val(sharp, blur)
 
