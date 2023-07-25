@@ -5,6 +5,7 @@ import os
 from torch.utils.data import Dataset
 import torchvision.transforms.functional as TF
 from torchvision import transforms
+from torchvision.io import read_image
 
 from PIL import Image
 import random
@@ -12,50 +13,37 @@ import torch
 
 class Data(Dataset):
 
-    def __init__(self, path, mode='train', size=(128,128), channels='RGB'):
+    def __init__(self, path, mode='train', size=(128,128)):
+        
+        # store img path
+        self.path = path
 
-        # only for validation
-        #if mode == 'val':
-        #torch.manual_seed(0)
-        #torch.cuda.manual_seed_all(0)
-        #random.seed(0)
-
-        self.channels = channels
-
-        self.dataset_name = {
-            'train': path + "train",
-            'val': path + "val",
-        }
+        # store mode type
+        self.mode = mode
 
         #size of the crop
         self.size = size
 
-        #store mode
-        self.mode = mode
-
-        # angles for tranformations
+        # used in tranformations
         self.angles = [90,180,270]
 
         # stores paths
-        self.sharp = os.path.join(self.dataset_name[mode], "sharp")
-        self.blur = os.path.join(self.dataset_name[mode], "blur")
+        sharp_folder = os.path.join(path+mode, "sharp")
+        blur_folder = os.path.join(path+mode, "blur")
 
-        self.sharp_imgs = os.listdir(self.sharp)
-        self.sharp_imgs.sort()
+        self.sharp_imgs = os.listdir(sharp_folder)
+        self.sharp_imgs = [os.path.join(sharp_folder, img) for img in self.sharp_imgs]
 
-        self.blur_imgs = os.listdir(self.blur)
-        self.blur_imgs.sort()
-
-        assert len(self.sharp_imgs) == len(self.blur_imgs)
+        self.blur_imgs = os.listdir(blur_folder)
+        self.blur_imgs = [os.path.join(blur_folder, img) for img in self.blur_imgs]
 
     def __len__(self):
-        assert len(self.sharp_imgs) == len(self.blur_imgs)
         return len(self.sharp_imgs)
     
     def __getitem__(self, idx):
 
-        sharp = Image.open(os.path.join(self.sharp, self.sharp_imgs[idx])).convert(self.channels)
-        blur = Image.open(os.path.join(self.blur, self.blur_imgs[idx])).convert(self.channels)
+        sharp = Image.open(self.sharp_imgs[idx])
+        blur = Image.open(self.blur_imgs[idx])
         
         if self.mode == 'train':
             return self.transform_train(sharp, blur)

@@ -196,20 +196,20 @@ class Trainer():
                                             sampler=DistributedSampler(dataset_train))
         
         self.dataloader_train2 = DataLoader(dataset=dataset_train2, 
-                                          batch_size=self.n_samples, 
-                                          num_workers=0, # os.cpu_count() // 4,
-                                          drop_last=True, 
-                                          shuffle=False,
-                                          pin_memory=False,
-                                          sampler=DistributedSampler(dataset_train2, shuffle=False))
+                                            batch_size=self.n_samples, 
+                                            num_workers=0, # os.cpu_count() // 4,
+                                            drop_last=True, 
+                                            shuffle=False,
+                                            pin_memory=False,
+                                            sampler=DistributedSampler(dataset_train2, shuffle=False))
         
         self.dataloader_val = DataLoader(dataset=dataset_val, 
-                                          batch_size=self.n_samples, 
-                                          num_workers=0, # os.cpu_count() // 4,
-                                          drop_last=True, 
-                                          shuffle=False,
-                                          pin_memory=False,
-                                          sampler=DistributedSampler(dataset_val, shuffle=False))
+                                            batch_size=self.n_samples, 
+                                            num_workers=0, # os.cpu_count() // 4,
+                                            drop_last=True, 
+                                            shuffle=False,
+                                            pin_memory=False,
+                                            sampler=DistributedSampler(dataset_val, shuffle=False))
 
         # Create optimizer
         self.params_denoiser = list(self.denoiser.parameters())
@@ -364,7 +364,7 @@ class Trainer():
             #### DENOISER LOSS ####
             #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
             ##denoiser_loss = self.diffusion.loss(residual, blur)
-            denoiser_loss = self.diffusion.loss(sharp, blur)
+            loss = self.diffusion.loss(sharp, blur)
 
             #### REGRESSION LOSS INIT ####
             ##alpha = 0.
@@ -378,7 +378,7 @@ class Trainer():
                 ##regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
-            loss = denoiser_loss #+ regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
+            ##loss = denoiser_loss #+ regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
 
             #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
             ##print(f'Epoch: {epoch+1}, Step: {self.step+1}, TOT_loss: {loss}, D_loss: {denoiser_loss}, G_loss: {regression_loss}, reg_G: {regularizer_init}')
@@ -391,8 +391,8 @@ class Trainer():
             #print("Grad bias init:", self.initP.module.final.bias.grad)
 
             # clip gradients
-            ##nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
-            ##nn.utils.clip_grad_norm_(self.params_init, 0.01)
+            nn.utils.clip_grad_norm_(self.params_denoiser, 0.01)
+            nn.utils.clip_grad_norm_(self.params_init, 0.01)
 
             # Take an optimization step
             self.optimizer.step()
@@ -487,7 +487,7 @@ def main(rank: int, world_size:int):
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
             "L2 Loss": False,
-            "Regularizer": True,
+            "Regularizer": False,
             "Regularizer Threshold": trainer.threshold
             }
         )
