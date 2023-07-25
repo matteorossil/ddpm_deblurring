@@ -328,7 +328,6 @@ class Trainer():
             init = self.diffusion.predictor(blur)
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
-            print("predictor:", self.diffusion.predictor.is_cuda)
             print("init:", init.is_cuda)
 
             # compute residual
