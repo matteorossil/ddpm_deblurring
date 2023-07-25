@@ -46,16 +46,20 @@ class Data(Dataset):
         blur = Image.open(self.blur_imgs[idx])
         
         if self.mode == 'train':
-            return self.transform_val(sharp, blur)
+            return self.transform_train(sharp, blur)
         else:
             return self.transform_val(sharp, blur)
 
     def transform_train(self, sharp, blur):
 
+        """
+
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
         blur = TF.crop(blur, i, j, h, w)
+
+        """
 
          # random horizontal flip
         if random.random() > 0.5:
