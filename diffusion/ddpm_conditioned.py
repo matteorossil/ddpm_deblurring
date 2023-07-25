@@ -35,6 +35,7 @@ class DenoiseDiffusion:
         # initial predictor
         self.predictor = predictor
 
+        # device id
         self.device = device
 
         # Create linearly increasing variance schedule
