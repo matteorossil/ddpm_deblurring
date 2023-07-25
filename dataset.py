@@ -42,8 +42,8 @@ class Data(Dataset):
     
     def __getitem__(self, idx):
 
-        sharp = Image.open(self.sharp_imgs[idx])
-        blur = Image.open(self.blur_imgs[idx])
+        sharp = read_image(self.sharp_imgs[idx])
+        blur = read_image(self.blur_imgs[idx])
         
         if self.mode == 'train':
             return self.transform_train(sharp, blur)
