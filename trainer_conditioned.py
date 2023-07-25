@@ -353,8 +353,6 @@ class Trainer():
             self.optimizer.zero_grad()
             self.optimizer2.zero_grad()
 
-            print("optmizer:", self.optimizer.is_cuda)
-
             #### REGULARIZER ####
 
             # Compute regularizer 1 (std dev)
