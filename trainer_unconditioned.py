@@ -3,7 +3,6 @@
 
 from typing import List
 import os
-import sys
 import torch
 import torch.utils.data
 from diffusion.ddpm_unconditioned import DenoiseDiffusion
@@ -41,10 +40,9 @@ class Trainer():
     # The number of channels is `channel_multipliers[i] * n_channels`
     channel_multipliers: List[int] = [1, 2, 3, 4]
     # The list of booleans that indicate whether to use attention at each resolution
-    is_attention: List[int] = [False, False, False, True]
-    attention_middle: List[int] = [True]
+    is_attention: List[int] = [False, False, False, False]
     # Number of time steps $T$
-    n_steps: int = 2_000
+    n_steps: int = 1_000
     # noise scheduler
     beta_0 = 1e-6 # 0.000001
     beta_T = 1e-2 # 0.01
@@ -82,8 +80,7 @@ class Trainer():
             image_channels=self.image_channels,
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
-            is_attn=self.is_attention,
-            attn_middle=self.attention_middle
+            is_attn=self.is_attention
         )
 
         self.eps_model = self.eps_model.to(self.gpu_id)
@@ -108,13 +105,17 @@ class Trainer():
         dataset = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
         self.dataloader_train = DataLoader(dataset=dataset,
                                     batch_size=self.batch_size,
-                                    num_workers=16,
+                                    num_workers=8,
                                     drop_last=False,
                                     shuffle=False,
                                     pin_memory=False,
                                     sampler=DistributedSampler(dataset)) # assures no overlapping samples
 
         # Create optimizer
+        params_denoiser = list(self.eps_model.parameters())
+        self.num_params_denoiser = sum(p.numel() for p in params_denoiser if p.requires_grad)
+        print("params denoiser:", self.num_params_denoiser)
+
         self.optimizer = torch.optim.AdamW(self.eps_model.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.step = 0
         self.exp_path = get_exp_path(path=self.store_checkpoints)
@@ -151,11 +152,12 @@ class Trainer():
         ### Train
         """
         # Iterate through the dataset
-        for batch_idx, sharp in enumerate(self.dataloader_train):
+        for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
             # Increment global step
             self.step += 1
             # Move data to device
             sharp = sharp.to(self.gpu_id)
+            blur = blur.to(self.gpu_id)
             # Make the gradients zero
             self.optimizer.zero_grad()
             # Calculate loss
@@ -174,15 +176,16 @@ class Trainer():
         ### Training loop
         """
         for epoch in range(self.epochs):
-            if (epoch == 0) and (self.gpu_id == 0):
-                self.sample(self.n_samples, self.checkpoint_epoch+epoch)
+            #if (epoch == 0) and (self.gpu_id == 0):
+                #pass
+                #self.sample(self.n_samples, self.checkpoint_epoch+epoch)
 
             # Train the model
             self.train()
-            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
+            #if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
                 # Save the eps model
-                self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
-                torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
+                #self.sample(self.n_samples, self.checkpoint_epoch+epoch+1)
+                #torch.save(self.eps_model.module.state_dict(), os.path.join(self.exp_path, f'checkpoint_{self.checkpoint_epoch+epoch+1}.pt'))
 
 def ddp_setup(rank, world_size):
     """
@@ -224,6 +227,6 @@ def main(rank: int, world_size:int):
     destroy_process_group()
 
 if __name__ == "__main__":
-    world_size = torch.cuda.device_count() # how many GPUs available in the machine
-    #world_size = 2
+    #world_size = torch.cuda.device_count() # how many GPUs available in the machine
+    world_size = 2
     mp.spawn(main, args=(world_size,), nprocs=world_size)

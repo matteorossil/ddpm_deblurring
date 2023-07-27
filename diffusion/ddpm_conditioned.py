@@ -18,16 +18,13 @@ class DenoiseDiffusion:
     ## Denoise Diffusion
     """
 
-    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device, beta_0: float, beta_T: float, path: str):
+    def __init__(self, eps_model: nn.Module,  predictor: nn.Module, n_steps: int, device: torch.device, beta_0: float, beta_T: float):
         """
         * `eps_model` is $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$ model
         * `n_steps` is $t$
         * `device` is the device to place constants on
         """
         super().__init__()
-
-        # store path
-        self.path = path
 
         # denoiser model
         self.eps_model = eps_model
@@ -78,7 +75,6 @@ class DenoiseDiffusion:
         """
         #### Sample from p_theta(x_t-1|x_t)
         """
-
         # $\textcolor{lightgreen}{\epsilon_\theta}(x_t, t)$
         xt_y = torch.cat((xt, blur), dim=1)
         

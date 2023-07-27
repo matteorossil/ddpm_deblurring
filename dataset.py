@@ -11,9 +11,13 @@ from PIL import Image
 import random
 import torch
 
+import cv2
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+
 class Data(Dataset):
 
-    def __init__(self, path, mode='train', size=(128,128)):
+    def __init__(self, path, mode='train', size=(128,128), multiplier=1):
         
         # store img path
         self.path = path
@@ -28,46 +32,36 @@ class Data(Dataset):
         self.angles = [90.,180.,270.]
 
         # stores paths
-        sharp_folder = os.path.join(path+mode, "sharp")
-        blur_folder = os.path.join(path+mode, "blur")
+        self.sharp_folder = os.path.join(path+mode, "sharp")
+        self.blur_folder = os.path.join(path+mode, "blur")
 
-        self.sharp_imgs = os.listdir(sharp_folder)
-        self.sharp_imgs = [os.path.join(sharp_folder, img) for img in self.sharp_imgs]
+        self.sharp_imgs = os.listdir(self.sharp_folder)
+        self.blur_imgs = os.listdir(self.blur_folder)
 
-        self.blur_imgs = os.listdir(blur_folder)
-        self.blur_imgs = [os.path.join(blur_folder, img) for img in self.blur_imgs]
-
-        self.transform = transforms.Compose([transforms.RandomCrop(self.size),
-                                             transforms.RandomHorizontalFlip(p=0.5),
-                                             transforms.RandomVerticalFlip(p=0.5),
-                                             #transforms.RandomRotation(self.angles),
-                                             transforms.ToTensor()])
+        self.data_multiplicator = multiplier
 
     def __len__(self):
-        return len(self.sharp_imgs)
+        assert len(self.sharp_imgs) == len(self.blur_imgs)
+        return len(self.sharp_imgs) * self.data_multiplicator
     
     def __getitem__(self, idx):
 
-        sharp = Image.open(self.sharp_imgs[idx])
-        blur = Image.open(self.blur_imgs[idx])
-        
+        idx = idx % (self.__len__() // self.data_multiplicator)
+
+        sharp = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[idx])).convert('RGB')
+        blur = Image.open(os.path.join(self.blur_folder, self.blur_imgs[idx])).convert('RGB')
+
         if self.mode == 'train':
-            #return self.transform_train(sharp, blur)
-            return self.transform(sharp), self.transform(blur)
+            return self.transform_train(sharp, blur)
         else:
             return self.transform_val(sharp, blur)
 
     def transform_train(self, sharp, blur):
 
-        """
         # Random crop
         i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
         sharp = TF.crop(sharp, i, j, h, w)
         blur = TF.crop(blur, i, j, h, w)
-        
-
-        sharp = TF.center_crop(sharp, output_size=self.size)
-        blur = TF.center_crop(blur, output_size=self.size)
 
         # random horizontal flip
         if random.random() > 0.5:
@@ -84,12 +78,6 @@ class Data(Dataset):
             angle = random.choice(self.angles)
             sharp = TF.rotate(sharp, angle)
             blur = TF.rotate(blur, angle)
-
-        return TF.to_tensor(sharp), TF.to_tensor(blur)
-        """
-
-
-    def transform_train2(self, sharp, blur):
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     

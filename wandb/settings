@@ -1,0 +1,5 @@
+[default]
+entity = matteo1994rossi
+project = deblurring
+base_url = https://api.wandb.ai
+

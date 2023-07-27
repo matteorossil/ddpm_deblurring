@@ -1,31 +1,24 @@
 ## Perceptual and Distortion Metrics
 
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-
-import tensorflow as tf
 import torch
+from torchmetrics.image import StructuralSimilarityIndexMeasure
+from torchmetrics.image import PeakSignalNoiseRatio
 
 # return a numpy array of psnr values (batched)
-def psnr(sharp, blurred):
+def psnr(sharp, deblurred):
 
-    sharp = sharp.mul(255).add_(0.5).clamp_(0, 255).permute(0,2,3,1).to("cpu", torch.uint8).numpy()
-    blurred = blurred.mul(255).add_(0.5).clamp_(0, 255).permute(0,2,3,1).to("cpu", torch.uint8).numpy()
+    sharp = sharp.mul(255).add_(0.5).clamp_(0, 255).to("cpu")
+    deblurred = deblurred.mul(255).add_(0.5).clamp_(0, 255).to("cpu")
 
-    psnr = tf.image.psnr(sharp, blurred, max_val=255.0)
+    psnr = PeakSignalNoiseRatio(data_range=255.0)
 
-    return psnr.numpy()
+    return psnr(deblurred, sharp).item()
 
+def ssim(sharp, deblurred):
 
-def ssim(sharp, blurred):
+    sharp = sharp.mul(255).add_(0.5).clamp_(0, 255).to("cpu")
+    deblurred = deblurred.mul(255).add_(0.5).clamp_(0, 255).to("cpu")
 
-    sharp = sharp.mul(255).add_(0.5).clamp_(0, 255).permute(0,2,3,1).to("cpu", torch.uint8).numpy()
-    blurred = blurred.mul(255).add_(0.5).clamp_(0, 255).permute(0,2,3,1).to("cpu", torch.uint8).numpy()
+    ssim = StructuralSimilarityIndexMeasure(data_range=255.0)
 
-    ssim = tf.image.ssim(sharp, blurred, max_val=255.0, filter_size=11,filter_sigma=1.5, k1=0.01, k2=0.03)
-
-    return ssim.numpy()
-
-    
-
-
+    return ssim(deblurred, sharp).item()
