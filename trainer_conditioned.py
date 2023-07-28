@@ -117,7 +117,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 128
     # Threshold Regularizer
     threshold = 0.02
     # Learning rate
@@ -134,13 +134,13 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    #store_checkpoints: str = '/home/mr6744/ckpts/'
-    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    store_checkpoints: str = '/home/mr6744/ckpts/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    #dataset: str = '/home/mr6744/gopro_small/'
-    dataset: str = '/scratch/mr6744/pytorch/gopro_small/'
-    #dataset2: str = '/home/mr6744/gopro_small_val/'
-    dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
+    dataset_t: str = '/home/mr6744/gopro/'
+    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
+    dataset_v: str = '/home/mr6744/gopro_128/'
+    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
@@ -192,12 +192,12 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size), multiplier=100)
+        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=1_000)
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
                                             num_workers=8, #os.cpu_count() // 2,
-                                            drop_last=False, 
+                                            drop_last=False,
                                             shuffle=False, 
                                             pin_memory=False,
                                             sampler=DistributedSampler(dataset_train))
@@ -218,13 +218,14 @@ class Trainer():
         # path
         self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-    def sample(self, type, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample(self, mode, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
-        dataset = Data(path=path, mode="val", size=(self.image_size,self.image_size))
-        dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=False, pin_memory=False)
+        dataset = Data(path=path, mode=mode, size=(self.image_size,self.image_size))
+        dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=True, pin_memory=False)
 
         with torch.no_grad():
 
+            torch.manual_seed(7)
             sharp, blur = next(iter(dataloader))
             
             sharp = sharp.to(self.gpu_id)
@@ -232,8 +233,8 @@ class Trainer():
 
             if self.step == 0:
                 # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'{type}__sharp.png'))
-                save_image(blur, os.path.join(self.exp_path, f'{type}__blur.png'))
+                save_image(sharp, os.path.join(self.exp_path, f'{mode}__sharp.png'))
+                save_image(blur, os.path.join(self.exp_path, f'{mode}__blur.png'))
 
             # compute initial predictor
             init = self.diffusion.predictor(blur)
@@ -258,13 +259,13 @@ class Trainer():
                 X = self.diffusion.p_sample(X, blur, t_vec)
 
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'{type}_init_step{self.step}.png'))
+            save_image(init, os.path.join(self.exp_path, f'{mode}_init_step{self.step}.png'))
             # save true residual
-            save_image(X_true, os.path.join(self.exp_path, f'{type}_residual_true_step{self.step}.png'))
+            save_image(X_true, os.path.join(self.exp_path, f'{mode}_residual_true_step{self.step}.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'{type}_residual_sampled_step{self.step}.png'))
+            save_image(X, os.path.join(self.exp_path, f'{mode}_residual_sampled_step{self.step}.png'))
             # save sampled deblurred
-            save_image(init + X, os.path.join(self.exp_path, f'{type}_deblurred_step{self.step}.png'))
+            save_image(init + X, os.path.join(self.exp_path, f'{mode}_deblurred_step{self.step}.png'))
 
             # compute metrics (sharp, init)
             psnr_sharp_init = psnr(sharp, init)
@@ -282,7 +283,7 @@ class Trainer():
             psnr_deblur.append(psnr_sharp_deblurred)
             ssim_deblur.append(ssim_sharp_deblurred)
 
-    def train(self, epoch):
+    def train(self):
         """
         ### Train
         """
@@ -370,7 +371,7 @@ class Trainer():
 
             #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
             if self.gpu_id == 0:
-                print('Epoch: {:4d}, Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, G_reg: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
+                print('Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, G_reg: {:.4f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
 
             # Compute gradients
             loss.backward()
@@ -412,24 +413,24 @@ class Trainer():
 
         for epoch in range(self.epochs):
 
-            # sample at epoch 0
-            if (epoch == 0) and (self.gpu_id == 0):
-                self.sample("train", self.dataset, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataset2, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+            # sample at step 0
+            if (self.step == 0) and (self.gpu_id == 0):
+                self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step)
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
-            self.train(epoch+1)
+            self.train()
 
             #if ((epoch+1) % 10 == 0) and (self.gpu_id == 0):
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            if ((epoch+1) % 20 == 0) and (self.gpu_id == 0):
-                self.sample("train", self.dataset, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataset2, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+            if ((self.step % 5_000) == 0) and (self.gpu_id == 0):
+                self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step)
                 title = f"eval:train,val - metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
@@ -446,7 +447,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12356" # any free port on machine
+    os.environ["MASTER_PORT"] = "12357" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
