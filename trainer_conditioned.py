@@ -117,7 +117,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 128
+    batch_size: int = 32
     # Threshold Regularizer
     threshold = 0.02
     # Learning rate
@@ -138,9 +138,9 @@ class Trainer():
     store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
     #dataset_t: str = '/home/mr6744/gopro/'
-    dataset_t: str = '/scratch/mr6744/pytorch/gopro/'
+    dataset_t: str = '/scratch/mr6744/pytorch/gopro_small/'
     #dataset_v: str = '/home/mr6744/gopro_128/'
-    dataset_v: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
@@ -358,13 +358,13 @@ class Trainer():
             denoiser_loss = self.diffusion.loss(residual, blur)
 
             #### REGRESSION LOSS INIT ####
-            #alpha = 0.
+            alpha = 0.01
             #if self.step < 500: alpha = 1.
             #else: alpha = 0. #0.01
 
             # initial predictor loss
-            #regression_loss = alpha * F.mse_loss(sharp, init)
-            regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            regression_loss = alpha * F.mse_loss(sharp, init)
+            #regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
@@ -447,7 +447,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12357" # any free port on machine
+    os.environ["MASTER_PORT"] = "12355" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -471,7 +471,7 @@ def main(rank: int, world_size:int):
             "Denoiser LR": trainer.learning_rate,
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
-            "L2 Loss": False,
+            "L2 Loss": True,
             "Regularizer": True,
             "Regularizer Threshold": trainer.threshold
             }
