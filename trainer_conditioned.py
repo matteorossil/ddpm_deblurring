@@ -134,13 +134,13 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    store_checkpoints: str = '/home/mr6744/ckpts/'
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    #store_checkpoints: str = '/home/mr6744/ckpts/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset_t: str = '/home/mr6744/gopro/'
-    #dataset: str = '/scratch/mr6744/pytorch/gopro/'
-    dataset_v: str = '/home/mr6744/gopro_128/'
-    #dataset2: str = '/scratch/mr6744/pytorch/gopro_small_val/'
+    #dataset_t: str = '/home/mr6744/gopro/'
+    dataset_t: str = '/scratch/mr6744/pytorch/gopro/'
+    #dataset_v: str = '/home/mr6744/gopro_128/'
+    dataset_v: str = '/scratch/mr6744/pytorch/gopro_128/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
