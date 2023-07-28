@@ -11,10 +11,6 @@ from PIL import Image
 import random
 import torch
 
-import cv2
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
-
 class Data(Dataset):
 
     def __init__(self, path, mode='train', size=(128,128), multiplier=1):
