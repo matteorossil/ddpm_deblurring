@@ -181,12 +181,12 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=1_000)
+        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=1)
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
                                             num_workers=8, #os.cpu_count() // 2,
-                                            drop_last=False,
+                                            drop_last=True,
                                             shuffle=False, 
                                             pin_memory=False,
                                             sampler=DistributedSampler(dataset_train))
@@ -417,7 +417,7 @@ class Trainer():
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            if ((self.step % 10_000) == 0) and (self.gpu_id == 0):
+            if ((self.step % 9_600) == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step)
