@@ -59,19 +59,28 @@ class Data(Dataset):
         
         if idx == 0: left = center
         if idx == self.l - 1: right = center
+
+        print(1)
+        print(os.path.join(self.sharp_folder, self.sharp_imgs[left]))
         
         sharp_left = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[left])).convert('RGB')
         blur_left = Image.open(os.path.join(self.blur_folder, self.blur_imgs[left])).convert('RGB')
 
+        print(2)
+        print(os.path.join(self.sharp_folder, self.sharp_imgs[center]))
+
         sharp = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[center])).convert('RGB')
         blur = Image.open(os.path.join(self.blur_folder, self.blur_imgs[center])).convert('RGB')
+
+        print(3)
+        print(os.path.join(self.sharp_folder, self.sharp_imgs[right]))
 
         sharp_right = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[right])).convert('RGB')
         blur_right = Image.open(os.path.join(self.blur_folder, self.blur_imgs[right])).convert('RGB')
 
         if self.mode == 'train':
             # Random crop
-            self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
+            self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=(512,512))
             return self.transform_train(sharp_left, blur_left), self.transform_train(sharp, blur), self.transform_train(sharp_right, blur_right)
         else:
             return self.transform_val(sharp_left, blur_left), self.transform_val(sharp, blur), self.transform_val(sharp_right, blur_right)

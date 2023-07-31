@@ -27,7 +27,6 @@ from pathlib import Path
 from datetime import datetime
 import wandb
 import matplotlib.pyplot as plt
-from pynvml import *
 
 # DDP
 import torch.multiprocessing as mp
@@ -39,17 +38,6 @@ from torch.distributed import init_process_group, destroy_process_group
 from torchvision.models.optical_flow import Raft_Large_Weights
 from torchvision.models.optical_flow import raft_large
 from torchvision.utils import flow_to_image
-
-def print_gpu_utilization():
-    nvmlInit()
-    handle = nvmlDeviceGetHandleByIndex(0)
-    info = nvmlDeviceGetMemoryInfo(handle)
-    print(f"GPU memory occupied: {info.used//1024**2} MB.")
-
-def print_summary(result):
-    print(f"Time: {result.metrics['train_runtime']:.2f}")
-    print(f"Samples/second: {result.metrics['train_samples_per_second']:.2f}")
-    print_gpu_utilization()
 
 def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
@@ -137,7 +125,7 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 1
     # Use wandb
-    wandb: bool = True
+    wandb: bool = False
     # checkpoints path
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
