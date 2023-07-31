@@ -117,12 +117,12 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 32
+    batch_size: int = 64
     # Threshold Regularizer
-    threshold = 0.02
+    threshold = 0.03
     # Learning rate
     learning_rate: float = 1e-4
-    learning_rate_init: float = 1e-4
+    learning_rate_init: float = 3e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -138,15 +138,15 @@ class Trainer():
     store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
     #dataset_t: str = '/home/mr6744/gopro/'
-    dataset_t: str = '/scratch/mr6744/pytorch/gopro_small/'
+    dataset_t: str = '/scratch/mr6744/pytorch/gopro/'
     #dataset_v: str = '/home/mr6744/gopro_128/'
-    dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
+    dataset_v: str = '/scratch/mr6744/pytorch/gopro_128/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
-    ckpt_denoiser: str = f'/home/mr6744/ckpts/07272023_012811/ckpt_denoiser_{ckpt_denoiser_step}.pt'
+    ckpt_denoiser: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_denoiser_{ckpt_denoiser_step}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
-    ckpt_initp: str = f'/home/mr6744/ckpts/07272023_012811/ckpt_initp_{ckpt_initp_step}.pt'
+    ckpt_initp: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_initp_{ckpt_initp_step}.pt'
     #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int, world_size: int):
@@ -358,13 +358,13 @@ class Trainer():
             denoiser_loss = self.diffusion.loss(residual, blur)
 
             #### REGRESSION LOSS INIT ####
-            alpha = 0.01
+            #alpha = 0.01
             #if self.step < 500: alpha = 1.
             #else: alpha = 0. #0.01
 
             # initial predictor loss
-            regression_loss = alpha * F.mse_loss(sharp, init)
-            #regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            #regression_loss = alpha * F.mse_loss(sharp, init)
+            regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
@@ -428,7 +428,7 @@ class Trainer():
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            if ((self.step % 5_000) == 0) and (self.gpu_id == 0):
+            if ((self.step % 10_000) == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step)
@@ -471,9 +471,11 @@ def main(rank: int, world_size:int):
             "Denoiser LR": trainer.learning_rate,
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
-            "L2 Loss": True,
+            "L2 Loss": False,
             "Regularizer": True,
-            "Regularizer Threshold": trainer.threshold
+            "Regularizer Threshold": trainer.threshold,
+            "Dataset_t": trainer.dataset_t,
+            "Dataset_v": trainer.dataset_v,
             }
         )
     ##### ####
