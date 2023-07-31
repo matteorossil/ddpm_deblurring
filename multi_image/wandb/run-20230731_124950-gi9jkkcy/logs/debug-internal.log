@@ -1,0 +1,171 @@
+2023-07-31 12:49:50,896 INFO    StreamThr :2214576 [internal.py:wandb_internal():86] W&B internal server running at pid: 2214576, started at: 2023-07-31 12:49:50.895769
+2023-07-31 12:49:50,897 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: status
+2023-07-31 12:49:50,898 INFO    WriterThread:2214576 [datastore.py:open_for_write():85] open: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/run-gi9jkkcy.wandb
+2023-07-31 12:49:50,899 DEBUG   SenderThread:2214576 [sender.py:send():375] send: header
+2023-07-31 12:49:50,922 DEBUG   SenderThread:2214576 [sender.py:send():375] send: run
+2023-07-31 12:49:51,343 INFO    SenderThread:2214576 [dir_watcher.py:__init__():219] watching files in: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files
+2023-07-31 12:49:51,343 INFO    SenderThread:2214576 [sender.py:_start_run_threads():1124] run started: gi9jkkcy with start time 1690822190.895349
+2023-07-31 12:49:51,343 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: summary_record
+2023-07-31 12:49:51,343 INFO    SenderThread:2214576 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-07-31 12:49:51,346 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: check_version
+2023-07-31 12:49:51,346 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: check_version
+2023-07-31 12:49:51,422 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: run_start
+2023-07-31 12:49:51,427 DEBUG   HandlerThread:2214576 [system_info.py:__init__():31] System info init
+2023-07-31 12:49:51,427 DEBUG   HandlerThread:2214576 [system_info.py:__init__():46] System info init done
+2023-07-31 12:49:51,427 INFO    HandlerThread:2214576 [system_monitor.py:start():181] Starting system monitor
+2023-07-31 12:49:51,427 INFO    SystemMonitor:2214576 [system_monitor.py:_start():145] Starting system asset monitoring threads
+2023-07-31 12:49:51,428 INFO    HandlerThread:2214576 [system_monitor.py:probe():201] Collecting system info
+2023-07-31 12:49:51,428 INFO    SystemMonitor:2214576 [interfaces.py:start():190] Started cpu monitoring
+2023-07-31 12:49:51,428 INFO    SystemMonitor:2214576 [interfaces.py:start():190] Started disk monitoring
+2023-07-31 12:49:51,429 INFO    SystemMonitor:2214576 [interfaces.py:start():190] Started gpu monitoring
+2023-07-31 12:49:51,430 INFO    SystemMonitor:2214576 [interfaces.py:start():190] Started memory monitoring
+2023-07-31 12:49:51,430 INFO    SystemMonitor:2214576 [interfaces.py:start():190] Started network monitoring
+2023-07-31 12:49:51,495 DEBUG   HandlerThread:2214576 [system_info.py:probe():195] Probing system
+2023-07-31 12:49:51,500 DEBUG   HandlerThread:2214576 [system_info.py:_probe_git():180] Probing git
+2023-07-31 12:49:51,508 DEBUG   HandlerThread:2214576 [system_info.py:_probe_git():188] Probing git done
+2023-07-31 12:49:51,508 DEBUG   HandlerThread:2214576 [system_info.py:probe():240] Probing system done
+2023-07-31 12:49:51,508 DEBUG   HandlerThread:2214576 [system_monitor.py:probe():210] {'os': 'Linux-5.15.0-52-generic-x86_64-with-glibc2.29', 'python': '3.8.10', 'heartbeatAt': '2023-07-31T16:49:51.495720', 'startedAt': '2023-07-31T16:49:50.888021', 'docker': None, 'cuda': None, 'args': (), 'state': 'running', 'program': '/home/mr6744/ddpm_deblurring/multi_image/trainer.py', 'codePath': 'multi_image/trainer.py', 'git': {'remote': 'https://github.com/mrossigrad/ddpm_deblurring.git', 'commit': 'b462a552702eda88d86ec7773a8dbd07132f0a6d'}, 'email': 'mrossigrad@gmail.com', 'root': '/home/mr6744/ddpm_deblurring', 'host': 'dl', 'username': 'mr6744', 'executable': '/home/mr6744/my_env/bin/python', 'cpu_count': 32, 'cpu_count_logical': 64, 'cpu_freq': {'current': 2107.4795, 'min': 1800.0, 'max': 3600.0}, 'cpu_freq_per_core': [{'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3600.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3356.85, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3593.041, 'min': 1800.0, 'max': 3600.0}, {'current': 3593.041, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3593.323, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3291.528, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3593.042, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3593.184, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3600.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3593.326, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 3592.198, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}, {'current': 1800.0, 'min': 1800.0, 'max': 3600.0}], 'disk': {'total': 1832.173656463623, 'used': 1347.3560180664062}, 'gpu': 'NVIDIA RTX A4000', 'gpu_count': 4, 'gpu_devices': [{'name': 'NVIDIA RTX A4000', 'memory_total': 16097738752}, {'name': 'NVIDIA RTX A4000', 'memory_total': 16097738752}, {'name': 'NVIDIA RTX A4000', 'memory_total': 16097738752}, {'name': 'NVIDIA RTX A4000', 'memory_total': 16097738752}], 'memory': {'total': 251.54295349121094}}
+2023-07-31 12:49:51,508 INFO    HandlerThread:2214576 [system_monitor.py:probe():211] Finished collecting system info
+2023-07-31 12:49:51,508 INFO    HandlerThread:2214576 [system_monitor.py:probe():214] Publishing system info
+2023-07-31 12:49:51,508 DEBUG   HandlerThread:2214576 [system_info.py:_save_pip():51] Saving list of pip packages installed into the current environment
+2023-07-31 12:49:51,509 DEBUG   HandlerThread:2214576 [system_info.py:_save_pip():67] Saving pip packages done
+2023-07-31 12:49:51,509 INFO    HandlerThread:2214576 [system_monitor.py:probe():216] Finished publishing system info
+2023-07-31 12:49:51,514 DEBUG   SenderThread:2214576 [sender.py:send():375] send: files
+2023-07-31 12:49:51,514 INFO    SenderThread:2214576 [sender.py:_save_file():1378] saving file wandb-metadata.json with policy now
+2023-07-31 12:49:51,518 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: stop_status
+2023-07-31 12:49:51,518 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: stop_status
+2023-07-31 12:49:51,671 DEBUG   SenderThread:2214576 [sender.py:send():375] send: telemetry
+2023-07-31 12:49:51,761 INFO    wandb-upload_0:2214576 [upload_job.py:push():137] Uploaded file /tmp/tmpur82hh6nwandb/uagyugw7-wandb-metadata.json
+2023-07-31 12:49:52,344 INFO    Thread-12 :2214576 [dir_watcher.py:_on_file_created():278] file/dir created: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/wandb-metadata.json
+2023-07-31 12:49:52,344 INFO    Thread-12 :2214576 [dir_watcher.py:_on_file_created():278] file/dir created: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/requirements.txt
+2023-07-31 12:49:52,345 INFO    Thread-12 :2214576 [dir_watcher.py:_on_file_created():278] file/dir created: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/wandb-summary.json
+2023-07-31 12:49:54,516 DEBUG   SenderThread:2214576 [sender.py:send():375] send: exit
+2023-07-31 12:49:54,516 INFO    SenderThread:2214576 [sender.py:send_exit():598] handling exit code: 0
+2023-07-31 12:49:54,516 INFO    SenderThread:2214576 [sender.py:send_exit():600] handling runtime: 3
+2023-07-31 12:49:54,516 INFO    SenderThread:2214576 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-07-31 12:49:54,516 INFO    SenderThread:2214576 [sender.py:send_exit():606] send defer
+2023-07-31 12:49:54,516 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,516 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 0
+2023-07-31 12:49:54,517 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,517 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 0
+2023-07-31 12:49:54,517 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 1
+2023-07-31 12:49:54,517 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,517 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 1
+2023-07-31 12:49:54,517 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,517 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 1
+2023-07-31 12:49:54,517 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 2
+2023-07-31 12:49:54,517 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,517 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 2
+2023-07-31 12:49:54,517 INFO    HandlerThread:2214576 [system_monitor.py:finish():190] Stopping system monitor
+2023-07-31 12:49:54,517 DEBUG   SystemMonitor:2214576 [system_monitor.py:_start():159] Starting system metrics aggregation loop
+2023-07-31 12:49:54,518 DEBUG   SystemMonitor:2214576 [system_monitor.py:_start():166] Finished system metrics aggregation loop
+2023-07-31 12:49:54,518 DEBUG   SystemMonitor:2214576 [system_monitor.py:_start():170] Publishing last batch of metrics
+2023-07-31 12:49:54,518 INFO    HandlerThread:2214576 [interfaces.py:finish():202] Joined cpu monitor
+2023-07-31 12:49:54,518 INFO    HandlerThread:2214576 [interfaces.py:finish():202] Joined disk monitor
+2023-07-31 12:49:54,711 INFO    HandlerThread:2214576 [interfaces.py:finish():202] Joined gpu monitor
+2023-07-31 12:49:54,712 INFO    HandlerThread:2214576 [interfaces.py:finish():202] Joined memory monitor
+2023-07-31 12:49:54,712 INFO    HandlerThread:2214576 [interfaces.py:finish():202] Joined network monitor
+2023-07-31 12:49:54,712 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,712 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 2
+2023-07-31 12:49:54,712 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 3
+2023-07-31 12:49:54,713 DEBUG   SenderThread:2214576 [sender.py:send():375] send: stats
+2023-07-31 12:49:54,713 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,713 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 3
+2023-07-31 12:49:54,713 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,713 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 3
+2023-07-31 12:49:54,713 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 4
+2023-07-31 12:49:54,713 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,713 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 4
+2023-07-31 12:49:54,714 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,714 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 4
+2023-07-31 12:49:54,714 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 5
+2023-07-31 12:49:54,714 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,714 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 5
+2023-07-31 12:49:54,714 DEBUG   SenderThread:2214576 [sender.py:send():375] send: summary
+2023-07-31 12:49:54,714 INFO    SenderThread:2214576 [sender.py:_save_file():1378] saving file wandb-summary.json with policy end
+2023-07-31 12:49:54,714 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,714 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 5
+2023-07-31 12:49:54,714 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 6
+2023-07-31 12:49:54,715 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,715 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 6
+2023-07-31 12:49:54,715 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,715 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 6
+2023-07-31 12:49:54,718 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: status_report
+2023-07-31 12:49:54,836 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 7
+2023-07-31 12:49:54,836 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,837 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 7
+2023-07-31 12:49:54,837 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,837 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 7
+2023-07-31 12:49:54,837 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 8
+2023-07-31 12:49:54,837 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,837 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 8
+2023-07-31 12:49:54,837 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:54,837 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 8
+2023-07-31 12:49:54,842 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 9
+2023-07-31 12:49:54,842 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:54,842 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 9
+2023-07-31 12:49:54,843 DEBUG   SenderThread:2214576 [sender.py:send():375] send: artifact
+2023-07-31 12:49:55,344 INFO    Thread-12 :2214576 [dir_watcher.py:_on_file_modified():295] file/dir modified: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/config.yaml
+2023-07-31 12:49:55,344 INFO    Thread-12 :2214576 [dir_watcher.py:_on_file_modified():295] file/dir modified: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/wandb-summary.json
+2023-07-31 12:49:55,389 INFO    SenderThread:2214576 [sender.py:send_artifact():1474] sent artifact job-https___github.com_mrossigrad_ddpm_deblurring.git_multi_image_trainer.py - {'id': 'QXJ0aWZhY3Q6NTI4MTE5MzYw', 'digest': '629eef3493f296348b030018519968f0', 'state': 'COMMITTED', 'aliases': [{'artifactCollectionName': 'job-https___github.com_mrossigrad_ddpm_deblurring.git_multi_image_trainer.py', 'alias': 'latest'}, {'artifactCollectionName': 'job-https___github.com_mrossigrad_ddpm_deblurring.git_multi_image_trainer.py', 'alias': 'v3'}], 'artifactSequence': {'id': 'QXJ0aWZhY3RDb2xsZWN0aW9uOjg2MzY2NTQ3', 'latestArtifact': {'id': 'QXJ0aWZhY3Q6NTI4MTE5MzYw', 'versionIndex': 3}}, 'version': 'v3'}
+2023-07-31 12:49:55,389 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:55,389 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 9
+2023-07-31 12:49:55,389 INFO    SenderThread:2214576 [dir_watcher.py:finish():365] shutting down directory watcher
+2023-07-31 12:49:55,516 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: poll_exit
+2023-07-31 12:49:56,345 INFO    SenderThread:2214576 [dir_watcher.py:finish():395] scan: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files
+2023-07-31 12:49:56,345 INFO    SenderThread:2214576 [dir_watcher.py:finish():409] scan save: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/config.yaml config.yaml
+2023-07-31 12:49:56,345 INFO    SenderThread:2214576 [dir_watcher.py:finish():409] scan save: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/wandb-summary.json wandb-summary.json
+2023-07-31 12:49:56,345 INFO    SenderThread:2214576 [dir_watcher.py:finish():409] scan save: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/wandb-metadata.json wandb-metadata.json
+2023-07-31 12:49:56,346 INFO    SenderThread:2214576 [dir_watcher.py:finish():409] scan save: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/requirements.txt requirements.txt
+2023-07-31 12:49:56,346 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 10
+2023-07-31 12:49:56,346 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: poll_exit
+2023-07-31 12:49:56,352 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:56,353 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 10
+2023-07-31 12:49:56,356 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:56,356 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 10
+2023-07-31 12:49:56,356 INFO    SenderThread:2214576 [file_pusher.py:finish():167] shutting down file pusher
+2023-07-31 12:49:56,517 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: poll_exit
+2023-07-31 12:49:56,517 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: poll_exit
+2023-07-31 12:49:56,607 INFO    wandb-upload_1:2214576 [upload_job.py:push():137] Uploaded file /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/config.yaml
+2023-07-31 12:49:56,685 INFO    wandb-upload_2:2214576 [upload_job.py:push():137] Uploaded file /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/requirements.txt
+2023-07-31 12:49:56,721 INFO    wandb-upload_0:2214576 [upload_job.py:push():137] Uploaded file /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/files/wandb-summary.json
+2023-07-31 12:49:56,921 INFO    Thread-11 :2214576 [sender.py:transition_state():626] send defer: 11
+2023-07-31 12:49:56,921 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:56,921 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 11
+2023-07-31 12:49:56,922 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:56,922 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 11
+2023-07-31 12:49:56,922 INFO    SenderThread:2214576 [file_pusher.py:join():172] waiting for file pusher
+2023-07-31 12:49:56,922 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 12
+2023-07-31 12:49:56,922 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:56,922 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 12
+2023-07-31 12:49:56,922 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:56,922 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 12
+2023-07-31 12:49:57,017 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 13
+2023-07-31 12:49:57,017 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:57,017 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 13
+2023-07-31 12:49:57,017 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:57,017 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 13
+2023-07-31 12:49:57,018 INFO    SenderThread:2214576 [sender.py:transition_state():626] send defer: 14
+2023-07-31 12:49:57,018 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: defer
+2023-07-31 12:49:57,018 INFO    HandlerThread:2214576 [handler.py:handle_request_defer():170] handle defer: 14
+2023-07-31 12:49:57,018 DEBUG   SenderThread:2214576 [sender.py:send():375] send: final
+2023-07-31 12:49:57,018 DEBUG   SenderThread:2214576 [sender.py:send():375] send: footer
+2023-07-31 12:49:57,019 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: defer
+2023-07-31 12:49:57,019 INFO    SenderThread:2214576 [sender.py:send_request_defer():622] handle sender defer: 14
+2023-07-31 12:49:57,019 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: poll_exit
+2023-07-31 12:49:57,020 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: poll_exit
+2023-07-31 12:49:57,020 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: poll_exit
+2023-07-31 12:49:57,020 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: server_info
+2023-07-31 12:49:57,021 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: poll_exit
+2023-07-31 12:49:57,021 DEBUG   SenderThread:2214576 [sender.py:send_request():402] send_request: server_info
+2023-07-31 12:49:57,023 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: get_summary
+2023-07-31 12:49:57,024 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: sampled_history
+2023-07-31 12:49:57,076 INFO    MainThread:2214576 [wandb_run.py:_footer_history_summary_info():3469] rendering history
+2023-07-31 12:49:57,076 INFO    MainThread:2214576 [wandb_run.py:_footer_history_summary_info():3501] rendering summary
+2023-07-31 12:49:57,076 INFO    MainThread:2214576 [wandb_run.py:_footer_sync_info():3428] logging synced files
+2023-07-31 12:49:57,076 DEBUG   HandlerThread:2214576 [handler.py:handle_request():144] handle_request: shutdown
+2023-07-31 12:49:57,076 INFO    HandlerThread:2214576 [handler.py:finish():842] shutting down handler
+2023-07-31 12:49:58,021 INFO    WriterThread:2214576 [datastore.py:close():298] close: /home/mr6744/ddpm_deblurring/multi_image/wandb/run-20230731_124950-gi9jkkcy/run-gi9jkkcy.wandb
+2023-07-31 12:49:58,076 INFO    SenderThread:2214576 [sender.py:finish():1550] shutting down sender
+2023-07-31 12:49:58,076 INFO    SenderThread:2214576 [file_pusher.py:finish():167] shutting down file pusher
+2023-07-31 12:49:58,076 INFO    SenderThread:2214576 [file_pusher.py:join():172] waiting for file pusher

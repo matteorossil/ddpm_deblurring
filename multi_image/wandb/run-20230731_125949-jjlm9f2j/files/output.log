@@ -1,0 +1,25 @@
+1
+/home/mr6744/gopro_small_multi/train/sharp/16000685.png
+2
+/home/mr6744/gopro_small_multi/train/sharp/16000736.png
+Step:    1, Loss: 1.2046, D_loss: 1.0041, G_loss: 0.0000, G_reg: 0.2004
+1
+/home/mr6744/gopro_small_multi/train/sharp/16000685.png
+2
+/home/mr6744/gopro_small_multi/train/sharp/16000767.png
+Step:    2, Loss: 3.1625, D_loss: 1.0007, G_loss: 0.0000, G_reg: 2.1618
+1
+/home/mr6744/gopro_small_multi/train/sharp/16000736.png
+2
+/home/mr6744/gopro_small_multi/train/sharp/16000694.png
+Step:    3, Loss: 2.9744, D_loss: 0.9911, G_loss: 0.0000, G_reg: 1.9834
+1
+/home/mr6744/gopro_small_multi/train/sharp/16000767.png
+2
+/home/mr6744/gopro_small_multi/train/sharp/16000757.png
+Step:    4, Loss: 2.4939, D_loss: 0.9969, G_loss: 0.0000, G_reg: 1.4970
+1
+/home/mr6744/gopro_small_multi/train/sharp/16000694.png
+2
+/home/mr6744/gopro_small_multi/train/sharp/16000700.png
+Step:    5, Loss: 2.4845, D_loss: 0.9954, G_loss: 0.0000, G_reg: 1.4892

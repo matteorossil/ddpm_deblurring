@@ -122,7 +122,7 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 4
+    batch_size: int = 1
     # Threshold Regularizer
     threshold = 0.02
     # Learning rate
@@ -147,8 +147,8 @@ class Trainer():
     dataset_v: str = '/home/mr6744/gopro_small_multi/'
     #dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
     # load from a checkpoint
-    ckpt_denoiser_step: int = 490000
-    ckpt_initp_step: int = 490000
+    ckpt_denoiser_step: int = 0
+    ckpt_initp_step: int = 0
     ckpt_denoiser: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_denoiser_{ckpt_denoiser_step}.pt'
     #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
     ckpt_initp: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_initp_{ckpt_initp_step}.pt'
@@ -205,7 +205,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
-                                            num_workers=8, #os.cpu_count() // 2,
+                                            num_workers=0, #os.cpu_count() // 2,
                                             drop_last=False,
                                             shuffle=False, 
                                             pin_memory=False,
@@ -306,14 +306,14 @@ class Trainer():
             self.step += 1
 
             # Move data to device
-            sharp_left = sharp.to(self.gpu_id)
-            blur_left = blur.to(self.gpu_id)
+            sharp_left = sharp_left.to(self.gpu_id)
+            blur_left = blur_left.to(self.gpu_id)
 
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
 
-            sharp_right = sharp.to(self.gpu_id)
-            blur_right = blur.to(self.gpu_id)
+            sharp_right = sharp_right.to(self.gpu_id)
+            blur_right = blur_right.to(self.gpu_id)
 
             # save images blur and sharp image pairs
             #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
@@ -335,15 +335,19 @@ class Trainer():
             flow_sharp = self.flow(sharp_left, sharp_right)[-1]
             imgs_sharp = flow_to_image(flow_sharp)
             save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
+
             save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
             save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
             save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
+
             flow_blur = self.flow(blur_left, blur_right)[-1]
             imgs_blur = flow_to_image(flow_blur)
             save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
+
             save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
             save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
             save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
+
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
             # compute residual
@@ -475,7 +479,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12356" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 

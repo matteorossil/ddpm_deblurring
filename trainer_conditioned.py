@@ -33,19 +33,6 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 
-from pynvml import *
-
-def print_gpu_utilization():
-    nvmlInit()
-    handle = nvmlDeviceGetHandleByIndex(0)
-    info = nvmlDeviceGetMemoryInfo(handle)
-    print(f"GPU memory occupied: {info.used//1024**2} MB.")
-
-def print_summary(result):
-    print(f"Time: {result.metrics['train_runtime']:.2f}")
-    print(f"Samples/second: {result.metrics['train_samples_per_second']:.2f}")
-    print_gpu_utilization()
-
 def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
@@ -119,6 +106,8 @@ class Trainer():
     # Batch size
     batch_size: int = 64
     # Threshold Regularizer
+    alpha = 0.00
+    # Threshold Regularizer
     threshold = 0.03
     # Learning rate
     learning_rate: float = 1e-4
@@ -137,9 +126,9 @@ class Trainer():
     #store_checkpoints: str = '/home/mr6744/ckpts/'
     store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    #dataset_t: str = '/home/mr6744/gopro/'
+    #dataset_t: str = '/home/mr6744/gopro_small/'
     dataset_t: str = '/scratch/mr6744/pytorch/gopro/'
-    #dataset_v: str = '/home/mr6744/gopro_128/'
+    #dataset_v: str = '/home/mr6744/gopro_small/'
     dataset_v: str = '/scratch/mr6744/pytorch/gopro_128/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
@@ -363,7 +352,7 @@ class Trainer():
             #else: alpha = 0. #0.01
 
             # initial predictor loss
-            #regression_loss = alpha * F.mse_loss(sharp, init)
+            #regression_loss = self.alpha * F.mse_loss(sharp, init)
             regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
@@ -447,7 +436,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12355" # any free port on machine
+    os.environ["MASTER_PORT"] = "12356" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -472,6 +461,7 @@ def main(rank: int, world_size:int):
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
             "L2 Loss": False,
+            "L2 param": trainer.alpha,
             "Regularizer": True,
             "Regularizer Threshold": trainer.threshold,
             "Dataset_t": trainer.dataset_t,

@@ -38,6 +38,11 @@ class Data(Dataset):
 
         self.l = len(self.sharp_imgs)
 
+        self.i = 0
+        self.j = 0
+        self.h = 0
+        self.w = 0
+
     def __len__(self):
         assert len(self.sharp_imgs) == len(self.blur_imgs)
         return len(self.sharp_imgs) * self.data_multiplicator
@@ -63,19 +68,19 @@ class Data(Dataset):
         blur_right = Image.open(os.path.join(self.blur_folder, self.blur_imgs[right])).convert('RGB')
 
         if self.mode == 'train':
+            # Random crop
+            #self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
             return self.transform_train(sharp_left, blur_left), self.transform_train(sharp, blur), self.transform_train(sharp_right, blur_right)
         else:
             return self.transform_val(sharp_left, blur_left), self.transform_val(sharp, blur), self.transform_val(sharp_right, blur_right)
 
     def transform_train(self, sharp, blur):
 
-        # Random crop
-         #i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-        #sharp = TF.crop(sharp, i, j, h, w)
-        #blur = TF.crop(blur, i, j, h, w)
+        #sharp = TF.crop(sharp, self.i, self.j, self.h, self.w)
+        #blur = TF.crop(blur, self.i, self.j, self.h, self.w)
 
-        sharp = TF.center_crop(sharp, output_size=self.size)
-        blur = TF.center_crop(blur, output_size=self.size)
+        #sharp = TF.center_crop(sharp, output_size=(512,512))
+        #blur = TF.center_crop(blur, output_size=(512,512))
 
         """
         # random horizontal flip

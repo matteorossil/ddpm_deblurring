@@ -1,0 +1,59 @@
+wandb_version: 1
+
+GPUs:
+  desc: null
+  value: 1
+GPU Type:
+  desc: null
+  value: NVIDIA RTX A4000
+Denoiser params:
+  desc: null
+  value: 50911139
+Initial Predictor params:
+  desc: null
+  value: 50377091
+Denoiser LR:
+  desc: null
+  value: 0.0001
+Init Predictor LR:
+  desc: null
+  value: 0.0001
+Batch size:
+  desc: null
+  value: 1
+L2 Loss:
+  desc: null
+  value: true
+Regularizer:
+  desc: null
+  value: true
+Regularizer Threshold:
+  desc: null
+  value: 0.02
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.10
+    cli_version: 0.15.3
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1690824222.716002
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 13
+      - 16
+      - 23
+      4: 3.8.10
+      5: 0.15.3
+      8:
+      - 5
+      - 9
