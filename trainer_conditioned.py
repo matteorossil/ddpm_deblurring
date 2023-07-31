@@ -104,14 +104,14 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 64
+    batch_size: int = 32
     # Threshold Regularizer
-    alpha = 0.00
+    alpha = 0.01
     # Threshold Regularizer
-    threshold = 0.03
+    threshold = 0.02
     # Learning rate
     learning_rate: float = 1e-4
-    learning_rate_init: float = 3e-4
+    learning_rate_init: float = 1e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -127,9 +127,9 @@ class Trainer():
     store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
     #dataset_t: str = '/home/mr6744/gopro_small/'
-    dataset_t: str = '/scratch/mr6744/pytorch/gopro/'
+    dataset_t: str = '/scratch/mr6744/pytorch/gopro_small/'
     #dataset_v: str = '/home/mr6744/gopro_small/'
-    dataset_v: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
@@ -352,8 +352,8 @@ class Trainer():
             #else: alpha = 0. #0.01
 
             # initial predictor loss
-            #regression_loss = self.alpha * F.mse_loss(sharp, init)
-            regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            regression_loss = self.alpha * F.mse_loss(sharp, init)
+            #regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
@@ -460,7 +460,7 @@ def main(rank: int, world_size:int):
             "Denoiser LR": trainer.learning_rate,
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
-            "L2 Loss": False,
+            "L2 Loss": True,
             "L2 param": trainer.alpha,
             "Regularizer": True,
             "Regularizer Threshold": trainer.threshold,
