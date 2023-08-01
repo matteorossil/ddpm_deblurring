@@ -110,7 +110,9 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 1
+    batch_size: int = 8
+    # l2 loss
+    alpha = 0.
     # Threshold Regularizer
     threshold = 0.02
     # Learning rate
@@ -123,7 +125,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000_000
     # Number of samples (evaluation)
-    n_samples: int = 1
+    n_samples: int = 16
     # Use wandb
     wandb: bool = False
     # checkpoints path
@@ -149,7 +151,7 @@ class Trainer():
         self.world_size = world_size
 
         self.denoiser = Denoiser(
-            image_channels=self.image_channels*2+2, #+2 for optical flow
+            image_channels=self.image_channels*2+6, #+2 for optical flow #+6 for left and right concatenation
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention
@@ -162,12 +164,12 @@ class Trainer():
             is_attn=self.is_attention
         ).to(self.gpu_id)
 
-        self.flow = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False).to(self.gpu_id)
+        #self.flow = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False).to(self.gpu_id)
         
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
         self.initp = DDP(self.initp, device_ids=[self.gpu_id])
-        self.flow = DDP(self.flow, device_ids=[self.gpu_id])
-        self.flow  = self.flow.eval()
+        #self.flow = DDP(self.flow, device_ids=[self.gpu_id])
+        #self.flow  = self.flow.eval()
 
         # only loads checkpoint if model is trained
         if self.ckpt_denoiser_step != 0:
@@ -189,11 +191,11 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=1_000)
+        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=1_60) # 3200
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
-                                            num_workers=0, #os.cpu_count() // 2,
+                                            num_workers=8, #os.cpu_count() // 2,
                                             drop_last=False,
                                             shuffle=False, 
                                             pin_memory=False,
@@ -223,10 +225,17 @@ class Trainer():
         with torch.no_grad():
 
             torch.manual_seed(7)
-            sharp, blur = next(iter(dataloader))
+            (sharp_left, blur_left), (sharp, blur), (sharp_right, blur_right) = next(iter(dataloader))
             
+            # Move data to device
+            sharp_left = sharp_left.to(self.gpu_id)
+            blur_left = blur_left.to(self.gpu_id)
+
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
+
+            sharp_right = sharp_right.to(self.gpu_id)
+            blur_right = blur_right.to(self.gpu_id)
 
             if self.step == 0:
                 # save images blur and sharp image pairs
@@ -235,6 +244,9 @@ class Trainer():
 
             # compute initial predictor
             init = self.diffusion.predictor(blur)
+
+            concat_ = torch.cat((blur_left, blur), dim=1)
+            concat_ = torch.cat((concat_, blur_right), dim=1)
 
             # get true residual
             X_true = sharp - init
@@ -253,7 +265,7 @@ class Trainer():
                 t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
 
                 # take one denoising step
-                X = self.diffusion.p_sample(X, blur, t_vec)
+                X = self.diffusion.p_sample(X, concat_, t_vec)
 
             # save initial predictor
             save_image(init, os.path.join(self.exp_path, f'{mode}_init_step{self.step}.png'))
@@ -319,22 +331,21 @@ class Trainer():
 
             # get initial prediction
             init = self.diffusion.predictor(blur)
+
+            ### PREDICT FLOW ###
             
-            flow_sharp = self.flow(sharp_left, sharp_right)[-1]
-            imgs_sharp = flow_to_image(flow_sharp)
-            save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
-
-            save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
-            save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
-
-            flow_blur = self.flow(blur_left, blur_right)[-1]
-            imgs_blur = flow_to_image(flow_blur)
-            save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
-
-            save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
-            save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
-            save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
+            #flow_sharp = self.flow(sharp_left, sharp_right)[-1]
+            #imgs_sharp = flow_to_image(flow_sharp)
+            #save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
+            #save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
+            #save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
+            #save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
+            #flow_blur = self.flow(blur_left, blur_right)[-1]
+            #imgs_blur = flow_to_image(flow_blur)
+            #save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
+            #save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
+            #save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
+            #save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
 
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
@@ -374,8 +385,9 @@ class Trainer():
             #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             #### DENOISER LOSS ####
-            #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
-            denoiser_loss = self.diffusion.loss(residual, torch.cat((blur, flow_blur), dim=1))
+            concat_ = torch.cat((blur_left, blur), dim=1)
+            concat_ = torch.cat((concat_, blur_right), dim=1)
+            denoiser_loss = self.diffusion.loss(residual, concat_)
 
             #### REGRESSION LOSS INIT ####
             #alpha = 0.01
@@ -383,7 +395,7 @@ class Trainer():
             #else: alpha = 0. #0.01
 
             # initial predictor loss
-            #regression_loss = alpha * F.mse_loss(sharp, init)
+            #regression_loss = self.alpha * F.mse_loss(sharp, init)
             regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
@@ -434,10 +446,10 @@ class Trainer():
         for epoch in range(self.epochs):
 
             # sample at step 0
-            #if (self.step == 0) and (self.gpu_id == 0):
-                #self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                #self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                #sample_steps.append(self.step)
+            if (self.step == 0) and (self.gpu_id == 0):
+                self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                sample_steps.append(self.step)
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
@@ -448,15 +460,15 @@ class Trainer():
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            #if ((self.step % 5_000) == 0) and (self.gpu_id == 0):
-                #self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                #self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                #sample_steps.append(self.step)
-                #title = f"eval:train,val - metric:"
-                #plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
-                #plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
-                #torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.ckpt_denoiser_step+self.step}.pt'))
-                #torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.ckpt_initp_step+self.step}.pt'))
+            if ((self.step % 1000) == 0) and (self.gpu_id == 0): #10_000
+                self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
+                self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
+                sample_steps.append(self.step)
+                title = f"eval:train,val - metric:"
+                plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
+                plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
+                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.ckpt_denoiser_step+self.step}.pt'))
+                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.ckpt_initp_step+self.step}.pt'))
 
 def ddp_setup(rank, world_size):
     """
@@ -491,9 +503,12 @@ def main(rank: int, world_size:int):
             "Denoiser LR": trainer.learning_rate,
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
-            "L2 Loss": True,
+            "L2 Loss": False,
+            "L2 param": trainer.alpha,
             "Regularizer": True,
-            "Regularizer Threshold": trainer.threshold
+            "Regularizer Threshold": trainer.threshold,
+            "Dataset_t": trainer.dataset_t,
+            "Dataset_v": trainer.dataset_v,
             }
         )
     ##### ####

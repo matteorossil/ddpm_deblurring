@@ -105,13 +105,13 @@ class Trainer():
     beta_T = 1e-2 # 0.01
     # Batch size
     batch_size: int = 64
+    # L2 loss
+    alpha = 0.1
     # Threshold Regularizer
-    alpha = 0.00
-    # Threshold Regularizer
-    threshold = 0.02
+    threshold = 0.03
     # Learning rate
     learning_rate: float = 1e-4
-    learning_rate_init: float = 1e-4
+    learning_rate_init: float = 3e-4
     # Weight decay rate
     weight_decay_rate: float = 1e-3
     # ema decay
@@ -185,7 +185,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
-                                            num_workers=8, #os.cpu_count() // 2,
+                                            num_workers=16, #os.cpu_count() // 2,
                                             drop_last=True,
                                             shuffle=False, 
                                             pin_memory=False,
@@ -347,13 +347,8 @@ class Trainer():
             denoiser_loss = self.diffusion.loss(residual, blur)
 
             #### REGRESSION LOSS INIT ####
-            #alpha = 0.01
-            #if self.step < 500: alpha = 1.
-            #else: alpha = 0. #0.01
-
-            # initial predictor loss
-            #regression_loss = self.alpha * F.mse_loss(sharp, init)
-            regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            if self.alpha > 0: regression_loss = self.alpha * F.mse_loss(sharp, init)
+            else: regression_loss = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
@@ -406,7 +401,7 @@ class Trainer():
             if (self.step == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step)
+                sample_steps.append(self.step + self.ckpt_denoiser_step)
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
@@ -420,7 +415,7 @@ class Trainer():
             if ((self.step % 9_600) == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step)
+                sample_steps.append(self.step + self.ckpt_denoiser_step)
                 title = f"eval:train,val - metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
@@ -460,12 +455,13 @@ def main(rank: int, world_size:int):
             "Denoiser LR": trainer.learning_rate,
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
-            "L2 Loss": False,
+            "L2 Loss": trainer.alpha > 0,
             "L2 param": trainer.alpha,
             "Regularizer": True,
             "Regularizer Threshold": trainer.threshold,
             "Dataset_t": trainer.dataset_t,
             "Dataset_v": trainer.dataset_v,
+            "Path": trainer.exp_path,
             }
         )
     ##### ####

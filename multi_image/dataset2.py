@@ -74,6 +74,7 @@ class Data(Dataset):
             self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
             return self.transform_train(sharp_left, blur_left), self.transform_train(sharp, blur), self.transform_train(sharp_right, blur_right)
         else:
+            self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
             return self.transform_val(sharp_left, blur_left), self.transform_val(sharp, blur), self.transform_val(sharp_right, blur_right)
 
     def transform_train(self, sharp, blur):
@@ -105,6 +106,12 @@ class Data(Dataset):
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     
     def transform_val(self, sharp, blur):
+
+        #sharp = TF.center_crop(sharp, output_size=self.size)
+        #blur = TF.center_crop(blur, output_size=self.size)
+
+        sharp = TF.crop(sharp, self.i, self.j, self.h, self.w)
+        blur = TF.crop(blur, self.i, self.j, self.h, self.w)
 
         # convert to tensors
         return TF.to_tensor(sharp), TF.to_tensor(blur)
