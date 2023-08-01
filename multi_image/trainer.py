@@ -127,7 +127,7 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 32
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # checkpoints path
     store_checkpoints: str = '/home/mr6744/ckpts/'
     #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
