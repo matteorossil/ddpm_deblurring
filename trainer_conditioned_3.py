@@ -1,11 +1,11 @@
 ### Matteo Rossi
 
 # Modules
-from dataset2 import Data
-from metrics2 import psnr, ssim
-from denoiser2 import UNet as Denoiser #
-from init2 import UNet as Init
-from ddpm2 import DenoiseDiffusion #
+from dataset import Data
+from metrics import psnr, ssim
+from eps_models.unet_conditioned import UNet as Denoiser #
+from eps_models.init_predictor_new import UNet as Init
+from diffusion.ddpm_conditioned import DenoiseDiffusion #
 
 # Torch
 import torch
@@ -17,7 +17,6 @@ import torch.nn.functional as F
 
 # Numpy
 import numpy as np
-from PIL import Image
 #from numpy import savetxt
 
 # Other
@@ -33,11 +32,6 @@ import torch.multiprocessing as mp
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
-
-# Flow
-from torchvision.models.optical_flow import Raft_Large_Weights
-from torchvision.models.optical_flow import raft_large
-from torchvision.utils import flow_to_image
 
 def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
@@ -111,7 +105,7 @@ class Trainer():
     beta_T = 1e-2 # 0.01
     # Batch size
     batch_size: int = 16
-    # l2 loss
+    # L2 loss
     alpha = 0.
     # Threshold Regularizer
     threshold = 0.02
@@ -127,15 +121,15 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 32
     # Use wandb
-    wandb: bool = False
+    wandb: bool = True
     # checkpoints path
-    store_checkpoints: str = '/home/mr6744/ckpts/'
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    #store_checkpoints: str = '/home/mr6744/ckpts/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset_t: str = '/home/mr6744/gopro_small_multi/'
-    #dataset_t: str = '/scratch/mr6744/pytorch/gopro_small/'
-    dataset_v: str = '/home/mr6744/gopro_small_multi/'
-    #dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
+    #dataset_t: str = '/home/mr6744/gopro_small/'
+    dataset_t: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
+    #dataset_v: str = '/home/mr6744/gopro_small/'
+    dataset_v: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
@@ -151,7 +145,7 @@ class Trainer():
         self.world_size = world_size
 
         self.denoiser = Denoiser(
-            image_channels=self.image_channels*2+6, #+2 for optical flow #+6 for left and right concatenation
+            image_channels=self.image_channels*2,
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention
@@ -164,18 +158,14 @@ class Trainer():
             is_attn=self.is_attention
         ).to(self.gpu_id)
 
-        #self.flow = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False).to(self.gpu_id)
-        
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
         self.initp = DDP(self.initp, device_ids=[self.gpu_id])
-        #self.flow = DDP(self.flow, device_ids=[self.gpu_id])
-        #self.flow  = self.flow.eval()
 
         # only loads checkpoint if model is trained
         if self.ckpt_denoiser_step != 0:
             checkpoint_d = torch.load(self.ckpt_denoiser)
             self.denoiser.module.load_state_dict(checkpoint_d)
-
+        
         if self.ckpt_initp_step != 0:
             checkpoint_i = torch.load(self.ckpt_initp)
             self.initp.module.load_state_dict(checkpoint_i)
@@ -191,7 +181,7 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=3_200) # 3200
+        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=3_200)
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
@@ -225,17 +215,10 @@ class Trainer():
         with torch.no_grad():
 
             torch.manual_seed(7)
-            (sharp_left, blur_left), (sharp, blur), (sharp_right, blur_right) = next(iter(dataloader))
+            sharp, blur = next(iter(dataloader))
             
-            # Move data to device
-            sharp_left = sharp_left.to(self.gpu_id)
-            blur_left = blur_left.to(self.gpu_id)
-
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
-
-            sharp_right = sharp_right.to(self.gpu_id)
-            blur_right = blur_right.to(self.gpu_id)
 
             if self.step == 0:
                 # save images blur and sharp image pairs
@@ -244,9 +227,6 @@ class Trainer():
 
             # compute initial predictor
             init = self.diffusion.predictor(blur)
-
-            concat_ = torch.cat((blur_left, blur), dim=1)
-            concat_ = torch.cat((concat_, blur_right), dim=1)
 
             # get true residual
             X_true = sharp - init
@@ -265,7 +245,7 @@ class Trainer():
                 t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
 
                 # take one denoising step
-                X = self.diffusion.p_sample(X, concat_, t_vec)
+                X = self.diffusion.p_sample(X, blur, t_vec)
 
             # save initial predictor
             save_image(init, os.path.join(self.exp_path, f'{mode}_init_step{self.step}.png'))
@@ -299,21 +279,15 @@ class Trainer():
         # Iterate through the dataset
 
         # Iterate through the dataset
-        for batch_idx, ((sharp_left, blur_left), (sharp, blur), (sharp_right, blur_right)) in enumerate(self.dataloader_train):
+        for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
         #sharp, blur = next(iter(self.dataloader_train))
 
             # Increment global step
             self.step += 1
 
             # Move data to device
-            sharp_left = sharp_left.to(self.gpu_id)
-            blur_left = blur_left.to(self.gpu_id)
-
             sharp = sharp.to(self.gpu_id)
             blur = blur.to(self.gpu_id)
-
-            sharp_right = sharp_right.to(self.gpu_id)
-            blur_right = blur_right.to(self.gpu_id)
 
             # save images blur and sharp image pairs
             #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
@@ -331,22 +305,6 @@ class Trainer():
 
             # get initial prediction
             init = self.diffusion.predictor(blur)
-
-            ### PREDICT FLOW ###
-            
-            #flow_sharp = self.flow(sharp_left, sharp_right)[-1]
-            #imgs_sharp = flow_to_image(flow_sharp)
-            #save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
-            #save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
-            #save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
-            #save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
-            #flow_blur = self.flow(blur_left, blur_right)[-1]
-            #imgs_blur = flow_to_image(flow_blur)
-            #save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
-            #save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
-            #save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
-            #save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
-
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
 
             # compute residual
@@ -385,9 +343,8 @@ class Trainer():
             #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             #### DENOISER LOSS ####
-            concat_ = torch.cat((blur_left, blur), dim=1)
-            concat_ = torch.cat((concat_, blur_right), dim=1)
-            denoiser_loss = self.diffusion.loss(residual, concat_)
+            #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
+            denoiser_loss = self.diffusion.loss(residual, blur)
 
             #### REGRESSION LOSS INIT ####
             if self.alpha > 0: regression_loss = self.alpha * F.mse_loss(sharp, init)
@@ -444,7 +401,7 @@ class Trainer():
             if (self.step == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step+self.ckpt_denoiser_step)
+                sample_steps.append(self.step + self.ckpt_denoiser_step)
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
@@ -455,10 +412,10 @@ class Trainer():
                 #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
                 #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
 
-            if ((self.step % 10_000) == 0) and (self.gpu_id == 0): #10_000
+            if ((self.step % 10_000) == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step+self.ckpt_denoiser_step)
+                sample_steps.append(self.step + self.ckpt_denoiser_step)
                 title = f"eval:train,val - metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
@@ -474,7 +431,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12354" # any free port on machine
+    os.environ["MASTER_PORT"] = "12359" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
@@ -488,7 +445,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"multi-image",
+            name=f"conditioned-small",
             config=
             {
             "GPUs": world_size,
