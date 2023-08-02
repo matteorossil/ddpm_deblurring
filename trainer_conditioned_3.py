@@ -119,7 +119,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000_000
     # Number of samples (evaluation)
-    n_samples: int = 32
+    n_samples: int = 16
     # Use wandb
     wandb: bool = True
     # checkpoints path
@@ -445,7 +445,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"conditioned-small",
+            name=f"single-on-multi-dataset",
             config=
             {
             "GPUs": world_size,

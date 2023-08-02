@@ -125,7 +125,7 @@ class Trainer():
     # Number of training epochs
     epochs: int = 1_000_000
     # Number of samples (evaluation)
-    n_samples: int = 32
+    n_samples: int = 16
     # Use wandb
     wandb: bool = True
     # checkpoints path
