@@ -156,6 +156,8 @@ class DenoiseDiffusion:
         #regularizer_mean = torch.tensor([0.], device=self.device, requires_grad=False)
         #regularizer_std = torch.tensor([0.], device=self.device, requires_grad=False)
 
+        """
+
         mean_r = torch.mean(eps_theta[:,0,:,:])
         self.R.append(mean_r.item())
 
@@ -188,6 +190,7 @@ class DenoiseDiffusion:
         self.B_min.append(min_b.item())
         max_b = torch.max(eps_theta[:,2,:,:])
         self.B_max.append(max_b.item())
+        """
 
         ##### DYNAMICS END #####
         
