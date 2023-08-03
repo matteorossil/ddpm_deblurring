@@ -445,7 +445,7 @@ def main(rank: int, world_size:int):
         
         wandb.init(
             project="deblurring",
-            name=f"conditioned",
+            name=f"conditioned-full-dataset-1-run2",
             config=
             {
             "GPUs": world_size,
