@@ -48,6 +48,23 @@ class DenoiseDiffusion:
         self.sigma2 = self.beta
         self.has_copy = False
 
+        self.R = []
+        self.G = []
+        self.B = []
+
+        self.R_std = []
+        self.G_std = []
+        self.B_std = []
+
+        self.R_min = []
+        self.R_max = []
+
+        self.G_min = []
+        self.G_max = []
+
+        self.B_min = []
+        self.B_max = []
+
     def q_xt_x0(self, x0: torch.Tensor, t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         #### Get q(x_t|x_0) distribution
@@ -128,25 +145,52 @@ class DenoiseDiffusion:
         eps_theta = self.eps_model(xt_, t)
         #save_image(eps_theta, os.path.join(self.path, f'predicted_noise_{self.t_step}_{t.item()}.png'))
 
-        """
 
-        eps_theta_mean = torch.mean(eps_theta)
-        eps_theta_std = torch.std(eps_theta)
-        regularizer_mean = torch.abs(eps_theta_mean)
-        regularizer_std = torch.abs(1. - eps_theta_std)
+        ##### DYNAMICS START #####
+
+        #eps_theta_mean = torch.mean(eps_theta)
+        #eps_theta_std = torch.std(eps_theta)
+        #regularizer_mean = torch.abs(eps_theta_mean)
+        #regularizer_std = torch.abs(1. - eps_theta_std)
         #regularizer = F.threshold(regularizer, 0.02, 0.)
-        regularizer_mean = torch.tensor([0.], device=self.device, requires_grad=False)
-        regularizer_std = torch.tensor([0.], device=self.device, requires_grad=False)
+        #regularizer_mean = torch.tensor([0.], device=self.device, requires_grad=False)
+        #regularizer_std = torch.tensor([0.], device=self.device, requires_grad=False)
 
         mean_r = torch.mean(eps_theta[:,0,:,:])
+        self.R.append(mean_r.item())
+
         mean_g = torch.mean(eps_theta[:,1,:,:])
+        self.G.append(mean_g.item())
+
         mean_b = torch.mean(eps_theta[:,2,:,:])
+        self.B.append(mean_b.item())
 
         std_r = torch.std(eps_theta[:,0,:,:])
-        std_g = torch.std(eps_theta[:,1,:,:])
-        std_b = torch.std(eps_theta[:,2,:,:])
-        """
+        self.R_std.append(std_r.item())
 
+        std_g = torch.std(eps_theta[:,1,:,:])
+        self.G_std.append(std_g.item())
+
+        std_b = torch.std(eps_theta[:,2,:,:])
+        self.B_std.append(std_b.item())
+
+        min_r = torch.min(eps_theta[:,0,:,:])
+        self.R_min.append(min_r.item())
+        max_r = torch.max(eps_theta[:,0,:,:])
+        self.R_max.append(max_r.item())
+
+        min_g = torch.min(eps_theta[:,1,:,:])
+        self.G_min.append(min_g.item())
+        max_g = torch.max(eps_theta[:,1,:,:])
+        self.G_max.append(max_g.item())
+
+        min_b = torch.min(eps_theta[:,2,:,:])
+        self.B_min.append(min_b.item())
+        max_b = torch.max(eps_theta[:,2,:,:])
+        self.B_max.append(max_b.item())
+
+        ##### DYNAMICS END #####
+        
         # Compute MSE loss
         #return F.mse_loss(noise, eps_theta), regularizer_mean, regularizer_std, mean_r, mean_g, mean_b, std_r, std_g, std_b
         return F.mse_loss(noise, eps_theta)

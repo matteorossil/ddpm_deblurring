@@ -49,20 +49,20 @@ def plot_channels(steps, R, G, B, path, title, ext=""):
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/channel_{ext}step{steps[-1]+1}.png')
+    plt.savefig(path + f'/channel_{ext}_step{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
-def plot(steps, Y, path, title, ext=""):
+def plot(steps, Y, path, title, ext="", l="means", c='r'):
 
-    plt.plot(steps, Y, label="means", color='r')
+    plt.plot(steps, Y, label=l, color=c)
 
     plt.xlabel("training steps")
     plt.ylabel(ext)
     plt.legend()
     plt.title(title)
     #plt.show()
-    plt.savefig(path + f'/{ext}_step{steps[-1]+1}.png')
+    plt.savefig(path + f'/{ext}_step{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
 
@@ -104,11 +104,11 @@ class Trainer():
     # noise scheduler Beta_T
     beta_T = 1e-2 # 0.01
     # Batch size
-    batch_size: int = 64
+    batch_size: int = 32
     # L2 loss
     alpha = 0.
     # Threshold Regularizer
-    threshold = 0.02
+    threshold = 10.
     # Learning rate
     learning_rate: float = 1e-4
     learning_rate_init: float = 1e-4
@@ -121,22 +121,22 @@ class Trainer():
     # Number of samples (evaluation)
     n_samples: int = 32
     # Use wandb
-    wandb: bool = True
+    wandb: bool = False
     # checkpoints path
-    #store_checkpoints: str = '/home/mr6744/ckpts/'
-    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    store_checkpoints: str = '/home/mr6744/ckpts/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    #dataset_t: str = '/home/mr6744/gopro_small/'
-    dataset_t: str = '/scratch/mr6744/pytorch/gopro/'
-    #dataset_v: str = '/home/mr6744/gopro_small/'
-    dataset_v: str = '/scratch/mr6744/pytorch/gopro_128/'
+    dataset_t: str = '/home/mr6744/gopro_small/'
+    #dataset_t: str = '/scratch/mr6744/pytorch/gopro_small/'
+    dataset_v: str = '/home/mr6744/gopro_small/'
+    #dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
     # load from a checkpoint
-    ckpt_denoiser_step: int = 278400
-    ckpt_initp_step: int = 278400
-    #ckpt_denoiser: str = f'/home/m6744/ckpts/07312023_220156/ckpt_denoiser_{ckpt_denoiser_step}.pt'
-    ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/07312023_220156/ckpt_denoiser_{ckpt_denoiser_step}.pt'
-    #ckpt_initp: str = f'/home/mr6744/ckpts/07312023_220156/ckpt_initp_{ckpt_initp_step}.pt'
-    ckpt_initp: str = f'/scratch/mr6744/pytorch/ckpts/07312023_220156/ckpt_initp_{ckpt_initp_step}.pt'
+    ckpt_denoiser_step: int = 0
+    ckpt_initp_step: int = 0
+    ckpt_denoiser: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_denoiser_{ckpt_denoiser_step}.pt'
+    #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
+    ckpt_initp: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_initp_{ckpt_initp_step}.pt'
+    #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
 
     def init(self, rank: int, world_size: int):
         # gpu id
@@ -181,15 +181,15 @@ class Trainer():
         )
 
         # Create dataloader (shuffle False for validation)
-        dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=317)
+        dataset_train = Data(path=self.dataset_t, mode="train2", size=(self.image_size,self.image_size), multiplier=100)
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
                                             num_workers=8, #os.cpu_count() // 2,
-                                            drop_last=True,
+                                            drop_last=False,
                                             shuffle=False, 
                                             pin_memory=False,
-                                            sampler=DistributedSampler(dataset_train))
+                                            sampler=DistributedSampler(dataset_train, shuffle=False))
 
         # Num params of models
         params_denoiser = list(self.denoiser.parameters())
@@ -272,7 +272,7 @@ class Trainer():
             psnr_deblur.append(psnr_sharp_deblurred)
             ssim_deblur.append(ssim_sharp_deblurred)
 
-    def train(self):
+    def train(self, steps, R, G, B, ch_blur, grad_bias_init_R, grad_bias_init_G, grad_bias_init_B, grad_bias_denoiser_R, grad_bias_denoiser_G, grad_bias_denoiser_B):
         """
         ### Train
         """
@@ -290,18 +290,17 @@ class Trainer():
             blur = blur.to(self.gpu_id)
 
             # save images blur and sharp image pairs
-            #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
-            #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
+            #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_{self.step}.png'))
+            #save_image(blur, os.path.join(self.exp_path, f'blur_train_{self.step}.png'))
 
             # get avg channels for blur dataset
-            #if self.step == 0:
-                #pass
+            if self.step == 1:
                 # save images blur and sharp image pairs
-                #save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
-                #save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-                #ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-                #ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-                #ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
+                save_image(sharp, os.path.join(self.exp_path, f'sharp_train_{self.step}.png'))
+                save_image(blur, os.path.join(self.exp_path, f'blur_train_{self.step}.png'))
+                ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
+                ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
 
             # get initial prediction
             init = self.diffusion.predictor(blur)
@@ -312,16 +311,16 @@ class Trainer():
             #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
 
             # store mean value of channels (RED, GREEN, BLUE)
-            #steps.append(self.step)
+            steps.append(self.step)
 
             r = torch.mean(init[:,0,:,:])
-            #R.append(r.item())
+            R.append(r.item())
 
             g = torch.mean(init[:,1,:,:])
-            #G.append(g.item())
+            G.append(g.item())
 
             b = torch.mean(init[:,2,:,:])
-            #B.append(b.item())
+            B.append(b.item())
 
             # Make the gradients zero
             self.optimizer.zero_grad()
@@ -361,8 +360,24 @@ class Trainer():
             loss.backward()
 
             #print("############ GRAD OUTPUT ############")
-            #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad)
-            #print("Grad bias init:", self.initp.module.final.bias.grad)
+            #print("Grad bias denoiser:", self.denoiser.module.final.bias.grad[0].item())
+            #print("Grad bias init:", self.initp.module.final.bias.grad[0].item())
+
+            self.initp.module.final.bias.grad[0] = 0.
+            self.initp.module.final.bias.grad[1] = 0.
+            self.initp.module.final.bias.grad[2] = 0.
+
+            self.denoiser.module.final.bias.grad[0] = 0.
+            self.denoiser.module.final.bias.grad[1] = 0.
+            self.denoiser.module.final.bias.grad[2] = 0.
+
+            grad_bias_denoiser_R.append(self.denoiser.module.final.bias.grad[0].item())
+            grad_bias_denoiser_G.append(self.denoiser.module.final.bias.grad[1].item())
+            grad_bias_denoiser_B.append(self.denoiser.module.final.bias.grad[2].item())
+
+            grad_bias_init_R.append(self.initp.module.final.bias.grad[0].item())
+            grad_bias_init_G.append(self.initp.module.final.bias.grad[1].item())
+            grad_bias_init_B.append(self.initp.module.final.bias.grad[2].item())
 
             # clip gradients
             nn.utils.clip_grad_norm_(self.denoiser.parameters(), 0.01)
@@ -384,6 +399,12 @@ class Trainer():
         B = []
         steps = []
         ch_blur = []
+        grad_bias_denoiser_R = []
+        grad_bias_denoiser_G = []
+        grad_bias_denoiser_B = []
+        grad_bias_init_R = []
+        grad_bias_init_G = []
+        grad_bias_init_B = []
 
         sample_steps= [] # stores the step at which you sample
         psnr_init_t = []
@@ -398,21 +419,66 @@ class Trainer():
         for epoch in range(self.epochs):
 
             # sample at step 0
+            '''
             if (self.step == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step + self.ckpt_denoiser_step)
+            '''
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
-            self.train()
+            self.train(steps, R, G, B, ch_blur, grad_bias_init_R, grad_bias_init_G, grad_bias_init_B, grad_bias_denoiser_R, grad_bias_denoiser_G, grad_bias_denoiser_B)
 
-            #if ((epoch+1) % 10 == 0) and (self.gpu_id == 0):
-                #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
-                #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
+            if ((self.step % 100) == 0) and (self.gpu_id == 0):
 
-            if ((self.step % 10_416) == 0) and (self.gpu_id == 0):
+                title = f"Init - D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init")
+
+                title = f"Grad Bias Init - D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot_channels(steps, grad_bias_init_R, grad_bias_init_G, grad_bias_init_B, self.exp_path, title=title, ext="grad_bias_init")
+
+                title = f"Grad Bias Denoiser - D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot_channels(steps, grad_bias_denoiser_R, grad_bias_denoiser_G, grad_bias_denoiser_B, self.exp_path, title=title, ext="grad_bias_denoiser")
+
+                title = f"Denoiser Mean Red - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.R, self.exp_path, title=title, ext="denoiser_mean_red", l='Mean Red', c='r')
+
+                title = f"Denoiser Mean Green - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.G, self.exp_path, title=title, ext="denoiser_mean_green", l='Mean Green', c='g')
+
+                title = f"Denoiser Mean Blue - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.B, self.exp_path, title=title, ext="denoiser_mean_blue", l='Mean Blue', c='b')
+
+                title = f"Denoiser Std Red - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.R_std, self.exp_path, title=title, ext="denoiser_std_red", l='Std Red', c='r')
+
+                title = f"Denoiser Std Green - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.G_std, self.exp_path, title=title, ext="denoiser_std_green", l='Std Green', c='g')
+
+                title = f"Denoiser Std Blue - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.B_std, self.exp_path, title=title, ext="denoiser_std_blue", l='Std Blue', c='b')
+
+                title = f"Denoiser Min Red - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.R_min, self.exp_path, title=title, ext="denoiser_min_red", l='Min Red', c='r')
+
+                title = f"Denoiser Max Red - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.R_max, self.exp_path, title=title, ext="denoiser_max_red", l='Max Red', c='r')
+
+                title = f"Denoiser Min Green - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.G_min, self.exp_path, title=title, ext="denoiser_min_green", l='Min Green', c='g')
+
+                title = f"Denoiser Max Green - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.G_max, self.exp_path, title=title, ext="denoiser_max_green", l='Max Green', c='g')
+
+                title = f"Denoiser Min Blue - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.B_min, self.exp_path, title=title, ext="denoiser_min_blue", l='Min Blue', c='b')
+
+                title = f"Denoiser Max Blue - B:{self.batch_size}, RGB:{ch_blur}, Reg:{self.threshold}"
+                plot(steps, self.diffusion.B_max, self.exp_path, title=title, ext="denoiser_max_blue", l='Max Blue', c='b')
+
+            '''
+            if ((self.step % 1_000) == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
                 sample_steps.append(self.step + self.ckpt_denoiser_step)
@@ -421,6 +487,7 @@ class Trainer():
                 plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
                 torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.ckpt_denoiser_step+self.step}.pt'))
                 torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.ckpt_initp_step+self.step}.pt'))
+            '''
 
 def ddp_setup(rank, world_size):
     """
@@ -431,7 +498,7 @@ def ddp_setup(rank, world_size):
     # IP address of machine running rank 0 process
     # master: machine coordinates communication across processes
     os.environ["MASTER_ADDR"] = "localhost" # we assume a single machine setup)
-    os.environ["MASTER_PORT"] = "12352" # any free port on machine
+    os.environ["MASTER_PORT"] = "12354" # any free port on machine
     # nvidia collective comms library (comms across CUDA GPUs)
     init_process_group(backend="nccl", rank=rank, world_size=world_size)
 
