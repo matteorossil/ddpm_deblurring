@@ -131,12 +131,12 @@ class Trainer():
     #dataset_v: str = '/home/mr6744/gopro_small/'
     dataset_v: str = '/scratch/mr6744/pytorch/gopro_small/'
     # load from a checkpoint
-    ckpt_denoiser_step: int = 0
-    ckpt_initp_step: int = 0
-    ckpt_denoiser: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_denoiser_{ckpt_denoiser_step}.pt'
-    #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
-    ckpt_initp: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_initp_{ckpt_initp_step}.pt'
-    #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    ckpt_denoiser_step: int = 730000
+    ckpt_initp_step: int = 730000
+    #ckpt_denoiser: str = f'/home/mr6744/ckpts/08012023_190906/ckpt_denoiser_{ckpt_denoiser_step}.pt'
+    ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/08012023_190906/ckpt_denoiser_{ckpt_denoiser_step}.pt'
+    #ckpt_initp: str = f'/home/mr6744/ckpts/08012023_190906/ckpt_initp_{ckpt_initp_step}.pt'
+    ckpt_initp: str = f'/scratch/mr6744/pytorch/ckpts/08012023_190906/ckpt_initp_{ckpt_initp_step}.pt'
 
     def init(self, rank: int, world_size: int):
         # gpu id
