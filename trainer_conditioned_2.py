@@ -210,7 +210,7 @@ class Trainer():
     def sample(self, mode, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         dataset = Data(path=path, mode=mode, size=(self.image_size,self.image_size))
-        dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=False, pin_memory=False)
+        dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=True, pin_memory=False)
 
         with torch.no_grad():
 

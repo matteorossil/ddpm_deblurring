@@ -1,7 +1,7 @@
 ### Matteo Rossi
 
 # Modules
-from dataset import Data
+from dataset_ import Data
 from metrics import psnr, ssim
 from eps_models.unet_conditioned import UNet as Denoiser #
 from eps_models.init_predictor_new import UNet as Init
@@ -123,13 +123,13 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    #store_checkpoints: str = '/home/mr6744/ckpts/'
-    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    store_checkpoints: str = '/home/mr6744/ckpts/'
+    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    #dataset_t: str = '/home/mr6744/gopro_small/'
-    dataset_t: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
-    #dataset_v: str = '/home/mr6744/gopro_small/'
-    dataset_v: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
+    dataset_t: str = '/home/mr6744/gopro_small/'
+    #dataset_t: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
+    dataset_v: str = '/home/mr6744/gopro_small/'
+    #dataset_v: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
     # load from a checkpoint
     ckpt_denoiser_step: int = 0
     ckpt_initp_step: int = 0
