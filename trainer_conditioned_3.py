@@ -123,20 +123,20 @@ class Trainer():
     # Use wandb
     wandb: bool = True
     # checkpoints path
-    store_checkpoints: str = '/home/mr6744/ckpts/'
-    #store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+    #store_checkpoints: str = '/home/mr6744/ckpts/'
+    store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
     # dataset path
-    dataset_t: str = '/home/mr6744/gopro_small/'
-    #dataset_t: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
-    dataset_v: str = '/home/mr6744/gopro_small/'
-    #dataset_v: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
+    #dataset_t: str = '/home/mr6744/gopro_small/'
+    dataset_t: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
+    #dataset_v: str = '/home/mr6744/gopro_small/'
+    dataset_v: str = '/scratch/mr6744/pytorch/gopro_small_multi/'
     # load from a checkpoint
-    ckpt_denoiser_step: int = 0
-    ckpt_initp_step: int = 0
-    ckpt_denoiser: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_denoiser_{ckpt_denoiser_step}.pt'
-    #checkpoint_init: str = f'/scratch/mr6744/pytorch/checkpoints_conditioned/06292023_100717/checkpoint__initpr_{checkpoint_init_epoch}.pt'
-    ckpt_initp: str = f'/home/mr6744/ckpts/07272023_182450/ckpt_initp_{ckpt_initp_step}.pt'
-    #checkpoint: str = f'/home/mr6744/checkpoints_conditioned/06022023_001525/checkpoint_{checkpoint_epoch}.pt'
+    ckpt_denoiser_step: int = 400000
+    ckpt_initp_step: int = 400000
+    #ckpt_denoiser: str = f'/home/mr6744/ckpts/08032023_032544/ckpt_denoiser_{ckpt_denoiser_step}.pt'
+    ckpt_denoiser: str = f'/scratch/mr6744/ckpts/08032023_032544/ckpt_denoiser_{ckpt_denoiser_step}.pt'
+    #ckpt_initp: str = f'/home/mr6744/ckpts/08032023_032544/ckpt_initp_{ckpt_initp_step}.pt'
+    ckpt_initp: str = f'/scratch/mr6744/ckpts/08032023_032544/ckpt_initp_{ckpt_initp_step}.pt'
 
     def init(self, rank: int, world_size: int):
         # gpu id
