@@ -14,6 +14,7 @@ import torch.utils.data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 import torch.nn.functional as F
+from torchvision.transforms.functional import gaussian_blur
 
 # Numpy
 import numpy as np
@@ -27,6 +28,7 @@ from datetime import datetime
 import wandb
 import matplotlib.pyplot as plt
 import argparse
+import pickle
 
 # DDP
 import torch.multiprocessing as mp
@@ -38,34 +40,6 @@ def get_exp_path(path=''):
     exp_path = os.path.join(path, datetime.now().strftime("%m%d%Y_%H%M%S"))
     Path(exp_path).mkdir(parents=True, exist_ok=True)
     return exp_path
-
-def plot_channels(steps, R, G, B, path, title, ext=""):
-
-    plt.plot(steps, R, label='red', color='r')
-    plt.plot(steps, G, label='green', color='g')
-    plt.plot(steps, B, label='blu', color='b')
-
-    plt.xlabel("training steps")
-    plt.ylabel("channel average")
-    plt.legend()
-    plt.title(title)
-    #plt.show()
-    plt.savefig(path + f'/channel_{ext}step{steps[-1]+1}.png')
-    plt.figure().clear()
-    plt.close('all')
-
-def plot(steps, Y, path, title, ext=""):
-
-    plt.plot(steps, Y, label="means", color='r')
-
-    plt.xlabel("training steps")
-    plt.ylabel(ext)
-    plt.legend()
-    plt.title(title)
-    #plt.show()
-    plt.savefig(path + f'/{ext}_step{steps[-1]+1}.png')
-    plt.figure().clear()
-    plt.close('all')
 
 def plot_metrics(steps, ylabel, label_init_t, label_deblur_t, label_init_v, label_deblur_v, metric_init_t, metric_deblur_t, metric_init_v, metric_deblur_v, path, title):
 
@@ -82,6 +56,17 @@ def plot_metrics(steps, ylabel, label_init_t, label_deblur_t, label_init_v, labe
     plt.savefig(path + f'/{ylabel}_step{steps[-1]}.png')
     plt.figure().clear()
     plt.close('all')
+
+def save_metrics(metrics, name):
+    file = open(name, 'wb')
+    pickle.dump(metrics, file)
+    file.close()
+
+def load_metrics(name):
+    file = open(name, 'rb')
+    metrics = pickle.load(file)
+    file.close()
+    return metrics
 
 class Trainer():
     """
@@ -111,8 +96,9 @@ class Trainer():
         self.alpha = argv.l2_loss
         # Threshold Regularizer
         self.threshold = argv.threshold
-        # Learning rate
+        # Learning rate D
         self.learning_rate: float = argv.d_lr
+        # Learning rate G
         self.learning_rate_init: float = argv.g_lr
         # Weight decay rate
         self.weight_decay_rate: float = 1e-3
@@ -124,24 +110,41 @@ class Trainer():
         self.n_samples: int = argv.sample_size
         # Use wandb
         self.wandb: bool = argv.wandb
-        #self.store_checkpoints: str = '/home/mr6744/ckpts/'
-        self.store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
-        #self.dataset_t: str = f'/home/mr6744/{argv.dataset_t}/'
-        self.dataset_t: str = f'/scratch/mr6744/pytorch/{argv.dataset_t}/'
-        #self.dataset_v: str = f'/home/mr6744/{argv.dataset_v}/'
-        self.dataset_v: str = f'/scratch/mr6744/pytorch/{argv.dataset_v}/'
         # load from a checkpoint
         self.ckpt_step: int = argv.ckpt_step
-        #self.ckpt_denoiser: str = f'/home/m6744/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
-        self.ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
-        #self.ckpt_initp: str = f'/home/mr6744/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
-        self.ckpt_initp: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
+        # paths
+        if  argv.hpc: 
+            self.store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+            self.dataset_t: str = f'/scratch/mr6744/pytorch/{argv.dataset_t}/'
+            self.dataset_v: str = f'/scratch/mr6744/pytorch/{argv.dataset_v}/'
+            self.ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
+            self.ckpt_initp: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
+            self.ckpt_metrics_: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/metrics_step{self.ckpt_step}.p'
+        else:
+            self.store_checkpoints: str = '/home/mr6744/ckpts/'
+            self.dataset_t: str = f'/home/mr6744/{argv.dataset_t}/'
+            self.dataset_v: str = f'/home/mr6744/{argv.dataset_v}/'
+            self.ckpt_denoiser: str = f'/home/mr6744/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
+            self.ckpt_initp: str = f'/home/mr6744/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
+            self.ckpt_metrics_: str = f'/home/mr6744/ckpts/{argv.ckpt_path}/metrics_step{self.ckpt_step}.p'
+        # multiplier for virtual dataset
         self.multiplier = argv.multiplier
+        # dataloader workers
         self.num_workers = argv.num_workers
+        # how often to sample
         self.sampling_interval = argv.sampling_interval
+        # random seed for evaluation
         self.seed = argv.random_seed
+        # whether to sample or not
+        self.sample = argv.sample
+        # import metrics from chpt
+        self.ckpt_metrics = argv.ckpt_metrics
+        # training step start
+        self.step = self.ckpt_step
+        # path
+        self.exp_path = get_exp_path(path=self.store_checkpoints)
 
-    def init(self, rank: int, world_size: int):
+    def init_train(self, rank: int, world_size: int):
         # gpu id
         self.gpu_id = rank
         # world_size
@@ -164,7 +167,7 @@ class Trainer():
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
         self.initp = DDP(self.initp, device_ids=[self.gpu_id])
 
-        # only loads checkpoint if model is trained
+        # load checkpoints
         if self.ckpt_step != 0:
             checkpoint_d = torch.load(self.ckpt_denoiser)
             self.denoiser.module.load_state_dict(checkpoint_d)
@@ -202,13 +205,7 @@ class Trainer():
         self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.optimizer2 = torch.optim.AdamW(self.initp.parameters(), lr=self.learning_rate_init, weight_decay= self.weight_decay_rate, betas=self.betas)
 
-        # training steps
-        self.step = self.ckpt_step
-
-        # path
-        self.exp_path = get_exp_path(path=self.store_checkpoints)
-
-    def sample(self, mode, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
+    def sample_(self, mode, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
         dataset = Data(path=path, mode=mode, size=(self.image_size,self.image_size))
         dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=True, pin_memory=False)
@@ -225,6 +222,16 @@ class Trainer():
                 # save images blur and sharp image pairs
                 save_image(sharp, os.path.join(self.exp_path, f'{mode}__sharp.png'))
                 save_image(blur, os.path.join(self.exp_path, f'{mode}__blur.png'))
+                sharp_ = gaussian_blur(sharp, kernel_size=(5, 5), sigma=(0.1, 1.5))
+                save_image(sharp_, os.path.join(self.exp_path, f'{mode}__sharp_.png'))
+                psnr_sharp_sharp = psnr(sharp, sharp_)
+                psnr_sharp_blur = psnr(sharp, blur)
+                print('Eval: {:6s} PSRN S-S: {:.6f}'.format(mode, psnr_sharp_sharp))
+                print('Eval: {:6s} PSRN S-B: {:.6f}'.format(mode, psnr_sharp_blur))
+                ssim_sharp_sharp = ssim(sharp, sharp_)
+                ssim_sharp_blur = ssim(sharp, blur)
+                print('Eval: {:6s} SSIM S-S: {:.6f}'.format(mode, ssim_sharp_sharp))
+                print('Eval: {:6s} SSIM S-B: {:.6f}'.format(mode, ssim_sharp_blur))
 
             # compute initial predictor
             init = self.diffusion.predictor(blur)
@@ -280,7 +287,7 @@ class Trainer():
         # Iterate through the dataset
 
         # Iterate through the dataset
-        for batch_idx, (sharp, blur) in enumerate(self.dataloader_train):
+        for _, (sharp, blur) in enumerate(self.dataloader_train):
         #sharp, blur = next(iter(self.dataloader_train))
 
             # Increment global step
@@ -294,16 +301,6 @@ class Trainer():
             #save_image(sharp, os.path.join(self.exp_path, f'sharp_train_step{self.step}.png'))
             #save_image(blur, os.path.join(self.exp_path, f'blur_train_step{self.step}.png'))
 
-            # get avg channels for blur dataset
-            #if self.step == 0:
-                #pass
-                # save images blur and sharp image pairs
-                #save_image(sharp, os.path.join(self.exp_path, f'sharp_train.png'))
-                #save_image(blur, os.path.join(self.exp_path, f'blur_train.png'))
-                #ch_blur.append(round(torch.mean(blur[:,0,:,:]).item(), 2))
-                #ch_blur.append(round(torch.mean(blur[:,1,:,:]).item(), 2))
-                #ch_blur.append(round(torch.mean(blur[:,2,:,:]).item(), 2))
-
             # get initial prediction
             init = self.diffusion.predictor(blur)
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
@@ -311,9 +308,6 @@ class Trainer():
             # compute residual
             residual = sharp - init
             #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
-
-            # store mean value of channels (RED, GREEN, BLUE)
-            #steps.append(self.step)
 
             r = torch.mean(init[:,0,:,:])
             #R.append(r.item())
@@ -328,13 +322,6 @@ class Trainer():
             self.optimizer.zero_grad()
             self.optimizer2.zero_grad()
 
-            #### REGULARIZER ####
-
-            # Compute regularizer 1 (std dev)
-            #rgb = torch.tensor([r, g, b], device=self.gpu_id, requires_grad=True)
-            #regularizer = torch.std(rgb) * 10
-            #regularizer = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
-
             #### REGULARIZER INIT ####
             r_blur = torch.mean(blur[:,0,:,:])
             g_blur = torch.mean(blur[:,1,:,:])
@@ -344,7 +331,6 @@ class Trainer():
             #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             #### DENOISER LOSS ####
-            #denoiser_loss, reg_denoiser_mean, reg_denoiser_std, mean_r, mean_g, mean_b, std_r, std_g, std_b = self.diffusion.loss(residual, blur)
             denoiser_loss = self.diffusion.loss(residual, blur)
 
             #### REGRESSION LOSS INIT ####
@@ -354,7 +340,6 @@ class Trainer():
             # final loss
             loss = denoiser_loss + regression_loss + regularizer_init #+ regularizer_denoiser_mean + regularizer_denoiser_std
 
-            #print('Epoch: {:4d}, Step: {:4d}, TOT_loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, reg_G: {:.4f}, reg_D_mean: {:.4f}, reg_D_std: {:.4f}, D_mean_r: {:+.4f}, D_mean_g: {:+.4f}, D_mean_b: {:+.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}, D_std_r: {:.4f}'.format(epoch, self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item(), reg_denoiser_mean.item(), reg_denoiser_std.item(), mean_r.item(), mean_g.item(), mean_b.item(), std_r.item(), std_g.item(), std_b.item()))
             if self.gpu_id == 0:
                 print('Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, G_reg: {:.4f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item(), regularizer_init.item()))
 
@@ -379,49 +364,33 @@ class Trainer():
 
     def run(self):
 
-        # used to plot channel averages
-        R = []
-        G = []
-        B = []
-        steps = []
-        ch_blur = []
+        if self.ckpt_metrics:
+            metrics = load_metrics(self.ckpt_metrics_)
+        else:
+            metrics = {"sample_steps":[], "psnr_init_t":[], "ssim_init_t":[], "psnr_deblur_t":[], "ssim_deblur_t":[], "psnr_init_v":[], "ssim_init_v":[], "psnr_deblur_v":[], "ssim_deblur_v":[]}
 
-        sample_steps= [] # stores the step at which you sample
-        psnr_init_t = []
-        ssim_init_t = []
-        psnr_deblur_t = []
-        ssim_deblur_t = []
-        psnr_init_v = []
-        ssim_init_v = []
-        psnr_deblur_v = []
-        ssim_deblur_v = []
-
-        for epoch in range(self.epochs):
+        for _ in range(self.epochs):
 
             # sample at step 0
-            if (self.step == 0) and (self.gpu_id == 0):
-                self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step + self.ckpt_step)
+            if (self.sample) and (self.step == 0) and (self.gpu_id == 0):
+                self.sample_("train2", self.dataset_v, metrics["psnr_init_t"], metrics["ssim_init_t"], metrics["psnr_deblur_t"], metrics["ssim_deblur_t"])
+                self.sample_("val", self.dataset_v, metrics["psnr_init_v"], metrics["ssim_init_v"], metrics["psnr_deblur_v"], metrics["ssim_deblur_v"])
+                metrics["sample_steps"].append(self.step)
+                save_metrics(metrics, os.path.join(self.exp_path, f"metrics_step{self.step}.p"))
 
             # train
-            #self.train(epoch, steps, R, G, B, ch_blur)
             self.train()
 
-            #if ((epoch+1) % 10 == 0) and (self.gpu_id == 0):
-                #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}, RGB:{ch_blur}"
-                #title = f"Init - D:{self.num_params_denoiser//1_000_000}M, G:{self.num_params_init//1_000_000}M, Pre:No, D:{'{:.0e}'.format(self.learning_rate)}, G:{'{:.0e}'.format(self.learning_rate_init)}, B:{self.batch_size}"
-                #plot_channels(steps, R, G, B, self.exp_path, title=title, ext="init_")
-
-            if ((self.step % self.sampling_interval) == 0) and (self.gpu_id == 0):
-                self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
-                self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step + self.ckpt_step)
+            if (self.sample) and ((self.step % self.sampling_interval) == 0) and (self.gpu_id == 0):
+                self.sample_("train2", self.dataset_v, metrics["psnr_init_t"], metrics["ssim_init_t"], metrics["psnr_deblur_t"], metrics["ssim_deblur_t"])
+                self.sample_("val", self.dataset_v, metrics["psnr_init_v"], metrics["ssim_init_v"], metrics["psnr_deblur_v"], metrics["ssim_deblur_v"])
+                metrics["sample_steps"].append(self.step)
                 title = f"eval:train,val - metric:"
-                plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
-                plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
-                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.ckpt_step+self.step}.pt'))
-                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.ckpt_step+self.step}.pt'))
+                plot_metrics(metrics["sample_steps"], ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=metrics["psnr_init_t"], metric_deblur_t=metrics["psnr_deblur_t"], metric_init_v=metrics["psnr_init_v"], metric_deblur_v=metrics["psnr_deblur_v"], path=self.exp_path, title=title)
+                plot_metrics(metrics["sample_steps"], ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=metrics["ssim_init_t"], metric_deblur_t=metrics["ssim_deblur_t"], metric_init_v=metrics["ssim_init_v"], metric_deblur_v=metrics["ssim_deblur_v"], path=self.exp_path, title=title)
+                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.step}.pt'))
+                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.step}.pt'))
+                save_metrics(metrics, os.path.join(self.exp_path, f"metrics_step{self.step}.p"))
 
 def ddp_setup(rank, world_size, port):
     """
@@ -439,7 +408,7 @@ def ddp_setup(rank, world_size, port):
 def main(rank: int, world_size:int, argv):
     ddp_setup(rank=rank, world_size=world_size, port=argv.port)
     trainer = Trainer(argv)
-    trainer.init(rank, world_size) # initialize trainer class
+    trainer.init_train(rank, world_size) # initialize trainer class
 
     #### Track Hyperparameters with WANDB####
     if trainer.wandb and rank == 0:
@@ -456,6 +425,7 @@ def main(rank: int, world_size:int, argv):
             "Denoiser LR": trainer.learning_rate,
             "Init Predictor LR": trainer.learning_rate_init,
             "Batch size": trainer.batch_size,
+            "Sample size": trainer.n_samples,
             "L2 Loss": trainer.alpha > 0,
             "L2 param": trainer.alpha,
             "Regularizer": True,
@@ -489,6 +459,9 @@ if __name__ == "__main__":
     parser.add_argument('--random_seed', type=int, default=7)
     parser.add_argument('--name', type=str, default="conditioned")
     parser.add_argument('--wandb', action="store_true")
+    parser.add_argument('--hpc', action="store_true")
+    parser.add_argument('--sample', action="store_true")
+    parser.add_argument('--ckpt_metrics', action="store_true")
     argv = parser.parse_args()
 
     print('port:', argv.port, type(argv.port))
@@ -508,6 +481,9 @@ if __name__ == "__main__":
     print('random_seed:', argv.random_seed, type(argv.random_seed))
     print('name:', argv.name, type(argv.name))
     print('wandb:', argv.wandb, type(argv.wandb))
+    print('hpc:', argv.hpc, type(argv.hpc))
+    print('sample:', argv.sample, type(argv.sample))
+    print('ckpt_metrics:', argv.ckpt_metrics, type(argv.ckpt_metrics))
 
     world_size = torch.cuda.device_count() # how many GPUs available in the machine
     mp.spawn(main, args=(world_size,argv), nprocs=world_size)
