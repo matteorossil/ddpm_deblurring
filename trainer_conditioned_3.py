@@ -402,7 +402,7 @@ class Trainer():
             if (self.step == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step + self.ckpt_denoiser_step)
+                sample_steps.append(self.step + self.ckpt_step)
 
             # train
             #self.train(epoch, steps, R, G, B, ch_blur)
@@ -416,12 +416,12 @@ class Trainer():
             if ((self.step % self.sampling_interval) == 0) and (self.gpu_id == 0):
                 self.sample("train2", self.dataset_v, psnr_init_t, ssim_init_t, psnr_deblur_t, ssim_deblur_t)
                 self.sample("val", self.dataset_v, psnr_init_v, ssim_init_v, psnr_deblur_v, ssim_deblur_v)
-                sample_steps.append(self.step + self.ckpt_denoiser_step)
+                sample_steps.append(self.step + self.ckpt_step)
                 title = f"eval:train,val - metric:"
                 plot_metrics(sample_steps, ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=psnr_init_t, metric_deblur_t=psnr_deblur_t, metric_init_v=psnr_init_v, metric_deblur_v=psnr_deblur_v, path=self.exp_path, title=title)
                 plot_metrics(sample_steps, ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=ssim_init_t, metric_deblur_t=ssim_deblur_t, metric_init_v=ssim_init_v, metric_deblur_v=ssim_deblur_v, path=self.exp_path, title=title)
-                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.ckpt_denoiser_step+self.step}.pt'))
-                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.ckpt_initp_step+self.step}.pt'))
+                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.ckpt_step+self.step}.pt'))
+                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.ckpt_step+self.step}.pt'))
 
 def ddp_setup(rank, world_size, port):
     """

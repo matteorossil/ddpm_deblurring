@@ -124,18 +124,18 @@ class Trainer():
         self.n_samples: int = argv.sample_size
         # Use wandb
         self.wandb: bool = argv.wandb
-        self.store_checkpoints: str = '/home/mr6744/ckpts/'
-        #self.store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
-        self.dataset_t: str = f'/home/mr6744/{argv.dataset_t}/'
-        #self.dataset_t: str = f'/scratch/mr6744/pytorch/{argv.dataset_t}/'
-        self.dataset_v: str = f'/home/mr6744/{argv.dataset_v}/'
-        #self.dataset_v: str = f'/scratch/mr6744/pytorch/{argv.dataset_v}/'
+        #self.store_checkpoints: str = '/home/mr6744/ckpts/'
+        self.store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
+        #self.dataset_t: str = f'/home/mr6744/{argv.dataset_t}/'
+        self.dataset_t: str = f'/scratch/mr6744/pytorch/{argv.dataset_t}/'
+        #self.dataset_v: str = f'/home/mr6744/{argv.dataset_v}/'
+        self.dataset_v: str = f'/scratch/mr6744/pytorch/{argv.dataset_v}/'
         # load from a checkpoint
         self.ckpt_step: int = argv.ckpt_step
-        self.ckpt_denoiser: str = f'/home/m6744/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
-        #self.ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_step}/ckpt_denoiser_{self.ckpt_step}.pt'
-        self.ckpt_initp: str = f'/home/mr6744/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
-        #self.ckpt_initp: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_step}/ckpt_initp_{self.ckpt_step}.pt'
+        #self.ckpt_denoiser: str = f'/home/m6744/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
+        self.ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
+        #self.ckpt_initp: str = f'/home/mr6744/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
+        self.ckpt_initp: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_initp_{self.ckpt_step}.pt'
         self.multiplier = argv.multiplier
         self.num_workers = argv.num_workers
         self.sampling_interval = argv.sampling_interval
