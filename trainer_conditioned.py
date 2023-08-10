@@ -311,26 +311,22 @@ class Trainer():
             residual = sharp - init
             #save_image(residual, os.path.join(self.exp_path, f'residual_step{self.step}.png'))
 
-            r = torch.mean(init[:,0,:,:])
-            #R.append(r.item())
-
-            g = torch.mean(init[:,1,:,:])
-            #G.append(g.item())
-
-            b = torch.mean(init[:,2,:,:])
-            #B.append(b.item())
-
             # Make the gradients zero
             self.optimizer.zero_grad()
             self.optimizer2.zero_grad()
 
             #### REGULARIZER INIT ####
-            r_blur = torch.mean(blur[:,0,:,:])
-            g_blur = torch.mean(blur[:,1,:,:])
-            b_blur = torch.mean(blur[:,2,:,:])
-            regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
-            regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
-            #regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
+            if self.threshold <= 0.5: # if threshold <= 0.5 regularizer is applied, otherwise no 
+                r = torch.mean(init[:,0,:,:])
+                g = torch.mean(init[:,1,:,:])
+                b = torch.mean(init[:,2,:,:])
+                r_blur = torch.mean(blur[:,0,:,:])
+                g_blur = torch.mean(blur[:,1,:,:])
+                b_blur = torch.mean(blur[:,2,:,:])
+                regularizer_init = (F.l1_loss(r, r_blur) + F.l1_loss(g, g_blur)+ F.l1_loss(b, b_blur))
+                regularizer_init = F.threshold(regularizer_init, self.threshold, 0.)
+            else:
+                regularizer_init = torch.tensor([0.], device=self.gpu_id, requires_grad=False)
 
             #### DENOISER LOSS ####
             denoiser_loss = self.diffusion.loss(residual, blur)
@@ -430,11 +426,21 @@ def main(rank: int, world_size:int, argv):
             "Sample size": trainer.n_samples,
             "L2 Loss": trainer.alpha > 0,
             "L2 param": trainer.alpha,
-            "Regularizer": True,
+            "Regularizer": trainer.threshold <= 0.5,
             "Regularizer Threshold": trainer.threshold,
             "Dataset_t": trainer.dataset_t,
             "Dataset_v": trainer.dataset_v,
             "Path": trainer.exp_path,
+            "Port": argv.port,
+            "Ckpt step": trainer.ckpt_step,
+            "Ckpt path": argv.ckpt_path,
+            "Ckpt metrics": trainer.ckpt_metrics,
+            "Workers": trainer.num_workers,
+            "Dataset multiplier": trainer.multiplier,
+            "Sampling interval": trainer.sampling_interval,
+            "Random seed eval": trainer.seed,
+            "Sampling": trainer.sample,
+            "Crop eval": trainer.crop_eval
             }
         )
     ##### ####
