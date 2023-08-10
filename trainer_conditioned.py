@@ -139,6 +139,8 @@ class Trainer():
         self.sample = argv.sample
         # import metrics from chpt
         self.ckpt_metrics = argv.ckpt_metrics
+        # perform crops on eval
+        self.crop_eval = argv.crop_eval
         # training step start
         self.step = self.ckpt_step
         # path
@@ -207,7 +209,7 @@ class Trainer():
 
     def sample_(self, mode, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
 
-        dataset = Data(path=path, mode=mode, size=(self.image_size,self.image_size))
+        dataset = Data(path=path, mode=mode, crop_eval=self.crop_eval, size=(self.image_size,self.image_size))
         dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=True, pin_memory=False)
 
         with torch.no_grad():
@@ -223,7 +225,7 @@ class Trainer():
                 save_image(sharp, os.path.join(self.exp_path, f'{mode}__sharp.png'))
                 save_image(blur, os.path.join(self.exp_path, f'{mode}__blur.png'))
                 sharp_ = gaussian_blur(sharp, kernel_size=(5, 5), sigma=(0.1, 1.5))
-                save_image(sharp_, os.path.join(self.exp_path, f'{mode}__sharp_.png'))
+                save_image(sharp_, os.path.join(self.exp_path, f'{mode}__sharp.png'))
                 psnr_sharp_sharp = psnr(sharp, sharp_)
                 psnr_sharp_blur = psnr(sharp, blur)
                 print('Eval: {:6s} PSRN S-S: {:.6f}'.format(mode, psnr_sharp_sharp))
@@ -462,6 +464,7 @@ if __name__ == "__main__":
     parser.add_argument('--hpc', action="store_true")
     parser.add_argument('--sample', action="store_true")
     parser.add_argument('--ckpt_metrics', action="store_true")
+    parser.add_argument('--crop_eval', action="store_true")
     argv = parser.parse_args()
 
     print('port:', argv.port, type(argv.port))
@@ -484,6 +487,7 @@ if __name__ == "__main__":
     print('hpc:', argv.hpc, type(argv.hpc))
     print('sample:', argv.sample, type(argv.sample))
     print('ckpt_metrics:', argv.ckpt_metrics, type(argv.ckpt_metrics))
+    print('crop_eval:', argv.crop_eval, type(argv.crop_eval))
 
     world_size = torch.cuda.device_count() # how many GPUs available in the machine
     mp.spawn(main, args=(world_size,argv), nprocs=world_size)

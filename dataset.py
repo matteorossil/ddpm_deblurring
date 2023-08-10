@@ -13,7 +13,7 @@ import torch
 
 class Data(Dataset):
 
-    def __init__(self, path, mode='train', size=(128,128), multiplier=1):
+    def __init__(self, path, mode='train', crop_eval=False, size=(128,128), multiplier=1):
         
         # store img path
         self.path = path
@@ -23,6 +23,9 @@ class Data(Dataset):
 
         #size of the crop
         self.size = size
+
+        # crop validation set
+        self.crop_eval = crop_eval
 
         # used in tranformations
         self.angles = [90.,180.,270.]
@@ -50,7 +53,10 @@ class Data(Dataset):
         if self.mode == 'train':
             return self.transform_train(sharp, blur)
         else:
-            return self.transform_val(sharp, blur)
+            if self.crop_eval:
+                return self.transform_val2(sharp, blur)
+            else:
+                return self.transform_val(sharp, blur)
 
     def transform_train(self, sharp, blur):
 
@@ -78,6 +84,16 @@ class Data(Dataset):
         return TF.to_tensor(sharp), TF.to_tensor(blur)
     
     def transform_val(self, sharp, blur):
+
+        # convert to tensors
+        return TF.to_tensor(sharp), TF.to_tensor(blur)
+    
+    def transform_val2(self, sharp, blur):
+
+        # Random crop
+        i, j, h, w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
+        sharp = TF.crop(sharp, i, j, h, w)
+        blur = TF.crop(blur, i, j, h, w)
 
         # convert to tensors
         return TF.to_tensor(sharp), TF.to_tensor(blur)
