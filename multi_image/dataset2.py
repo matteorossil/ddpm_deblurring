@@ -13,7 +13,7 @@ import torch
 
 class Data(Dataset):
 
-    def __init__(self, path, mode='train', size=(128,128), multiplier=1):
+    def __init__(self, path, mode='train', crop_eval=False, size=(128,128), multiplier=1):
         
         # store img path
         self.path = path
@@ -23,6 +23,9 @@ class Data(Dataset):
 
         #size of the crop
         self.size = size
+
+        # crop validation set
+        self.crop_eval = crop_eval
 
         # used in tranformations
         self.angles = [90.,180.,270.]
@@ -44,6 +47,11 @@ class Data(Dataset):
         self.j = 0
         self.h = 0
         self.w = 0
+
+        self.hflip = False
+        self.vflip = False
+        self.rotate = False
+        self.angle = 0.
 
     def __len__(self):
         assert len(self.sharp_imgs) == len(self.blur_imgs)
@@ -72,49 +80,49 @@ class Data(Dataset):
         if self.mode == 'train':
             # Random crop
             self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
+            self.hflip = random.random() > 0.5
+            self.vflip = random.random() > 0.5
+            self.rotate = random.random() > 0.5
+            if self.rotate: self.angle = random.choice(self.angles)
             return self.transform_train(sharp_left, blur_left), self.transform_train(sharp, blur), self.transform_train(sharp_right, blur_right)
         else:
-            self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
-            return self.transform_val(sharp_left, blur_left), self.transform_val(sharp, blur), self.transform_val(sharp_right, blur_right)
+            if self.crop_eval:
+                self.i, self.j, self.h, self.w = transforms.RandomCrop.get_params(sharp, output_size=self.size)
+                return self.transform_val2(sharp_left, blur_left), self.transform_val2(sharp, blur), self.transform_val2(sharp_right, blur_right)
+            else:
+                return self.transform_val(sharp_left, blur_left), self.transform_val(sharp, blur), self.transform_val(sharp_right, blur_right)
 
     def transform_train(self, sharp, blur):
 
         sharp = TF.crop(sharp, self.i, self.j, self.h, self.w)
         blur = TF.crop(blur, self.i, self.j, self.h, self.w)
 
-        #sharp = TF.center_crop(sharp, output_size=self.size)
-        #blur = TF.center_crop(blur, output_size=self.size)
-
-        """
         # random horizontal flip
-        if random.random() > 0.5:
+        if self.hflip:
             sharp = TF.hflip(sharp)
             blur = TF.hflip(blur)
 
         # Random vertical flip
-        if random.random() > 0.5:
+        if self.vflip:
             sharp = TF.vflip(sharp)
             blur = TF.vflip(blur)
 
         # random rotation
-        if random.random() > 0.5:
-            angle = random.choice(self.angles)
-            sharp = TF.rotate(sharp, angle)
-            blur = TF.rotate(blur, angle)
-        """
+        if self.rotate:
+            sharp = TF.rotate(sharp, self.angle)
+            blur = TF.rotate(blur, self.angle)
 
         return TF.to_tensor(sharp), TF.to_tensor(blur)
-    
+
     def transform_val(self, sharp, blur):
 
-        #sharp = TF.center_crop(sharp, output_size=self.size)
-        #blur = TF.center_crop(blur, output_size=self.size)
+        # convert to tensors
+        return TF.to_tensor(sharp), TF.to_tensor(blur)
+    
+    def transform_val2(self, sharp, blur):
 
         sharp = TF.crop(sharp, self.i, self.j, self.h, self.w)
         blur = TF.crop(blur, self.i, self.j, self.h, self.w)
 
         # convert to tensors
         return TF.to_tensor(sharp), TF.to_tensor(blur)
-    
-#sharp = TF.center_crop(sharp, output_size=self.size)
-#blur = TF.center_crop(blur, output_size=self.size)
