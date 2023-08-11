@@ -401,7 +401,7 @@ class Trainer():
             # train
             self.train()
 
-            if (self.sample) and ((self.step % self.sampling_interval) == 0) and (self.gpu_id == 0):
+            if (self.sample) and (((self.step - self.ckpt_step) % self.sampling_interval) == 0) and (self.gpu_id == 0):
                 self.sample_("train2", self.dataset_v, metrics["psnr_init_t"], metrics["ssim_init_t"], metrics["psnr_deblur_t"], metrics["ssim_deblur_t"])
                 self.sample_("val", self.dataset_v, metrics["psnr_init_v"], metrics["ssim_init_v"], metrics["psnr_deblur_v"], metrics["ssim_deblur_v"])
                 metrics["sample_steps"].append(self.step)
