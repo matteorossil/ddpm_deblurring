@@ -12,11 +12,9 @@ from dataset import Data
 from torch.utils.data import DataLoader
 from torchvision.utils import save_image
 from utils import gather
-from metrics import *
+from metrics import psnr, ssim
 from numpy import savetxt
 import numpy as np
-
-import sys
 
 class Trainer():
     """
@@ -35,14 +33,14 @@ class Trainer():
     # Define sampling
 
     # Number of sample images
-    n_samples: int = 2
+    n_samples: int = 32
     # checkpoint path
-    epoch: int = 5600
+    epoch: int = 10_000
     #checkpoint: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/06182023_103900/checkpoint_{epoch}.pt'
-    checkpoint = f'/home/mr6744/checkpoints_init_predictor/checkpoint_{epoch}.pt'
+    checkpoint = f'/home/mr6744/prev/checkpoints_init_predictor/checkpoint_{epoch}.pt'
     # store sample
     #sampling_path: str = f'/scratch/mr6744/pytorch/checkpoints_init_predictor/sample/'
-    sampling_path = '/home/mr6744/checkpoints_init_predictor/sample4/'
+    sampling_path = '/home/mr6744/prev/checkpoints_init_predictor/sample_/'
     # dataset
     #dataset: str = '/scratch/mr6744/pytorch/gopro/'
     dataset: str = '/home/mr6744/gopro/'
@@ -62,8 +60,8 @@ class Trainer():
         checkpoint_ = torch.load(self.checkpoint)
         self.eps_model.load_state_dict(checkpoint_)
 
-        dataset_train = Data(path=self.dataset, mode="train", size=(self.image_size,self.image_size))
-        dataset_val = Data(path=self.dataset, mode="val", size=(self.image_size,self.image_size))
+        dataset_train = Data(path=self.dataset, mode="train2", crop_eval=True, size=(self.image_size,self.image_size))
+        dataset_val = Data(path=self.dataset, mode="val", crop_eval=True, size=(self.image_size,self.image_size))
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                     batch_size=self.n_samples, 
@@ -86,6 +84,7 @@ class Trainer():
         with torch.no_grad():
             
             # training dataset
+            torch.manual_seed(7)
             sharp_train, blur_train = next(iter(self.dataloader_train))
             sharp_train = sharp_train.to(self.device)
             blur_train = blur_train.to(self.device)
@@ -98,19 +97,19 @@ class Trainer():
 
             # compute psnr for train
             psnr_train1 = psnr(sharp_train, blur_train)
-            savetxt(os.path.join(self.sampling_path, f"psnr_train_blur_epoch{self.epoch}.txt"), psnr_train1)
-            savetxt(os.path.join(self.sampling_path, f"psnr_train_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_train1)]))
+            savetxt(os.path.join(self.sampling_path, f"psnr_train_blur_epoch{self.epoch}.txt"), np.array([psnr_train1]))
+            #savetxt(os.path.join(self.sampling_path, f"psnr_train_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_train1)]))
             psnr_train2 = psnr(sharp_train, deblurred_train)
-            savetxt(os.path.join(self.sampling_path, f"psnr_train_deblurred_epoch{self.epoch}.txt"), psnr_train2)
-            savetxt(os.path.join(self.sampling_path, f"psnr_train_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_train2)]))
+            savetxt(os.path.join(self.sampling_path, f"psnr_train_deblurred_epoch{self.epoch}.txt"), np.array([psnr_train2]))
+            #savetxt(os.path.join(self.sampling_path, f"psnr_train_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_train2)]))
 
             # compute ssim for train
             ssim_train1 = ssim(sharp_train, blur_train)
-            savetxt(os.path.join(self.sampling_path, f"ssim_train_blur_epoch{self.epoch}.txt"), ssim_train1)
-            savetxt(os.path.join(self.sampling_path, f"ssim_train_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_train1)]))
+            savetxt(os.path.join(self.sampling_path, f"ssim_train_blur_epoch{self.epoch}.txt"), np.array([ssim_train1]))
+            #savetxt(os.path.join(self.sampling_path, f"ssim_train_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_train1)]))
             ssim_train2 = ssim(sharp_train, deblurred_train)
-            savetxt(os.path.join(self.sampling_path, f"ssim_train_deblurred_epoch{self.epoch}.txt"), ssim_train2)
-            savetxt(os.path.join(self.sampling_path, f"ssim_train_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_train2)]))
+            savetxt(os.path.join(self.sampling_path, f"ssim_train_deblurred_epoch{self.epoch}.txt"), np.array([ssim_train2]))
+            #savetxt(os.path.join(self.sampling_path, f"ssim_train_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_train2)]))
 
             # validation dataset
             sharp_val, blur_val = next(iter(self.dataloader_val))
@@ -125,19 +124,19 @@ class Trainer():
 
             # compute psnr for val
             psnr_val1 = psnr(sharp_val, blur_val)
-            savetxt(os.path.join(self.sampling_path, f"psnr_val_blur_epoch{self.epoch}.txt"), psnr_val1)
-            savetxt(os.path.join(self.sampling_path, f"psnr_val_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_val1)]))
+            savetxt(os.path.join(self.sampling_path, f"psnr_val_blur_epoch{self.epoch}.txt"), np.array([psnr_val1]))
+            #savetxt(os.path.join(self.sampling_path, f"psnr_val_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_val1)]))
             psnr_val2 = psnr(sharp_val, deblurred_val)
-            savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}.txt"), psnr_val2)
-            savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_val2)]))
+            savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}.txt"), np.array([psnr_val2]))
+            #savetxt(os.path.join(self.sampling_path, f"psnr_val_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(psnr_val2)]))
 
             # compute ssim for val
             ssim_val1 = ssim(sharp_val, blur_val)
-            savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}.txt"), ssim_val1)
-            savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_val1)]))
+            savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}.txt"), np.array([ssim_val1]))
+            #savetxt(os.path.join(self.sampling_path, f"ssim_val_blur_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_val1)]))
             ssim_val2 = ssim(sharp_val, deblurred_val)
-            savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}.txt"), ssim_val2)
-            savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_val2)]))
+            savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}.txt"), np.array([ssim_val2]))
+            #savetxt(os.path.join(self.sampling_path, f"ssim_val_deblurred_epoch{self.epoch}_avg.txt"), np.array([np.mean(ssim_val2)]))
 
 
 def main():

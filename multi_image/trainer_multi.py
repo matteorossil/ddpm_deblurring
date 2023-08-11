@@ -171,12 +171,12 @@ class Trainer():
             is_attn=self.is_attention
         ).to(self.gpu_id)
 
-        #self.flow = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False).to(self.gpu_id)
+        self.flow = raft_large(weights=Raft_Large_Weights.DEFAULT, progress=False).to(self.gpu_id)
 
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
         self.initp = DDP(self.initp, device_ids=[self.gpu_id])
-        #self.flow = DDP(self.flow, device_ids=[self.gpu_id])
-        #self.flow  = self.flow.eval()
+        self.flow = DDP(self.flow, device_ids=[self.gpu_id])
+        self.flow  = self.flow.eval()
 
         # load checkpoints
         if self.ckpt_step != 0:
@@ -326,6 +326,21 @@ class Trainer():
             # get initial prediction
             init = self.diffusion.predictor(blur)
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
+
+            ### PREDICT FLOW ###
+            
+            flow_sharp = self.flow(sharp_left, sharp_right)[-1]
+            imgs_sharp = flow_to_image(flow_sharp)
+            save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
+            save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
+            save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
+            flow_blur = self.flow(blur_left, blur_right)[-1]
+            imgs_blur = flow_to_image(flow_blur)
+            save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
+            save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
+            save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
+            save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
 
             # compute residual
             residual = sharp - init
