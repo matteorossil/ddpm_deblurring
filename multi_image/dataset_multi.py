@@ -81,14 +81,6 @@ class Data(Dataset):
             right = center
             center = left
             left = left - 1
-
-        print(left)
-        print(center)
-        print(right)
-
-        print(os.path.join(self.sharp_folder, self.sharp_imgs[left]))
-        print(os.path.join(self.sharp_folder, self.sharp_imgs[center]))
-        print(os.path.join(self.sharp_folder, self.sharp_imgs[right]))
         
         sharp_left = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[left])).convert('RGB')
         blur_left = Image.open(os.path.join(self.blur_folder, self.blur_imgs[left])).convert('RGB')
