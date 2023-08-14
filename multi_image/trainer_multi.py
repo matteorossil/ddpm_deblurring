@@ -329,18 +329,18 @@ class Trainer():
 
             ### PREDICT FLOW ###
             
-            flow_sharp = self.flow(sharp_left, sharp_right)[-1]
-            imgs_sharp = flow_to_image(flow_sharp)
-            save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
-            save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
-            save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
-            flow_blur = self.flow(blur_left, blur_right)[-1]
-            imgs_blur = flow_to_image(flow_blur)
-            save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
-            save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
-            save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
-            save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
+            #flow_sharp = self.flow(sharp_left, sharp_right)[-1]
+            #imgs_sharp = flow_to_image(flow_sharp)
+            #save_image(imgs_sharp.to(torch.float)/255., os.path.join(self.exp_path, f'flow_sharp_step{self.step}.png'))
+            #save_image(sharp_left, os.path.join(self.exp_path, f'sharp_left_step{self.step}.png'))
+            #save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
+            #save_image(sharp_right, os.path.join(self.exp_path, f'sharp_right_step{self.step}.png'))
+            #flow_blur = self.flow(blur_left, blur_right)[-1]
+            #imgs_blur = flow_to_image(flow_blur)
+            #save_image(imgs_blur.to(torch.float)/255., os.path.join(self.exp_path, f'flow_blur_step{self.step}.png'))
+            #save_image(blur_left, os.path.join(self.exp_path, f'blur_left_step{self.step}.png'))
+            #save_image(blur, os.path.join(self.exp_path, f'blur_step{self.step}.png'))
+            #save_image(blur_right, os.path.join(self.exp_path, f'blur_right_step{self.step}.png'))
 
             # compute residual
             residual = sharp - init
