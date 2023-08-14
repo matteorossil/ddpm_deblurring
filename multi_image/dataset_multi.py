@@ -53,6 +53,13 @@ class Data(Dataset):
         self.rotate = False
         self.angle = 0.
 
+        if self.mode != "val": # if train or train2
+            self.lower_bounds = [0, 150, 210, 310, 410, 458, 558, 638, 738, 838, 938, 1038, 1138, 1238, 1338, 1438, 1513, 1623, 1723, 1823, 1923, 2023]
+            self.upper_bounds = [149, 209, 309, 409, 457, 557, 637, 737, 837, 937, 1037, 1137, 1237, 1337, 1437, 1512, 1622, 1722, 1822, 1922, 2022, 2102]
+        else:
+            self.lower_bounds = [0, 100, 200, 300, 377, 477, 577, 677, 777, 877, 1011]
+            self.upper_bounds = [99, 199, 299, 376, 476, 576, 676, 776, 876, 1010, 1110]
+
     def __len__(self):
         assert len(self.sharp_imgs) == len(self.blur_imgs)
         return len(self.sharp_imgs) * self.data_multiplicator
@@ -65,8 +72,23 @@ class Data(Dataset):
         center = idx
         right = idx + 1
         
-        if idx == 0: left = center, center = right, right = right + 1
-        if idx == self.l - 1: right = center, center = left, left = left - 1
+        if idx in self.lower_bounds: # if left scene endpoint, drop it
+            left = center
+            center = right
+            right = right + 1
+
+        if idx in self.upper_bounds: # if right scene endpoint, drop it
+            right = center
+            center = left
+            left = left - 1
+
+        print(left)
+        print(center)
+        print(right)
+
+        print(os.path.join(self.sharp_folder, self.sharp_imgs[left]))
+        print(os.path.join(self.sharp_folder, self.sharp_imgs[center]))
+        print(os.path.join(self.sharp_folder, self.sharp_imgs[right]))
         
         sharp_left = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[left])).convert('RGB')
         blur_left = Image.open(os.path.join(self.blur_folder, self.blur_imgs[left])).convert('RGB')
