@@ -65,8 +65,15 @@ class Data(Dataset):
         center = idx
         right = idx + 1
         
-        if idx == 0: left = center, center = right, right = right + 1
-        if idx == self.l - 1: right = center, center = left, left = left - 1
+        if idx == 0: # if left endpoint, drop it
+            left = center
+            center = right
+            right = right + 1
+        
+        if idx == self.l - 1: # if right endpoint, drop it
+            right = center
+            center = left
+            left = left - 1
         
         sharp_left = Image.open(os.path.join(self.sharp_folder, self.sharp_imgs[left])).convert('RGB')
         blur_left = Image.open(os.path.join(self.blur_folder, self.blur_imgs[left])).convert('RGB')
