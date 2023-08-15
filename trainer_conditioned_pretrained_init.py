@@ -142,6 +142,8 @@ class Trainer():
         self.ckpt_metrics = argv.ckpt_metrics
         # perform crops on eval
         self.crop_eval = argv.crop_eval
+        # freeze init
+        self.freeze_init = argv.freeze_init
         # training step start
         self.step = self.ckpt_step
         # path
@@ -355,7 +357,8 @@ class Trainer():
 
             # Take an optimization step
             self.optimizer.step()
-            self.optimizer2.step()
+            if not self.freeze_init:
+                self.optimizer2.step()
 
             # Track the loss with WANDB
             if self.wandb and self.gpu_id == 0:
@@ -472,6 +475,7 @@ if __name__ == "__main__":
     parser.add_argument('--sample', action="store_true")
     parser.add_argument('--ckpt_metrics', action="store_true")
     parser.add_argument('--crop_eval', action="store_true")
+    parser.add_argument('--freeze_init', action="store_true")
     argv = parser.parse_args()
 
     print('port:', argv.port, type(argv.port))
@@ -495,6 +499,7 @@ if __name__ == "__main__":
     print('sample:', argv.sample, type(argv.sample))
     print('ckpt_metrics:', argv.ckpt_metrics, type(argv.ckpt_metrics))
     print('crop_eval:', argv.crop_eval, type(argv.crop_eval))
+    print('freeze_init:', argv.freeze_init, type(argv.freeze_init))
 
     world_size = torch.cuda.device_count() # how many GPUs available in the machine
     mp.spawn(main, args=(world_size,argv), nprocs=world_size)

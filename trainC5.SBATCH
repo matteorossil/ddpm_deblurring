@@ -4,9 +4,9 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=20
 #SBATCH --time=24:00:00
-#SBATCH --mem=30GB
-#SBATCH --gres=gpu:2
-#SBATCH --job-name=gp_s_m_single
+#SBATCH --mem=40GB
+#SBATCH --gres=gpu:4
+#SBATCH --job-name=if_gp_w/o_l2
 #SBATCH --output=/scratch/mr6744/pytorch/outputs_slurm/%j.out
 
 module purge
@@ -14,10 +14,10 @@ module purge
 singularity exec --nv \
 	    --overlay /scratch/mr6744/pytorch/overlay-25GB-500K.ext3:ro \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
-	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/trainer_conditioned.py \
-		--port 52 --batch_size 16 --sample_size 16 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. \
-		--dataset_t gopro_small_multi --dataset_v gopro_small_multi --ckpt_step 2031250 --ckpt_path 08142023_110111 \
-		--num_workers 8 --multiplier 1000 --sampling_interval 18_750 --random_seed 7 --name gopro_small_multi_single_image --wandb --hpc --sample --crop_eval --ckpt_metrics"
+	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/trainer_conditioned_pretrained_init.py \
+		--port 53 --batch_size 64 --sample_size 32 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. \
+		--dataset_t gopro --dataset_v gopro --num_workers 8 --multiplier 175 --sampling_interval 11_500 \
+		--random_seed 7 --name gopro_w/o_l2_pretrained_init_frozen --wandb --hpc --sample --crop_eval --freeze_init"
 
 ### --port, type=str, default='50'                   --> DDP
 ### --batch_size, type=int, default=32               --> How many samples in a batch, each GPU takes batch_size/num_gpus
@@ -41,5 +41,6 @@ singularity exec --nv \
 
 ### --ckpt_metrics, action="store_true"				 --> Use it if you want to use metrics computed during previous checkpoint
 ### --crop_eval, action="store_true"				 --> Whether to perform crops on the evaluation sets
+### --freeze_init, action="store_true"				 --> Whether to perform crops on the evaluation sets
 
 ### FORMULA: FLOOR(DATSET_SIZE * MULTIPLIER / BATCH_SIZE) = K * SAMPLING_INTERVAL

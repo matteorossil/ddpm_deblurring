@@ -15,8 +15,8 @@ singularity exec --nv \
 	    --overlay /scratch/mr6744/pytorch/overlay-25GB-500K.ext3:ro \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
 	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/multi_image/trainer_multi.py \
-		--port 53 --batch_size 16 --sample_size 16 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. --dataset_t gopro_small_multi \
-		--dataset_v gopro_small_multi --ckpt_step 275000 --ckpt_path 08112023_170543 --num_workers 8 --multiplier 1000 \
+		--port 55 --batch_size 16 --sample_size 16 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. --dataset_t gopro_small_multi \
+		--dataset_v gopro_small_multi --ckpt_step 650000 --ckpt_path 08142023_113113 --num_workers 8 --multiplier 1000 \
 		--sampling_interval 12_500 --random_seed 7 --name gopro_small_multi_multi_image --wandb --hpc --sample --crop_eval --ckpt_metrics"
 
 ### --port, type=str, default='50'                   --> DDP
