@@ -71,7 +71,7 @@ class Data(Dataset):
         left = idx - 1
         center = idx
         right = idx + 1
-        
+
         if idx in self.lower_bounds: # if left scene endpoint, drop it
             left = center
             center = right

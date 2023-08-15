@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=20
 #SBATCH --time=24:00:00
 #SBATCH --mem=30GB
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:2
 #SBATCH --job-name=gp_multi
 #SBATCH --output=/scratch/mr6744/pytorch/outputs_slurm/%j.out
 
@@ -16,18 +16,18 @@ singularity exec --nv \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
 	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/multi_image/trainer_multi_full.py \
 		--port 56 --batch_size 16 --sample_size 16 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. --dataset_t gopro2 \
-		--dataset_v gopro2 --num_workers 16 --multiplier 77 --sampling_interval 10_120 --name gopro_multi_image \
-		--wandb --hpc --sample --crop_eval"
+		--dataset_v gopro2 --num_workers 8 --multiplier 77 --sampling_interval 10_120 --name gopro_multi_image \
+		--wandb --hpc --sample --crop_eval --ckpt_metrics --ckpt_step 20240 --ckpt_path 08142023_151748"
 
 ### --port, type=str, default='50'                   --> DDP
-### --batch_size, type=int, default=32               --> How many samples in a batch, each GPU takes batch_size/num_gpus
-### --sample_size, type=int, default=32              --> How many samples to generate
+### --batch_size, type=int, default=16               --> How many samples in a batch, each GPU takes batch_size/num_gpus
+### --sample_size, type=int, default=16              --> How many samples to generate
 ### --d_lr, type=float, default=1e-4                 --> Learning Rate for Denoiser
 ### --g_lr, type=float, default=1e-4				 --> Learning rate for Initial Predictor
 ### --threshold, type=float, default=0.02			 --> Regularizer threshold
 ### --l2_loss, type=float, default=0.				 --> Hyperparam for L2 loss of Initial Predictor
-### --dataset_t, type=str, default="gopro"			 --> Dataset for Training
-### --dataset_v, type=str, default="gopro_128"		 --> Dataset for Validation
+### --dataset_t, type=str, default="gopro2"			 --> Dataset for Training
+### --dataset_v, type=str, default="gopro2"  		 --> Dataset for Validation
 ### --ckpt_step, type=int, default=0				 --> Training step of checkpoint to use
 ### --ckpt_path, type=str, default=""				 --> Directory  where checkpoints are saved
 ### --num_workers, type=int, default=8				 --> Workers used in Dataloader

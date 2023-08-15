@@ -200,7 +200,7 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train,
                                             batch_size=self.batch_size // self.world_size, 
-                                            num_workers=0, #self.num_workers, #os.cpu_count() // 2,
+                                            num_workers=self.num_workers, #os.cpu_count() // 2,
                                             drop_last=True,
                                             shuffle=False, 
                                             pin_memory=False,
@@ -300,7 +300,6 @@ class Trainer():
         """
         ### Train
         """
-        torch.manual_seed(self.seed)
         # Iterate through the dataset
         for batch_idx, ((sharp_left, blur_left), (sharp, blur), (sharp_right, blur_right)) in enumerate(self.dataloader_train):
         #sharp, blur = next(iter(self.dataloader_train))
@@ -493,8 +492,8 @@ if __name__ == "__main__":
     parser.add_argument('--g_lr', type=float, default=1e-4)
     parser.add_argument('--threshold', type=float, default=0.02)
     parser.add_argument('--l2_loss', type=float, default=0.)
-    parser.add_argument('--dataset_t', type=str, default="gopro")
-    parser.add_argument('--dataset_v', type=str, default="gopro")
+    parser.add_argument('--dataset_t', type=str, default="gopro2")
+    parser.add_argument('--dataset_v', type=str, default="gopro2")
     parser.add_argument('--ckpt_step', type=int, default=0)
     parser.add_argument('--ckpt_path', type=str, default="")
     parser.add_argument('--num_workers', type=int, default=8)
