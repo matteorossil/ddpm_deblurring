@@ -1,8 +1,0 @@
-Step:    1, Loss: 16.0829, D_loss: 14.4629, G_loss: 0.0000, G_reg: 1.6201
-Step:    2, Loss: 3.9124, D_loss: 2.3703, G_loss: 0.0000, G_reg: 1.5421
-Step:    3, Loss: 2.0928, D_loss: 1.0073, G_loss: 0.0000, G_reg: 1.0855
-Step:    4, Loss: 2.8225, D_loss: 1.4530, G_loss: 0.0000, G_reg: 1.3695
-Step:    5, Loss: 2.4850, D_loss: 1.2182, G_loss: 0.0000, G_reg: 1.2668
-Step:    6, Loss: 2.6832, D_loss: 1.0112, G_loss: 0.0000, G_reg: 1.6720
-Step:    7, Loss: 2.4781, D_loss: 1.0838, G_loss: 0.0000, G_reg: 1.3943
-Step:    8, Loss: 5.9441, D_loss: 4.6507, G_loss: 0.0000, G_reg: 1.2934

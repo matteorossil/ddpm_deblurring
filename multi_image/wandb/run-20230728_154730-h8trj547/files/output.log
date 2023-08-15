@@ -1,5 +1,0 @@
-Step:    1, Loss: 2.1395, D_loss: 1.0081, G_loss: 0.0000, G_reg: 1.1314
-Step:    2, Loss: 2.3490, D_loss: 0.9983, G_loss: 0.0000, G_reg: 1.3506
-Step:    3, Loss: 2.2376, D_loss: 1.0080, G_loss: 0.0000, G_reg: 1.2296
-Step:    4, Loss: 2.2465, D_loss: 0.9908, G_loss: 0.0000, G_reg: 1.2557
-Step:    5, Loss: 2.0596, D_loss: 0.9911, G_loss: 0.0000, G_reg: 1.0684
