@@ -6,7 +6,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --mem=30GB
 #SBATCH --gres=gpu:2
-#SBATCH --job-name=gp_multi_w/
+#SBATCH --job-name=gp_m_w/
 #SBATCH --output=/scratch/mr6744/pytorch/outputs_slurm/%j.out
 
 module purge
