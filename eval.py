@@ -79,7 +79,7 @@ class Evaluator():
         # load from a checkpoint
         self.ckpt_step: int = argv.ckpt_step
         # paths
-        if  argv.hpc: 
+        if  argv.hpc:
             self.store_checkpoints: str = '/scratch/mr6744/pytorch/ckpts/'
             self.dataset: str = f'/scratch/mr6744/pytorch/{argv.dataset}/'
             self.ckpt_denoiser: str = f'/scratch/mr6744/pytorch/ckpts/{argv.ckpt_path}/ckpt_denoiser_{self.ckpt_step}.pt'
@@ -97,6 +97,8 @@ class Evaluator():
         self.crop_eval = argv.crop_eval
         # perform eval on training set
         self.train = argv.train
+        # sample average
+        self.sa = argv.sa
         # training step start
         self.step = self.ckpt_step
         # path
@@ -155,20 +157,27 @@ class Evaluator():
                 X_true = sharp - init
 
                 # Sample X from Gaussian Noise
-                #torch.cuda.manual_seed(0)
-                X = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]], device=self.device)
+                residuals = torch.zeros_like(sharp)
 
-                # Remove noise for $T$ steps
-                for t_ in range(self.n_steps):
-                    
-                    # e.g. t_ from 999 to 0 for 1_000 time steps
-                    t = self.n_steps - t_ - 1
+                for _ in range(self.sa):
 
-                    # create a t for every sample in batch
-                    t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
+                    X = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]], device=self.device)
 
-                    # take one denoising step
-                    X = self.diffusion.p_sample(X, blur, t_vec)
+                    # Remove noise for $T$ steps
+                    for t_ in range(self.n_steps):
+                        
+                        # e.g. t_ from 999 to 0 for 1_000 time steps
+                        t = self.n_steps - t_ - 1
+
+                        # create a t for every sample in batch
+                        t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
+
+                        # take one denoising step
+                        X = self.diffusion.p_sample(X, blur, t_vec)
+
+                    residuals += X
+
+                X = residuals / self.sa
 
                 # save initial predictor
                 save_image(sharp, os.path.join(self.exp_path, f'{mode}_sharp_{idx+1}.png'))
@@ -231,6 +240,7 @@ if __name__ == "__main__":
     parser.add_argument('--hpc', action="store_true")
     parser.add_argument('--crop_eval', action="store_true")
     parser.add_argument('--train', action="store_true")
+    parser.add_argument('--sa', type=int, default=1)
     argv = parser.parse_args()
 
     print('sample_size:', argv.sample_size, type(argv.sample_size))
@@ -242,5 +252,6 @@ if __name__ == "__main__":
     print('hpc:', argv.hpc, type(argv.hpc))
     print('crop_eval:', argv.crop_eval, type(argv.crop_eval))
     print('train:', argv.train, type(argv.train))
+    print('sample_average:', argv.sa, type(argv.sa))
 
     main(argv)

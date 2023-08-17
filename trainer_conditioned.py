@@ -242,12 +242,11 @@ class Trainer():
             X_true = sharp - init
 
             # Sample X from Gaussian Noise
-            #torch.cuda.manual_seed(0)
             X = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]], device=self.gpu_id)
 
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
-                
+                    
                 # e.g. t_ from 999 to 0 for 1_000 time steps
                 t = self.n_steps - t_ - 1
 
