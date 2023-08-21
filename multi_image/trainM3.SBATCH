@@ -17,7 +17,7 @@ singularity exec --nv \
 	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/multi_image/trainer_multi_full.py \
 		--port 57 --batch_size 16 --sample_size 16 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.03 --l2_loss 0.1 --dataset_t gopro2 \
 		--dataset_v gopro2 --num_workers 8 --multiplier 77 --sampling_interval 10_120 --name gopro_multi_image_with_l2 \
-		--wandb --hpc --sample --crop_eval --ckpt_metrics --ckpt_step 394680 --ckpt_path 08162023_154304"
+		--wandb --hpc --sample --crop_eval --ckpt_metrics --ckpt_step 789360 --ckpt_path 08182023_023117"
 
 ### --port, type=str, default='50'                   --> DDP
 ### --batch_size, type=int, default=16               --> How many samples in a batch, each GPU takes batch_size/num_gpus

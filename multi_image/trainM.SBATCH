@@ -16,7 +16,7 @@ singularity exec --nv \
 	    /scratch/work/public/singularity/cuda11.6.124-cudnn8.4.0.27-devel-ubuntu20.04.4.sif \
 	    /bin/bash -c "source /ext3/env.sh; python /scratch/mr6744/pytorch/ddpm_deblurring/multi_image/trainer_multi.py \
 		--port 55 --batch_size 16 --sample_size 16 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. --dataset_t gopro_small_multi \
-		--dataset_v gopro_small_multi --ckpt_step 1500000 --ckpt_path 08172023_022406 --num_workers 8 --multiplier 1_000 \
+		--dataset_v gopro_small_multi --ckpt_step 1900000 --ckpt_path 08182023_185014 --num_workers 8 --multiplier 1_000 \
 		--sampling_interval 12_500 --random_seed 7 --name gopro_small_multi_multi_image --wandb --hpc --sample --crop_eval --ckpt_metrics"
 
 ### --port, type=str, default='50'                   --> DDP
