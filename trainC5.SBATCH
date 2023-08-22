@@ -18,7 +18,7 @@ singularity exec --nv \
 		--port 53 --batch_size 64 --sample_size 32 --d_lr 1e-4 --g_lr 1e-4 --threshold 0.02 --l2_loss 0. \
 		--dataset_t gopro --dataset_v gopro --num_workers 8 --multiplier 175 --sampling_interval 11_500 \
 		--random_seed 7 --name gopro_w/o_l2_pretrained_init_frozen --wandb --hpc --sample --crop_eval --freeze_init \
-		--ckpt_metrics --ckpt_step 356500 --ckpt_path 08192023_084743"
+		--ckpt_metrics --ckpt_step 391000 --ckpt_path 08212023_163407"
 
 ### --port, type=str, default='50'                   --> DDP
 ### --batch_size, type=int, default=32               --> How many samples in a batch, each GPU takes batch_size/num_gpus
