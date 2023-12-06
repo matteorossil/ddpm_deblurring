@@ -265,6 +265,8 @@ class UNet(nn.Module):
 
         # Middle block
         self.middle = MiddleBlock(out_channels, is_attn[-1]) # false for middle block not having attention
+        self.middle0 = nn.Conv2d(out_channels, out_channels, kernel_size=4, stride=2, padding=2)
+        self.middle1 = nn.ConvTranspose2d(out_channels, out_channels, kernel_size=3, stride=2, padding=1)
 
         # #### Second half of U-Net - increasing resolution
         up = []
@@ -290,7 +292,7 @@ class UNet(nn.Module):
         # Final normalization and convolution layer
         #self.norm = nn.GroupNorm(8, n_channels)
         self.act = Swish()
-        self.final = nn.Conv2d(in_channels, image_channels, kernel_size=(3, 3), padding=(1, 1))
+        self.final = nn.Conv2d(in_channels, 1, kernel_size=(3, 3), padding=(1, 1))
 
     def unet_forward(self, x: torch.Tensor):
         # Get image projection
@@ -304,7 +306,9 @@ class UNet(nn.Module):
             h.append(x)
 
         # Middle (bottom)
-        x = self.middle(x)
+        x = self.middle0(x)
+        repr_ = self.middle(x)
+        x = self.middle1(repr_)
 
         # Second half of U-Net
         for m in self.up:
@@ -318,7 +322,7 @@ class UNet(nn.Module):
 
         # Final normalization and convolution
         #return self.final(self.act(self.norm(x)))
-        return self.final(self.act(x))
+        return self.final(self.act(x)), repr_.flatten(1)
 
 
     def forward(self, x: torch.Tensor):
@@ -327,3 +331,18 @@ class UNet(nn.Module):
         """
 
         return self.unet_forward(x)
+
+
+### TESTING
+# Create input tensor of size (224, 224, 3)
+# x = torch.randn(3, 3, 224, 224)
+
+# # Create U-Net
+# unet = UNet(3, 4, (1, 2, 3, 1, 1, 1), (False, False, False, False, False, False), 1)
+
+# # Get output
+# y, repr_ = unet(x)
+
+# # Print output shape
+# print(y.shape)
+# print(repr_.shape)

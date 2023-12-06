@@ -4,7 +4,7 @@
 from dataset import Data
 from metrics import psnr, ssim
 from eps_models.unet_conditioned import UNet as Denoiser #
-from eps_models.init_predictor_new import UNet as Init
+from eps_models.init_reps import UNet as Init
 from diffusion.ddpm_conditioned import DenoiseDiffusion #
 
 # Torch
@@ -83,7 +83,7 @@ class Trainer():
         self.n_channels: int = 32
         # The list of channel numbers at each resolution.
         # The number of channels is `channel_multipliers[i] * n_channels`
-        self.channel_multipliers: List[int] = [1, 2, 3, 4]
+        self.channel_multipliers: List[int] = [1, 2, 2, 3]
         # The list of booleans that indicate whether to use attention at each resolution
         self.is_attention: List[int] = [False, False, False, False]
         # Number of time steps $T$
@@ -155,7 +155,7 @@ class Trainer():
         self.world_size = world_size
 
         self.denoiser = Denoiser(
-            image_channels=self.image_channels*2,
+            image_channels=self.image_channels+1, #self.image_channels*2,
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention
@@ -193,7 +193,12 @@ class Trainer():
             transforms.RandomResizedCrop(self.image_size, scale=(0.2, 1.0), interpolation=3), 
             transforms.RandomHorizontalFlip(), 
             transforms.ToTensor(), 
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+        
+        self.transform_val = transforms.Compose([
+            transforms.ToTensor(), 
+            #transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
             ])
         
         dataset_train = ImageFolder(self.dataset_t, transform=transform)
@@ -212,86 +217,54 @@ class Trainer():
         # Num params of models
         params_denoiser = list(self.denoiser.parameters())
         params_init = list(self.initp.parameters())
-        self.num_params_denoiser = sum(p.numel() for p in params_denoiser if p.requires_grad)
+        num_params_denoiser = sum(p.numel() for p in params_denoiser if p.requires_grad)
         self.num_params_init = sum(p.numel() for p in params_init if p.requires_grad)
+        print(num_params_denoiser)
 
         # Create optimizers
         self.optimizer = torch.optim.AdamW(self.denoiser.parameters(), lr=self.learning_rate, weight_decay= self.weight_decay_rate, betas=self.betas)
         self.optimizer2 = torch.optim.AdamW(self.initp.parameters(), lr=self.learning_rate_init, weight_decay= self.weight_decay_rate, betas=self.betas)
 
-    def sample_(self, mode, path, psnr_init, ssim_init, psnr_deblur, ssim_deblur):
-
-        dataset = Data(path=path, mode=mode, crop_eval=self.crop_eval, size=(self.image_size,self.image_size))
-        dataloader = DataLoader(dataset=dataset, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=True, pin_memory=False)
+    def sample_(self):
+        
+        dataset_val = ImageFolder(self.dataset_v, transform=self.transform_val)
+        dataloader = DataLoader(dataset=dataset_val, batch_size=self.n_samples, num_workers=0, drop_last=False, shuffle=True, pin_memory=False)
 
         with torch.no_grad():
 
             torch.manual_seed(self.seed)
-            sharp, blur = next(iter(dataloader))
+            sharp = next(iter(dataloader))
             
-            sharp = sharp.to(self.gpu_id)
-            blur = blur.to(self.gpu_id)
+            sharp = sharp[0].to(self.gpu_id)
 
-            if self.step == 0:
-                # save images blur and sharp image pairs
-                save_image(sharp, os.path.join(self.exp_path, f'{mode}__sharp.png'))
-                save_image(blur, os.path.join(self.exp_path, f'{mode}__blur.png'))
-                sharp_ = gaussian_blur(sharp, kernel_size=(5, 5), sigma=(0.1, 1.5))
-                save_image(sharp_, os.path.join(self.exp_path, f'{mode}__sharp.png'))
-                psnr_sharp_sharp = psnr(sharp, sharp_)
-                psnr_sharp_blur = psnr(sharp, blur)
-                print('Eval: {:6s} PSRN S-S: {:.6f}'.format(mode, psnr_sharp_sharp))
-                print('Eval: {:6s} PSRN S-B: {:.6f}'.format(mode, psnr_sharp_blur))
-                ssim_sharp_sharp = ssim(sharp, sharp_)
-                ssim_sharp_blur = ssim(sharp, blur)
-                print('Eval: {:6s} SSIM S-S: {:.6f}'.format(mode, ssim_sharp_sharp))
-                print('Eval: {:6s} SSIM S-B: {:.6f}'.format(mode, ssim_sharp_blur))
+            print(sharp.shape)
 
             # compute initial predictor
-            init = self.diffusion.predictor(blur)
-
-            # get true residual
-            X_true = sharp - init
+            init = self.diffusion.predictor(sharp)
 
             # Sample X from Gaussian Noise
-            X = torch.randn([self.n_samples, self.image_channels, blur.shape[2], blur.shape[3]], device=self.gpu_id)
+            X = torch.randn([self.n_samples, self.image_channels, sharp.shape[2], sharp.shape[3]], device=self.gpu_id)
 
             # Remove noise for $T$ steps
             for t_ in range(self.n_steps):
                     
                 # e.g. t_ from 999 to 0 for 1_000 time steps
                 t = self.n_steps - t_ - 1
+                print(t)
 
                 # create a t for every sample in batch
                 t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
 
                 # take one denoising step
-                X = self.diffusion.p_sample(X, blur, t_vec)
-
+                X = self.diffusion.p_sample(X, init, t_vec)
+            
+            #save initial image
+            save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'{mode}_init_step{self.step}.png'))
-            # save true residual
-            save_image(X_true, os.path.join(self.exp_path, f'{mode}_residual_true_step{self.step}.png'))
+            save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'{mode}_residual_sampled_step{self.step}.png'))
-            # save sampled deblurred
-            save_image(init + X, os.path.join(self.exp_path, f'{mode}_deblurred_step{self.step}.png'))
+            save_image(X, os.path.join(self.exp_path, f'sampled_step{self.step}.png'))
 
-            # compute metrics (sharp, init)
-            psnr_sharp_init = psnr(sharp, init)
-            ssim_sharp_init = ssim(sharp, init)
-            #savetxt(os.path.join(self.exp_path, f"psnr_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_init)]))
-            #savetxt(os.path.join(self.exp_path, f"ssim_sharp_init_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_init)]))
-            psnr_init.append(psnr_sharp_init)
-            ssim_init.append(ssim_sharp_init)
-
-            # compute metrics (sharp, deblurred)
-            psnr_sharp_deblurred = psnr(sharp, init + X)
-            ssim_sharp_deblurred = ssim(sharp, init + X)
-            #savetxt(os.path.join(self.exp_path, f"psnr_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(psnr_sharp_deblurred)]))
-            #savetxt(os.path.join(self.exp_path, f"ssim_sharp_deblurred_avg_step{self.step}.txt"), np.array([np.mean(ssim_sharp_deblurred)]))
-            psnr_deblur.append(psnr_sharp_deblurred)
-            ssim_deblur.append(ssim_sharp_deblurred)
 
     def train(self):
         """
@@ -305,8 +278,6 @@ class Trainer():
 
             # Increment global step
             self.step += 1
-
-            print(sharp[0].shape)
 
             # Move data to device
             sharp = sharp[0].to(self.gpu_id)
@@ -325,13 +296,13 @@ class Trainer():
             self.optimizer2.zero_grad()
 
             #### DENOISER LOSS ####
-            denoiser_loss = self.diffusion.loss(sharp, sharp)
+            denoiser_loss = self.diffusion.loss(sharp, init)
 
             # final loss
             loss = denoiser_loss
 
             if self.gpu_id == 0:
-                print('Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}, G_reg: {:.4f}'.format(self.step, loss.item(), denoiser_loss.item()))
+                print('Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}'.format(self.step, loss.item(), denoiser_loss.item()))
 
             # Compute gradients
             loss.backward()
@@ -354,33 +325,17 @@ class Trainer():
 
     def run(self):
 
-        if self.ckpt_metrics:
-            metrics = load_metrics(self.ckpt_metrics_)
-        else:
-            metrics = {"sample_steps":[], "psnr_init_t":[], "ssim_init_t":[], "psnr_deblur_t":[], "ssim_deblur_t":[], "psnr_init_v":[], "ssim_init_v":[], "psnr_deblur_v":[], "ssim_deblur_v":[]}
-
         for _ in range(self.epochs):
 
             # sample at step 0
             if (self.sample) and (self.step == 0) and (self.gpu_id == 0):
-                self.sample_("train2", self.dataset_v, metrics["psnr_init_t"], metrics["ssim_init_t"], metrics["psnr_deblur_t"], metrics["ssim_deblur_t"])
-                self.sample_("val", self.dataset_v, metrics["psnr_init_v"], metrics["ssim_init_v"], metrics["psnr_deblur_v"], metrics["ssim_deblur_v"])
-                metrics["sample_steps"].append(self.step)
-                save_metrics(metrics, os.path.join(self.exp_path, f"metrics_step{self.step}.p"))
+                self.sample_()
 
             # train
             self.train()
 
             if (self.sample) and (((self.step - self.ckpt_step) % self.sampling_interval) == 0) and (self.gpu_id == 0):
-                self.sample_("train2", self.dataset_v, metrics["psnr_init_t"], metrics["ssim_init_t"], metrics["psnr_deblur_t"], metrics["ssim_deblur_t"])
-                self.sample_("val", self.dataset_v, metrics["psnr_init_v"], metrics["ssim_init_v"], metrics["psnr_deblur_v"], metrics["ssim_deblur_v"])
-                metrics["sample_steps"].append(self.step)
-                title = f"eval:train,val - metric:"
-                plot_metrics(metrics["sample_steps"], ylabel="psnr", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=metrics["psnr_init_t"], metric_deblur_t=metrics["psnr_deblur_t"], metric_init_v=metrics["psnr_init_v"], metric_deblur_v=metrics["psnr_deblur_v"], path=self.exp_path, title=title)
-                plot_metrics(metrics["sample_steps"], ylabel="ssim", label_init_t="init train", label_deblur_t="deblur train", label_init_v="init val", label_deblur_v="deblur val", metric_init_t=metrics["ssim_init_t"], metric_deblur_t=metrics["ssim_deblur_t"], metric_init_v=metrics["ssim_init_v"], metric_deblur_v=metrics["ssim_deblur_v"], path=self.exp_path, title=title)
-                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.step}.pt'))
-                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.step}.pt'))
-                save_metrics(metrics, os.path.join(self.exp_path, f"metrics_step{self.step}.p"))
+                self.sample_()
 
 def ddp_setup(rank, world_size, port):
     """
@@ -491,4 +446,4 @@ if __name__ == "__main__":
     mp.spawn(main, args=(world_size,argv), nprocs=world_size)
 
 
-#CUDA_VISIBLE_DEVICES=0 python trainer_reps.py --batch_size 8 --dataset_t SAYCAM_200K_deblur_crop
+#CUDA_VISIBLE_DEVICES=0 python trainer_reps.py --batch_size 16 --dataset_t SAYCAM_200K_deblur_crop --dataset_v val_saycam --sample --sample_size 1
