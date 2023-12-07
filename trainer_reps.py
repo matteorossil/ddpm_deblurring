@@ -6,7 +6,7 @@ from metrics import psnr, ssim
 from eps_models.unet_conditioned import UNet as Denoiser #
 from eps_models.init_reps import UNet as Init
 from eps_models.init_conv import ConvNetConditioner as Init2
-from eps_models.init_mat import MyResNet as Init3
+from eps_models.init_light import MyResNet as Init3
 from diffusion.ddpm_conditioned import DenoiseDiffusion #
 
 # Torch
@@ -209,6 +209,7 @@ class Trainer():
             ])
         
         dataset_train = ImageFolder(self.dataset_t, transform=transform)
+        print(dataset_train)
 
         # Create dataloader (shuffle False for validation)
         #dataset_train = Data(path=self.dataset_t, mode="train", size=(self.image_size,self.image_size), multiplier=self.multiplier)
@@ -257,7 +258,6 @@ class Trainer():
                     
                 # e.g. t_ from 999 to 0 for 1_000 time steps
                 t = self.n_steps - t_ - 1
-                print(t)
 
                 # create a t for every sample in batch
                 t_vec = X.new_full((self.n_samples,), t, dtype=torch.long)
@@ -266,11 +266,11 @@ class Trainer():
                 X = self.diffusion.p_sample(X, init, t_vec)
             
             #save initial image
-            save_image(sharp, os.path.join(self.exp_path, f'sharp_step{self.step}.png'))
+            save_image(sharp, os.path.join(self.exp_path, f'img_sharp_step{self.step}.png'))
             # save initial predictor
-            save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
+            save_image(init, os.path.join(self.exp_path, f'img_init_step{self.step}.png'))
             # save sampled residual
-            save_image(X, os.path.join(self.exp_path, f'sampled_step{self.step}.png'))
+            save_image(X, os.path.join(self.exp_path, f'img_sampled_step{self.step}.png'))
 
 
     def train(self):
@@ -304,12 +304,13 @@ class Trainer():
 
             #### DENOISER LOSS ####
             denoiser_loss = self.diffusion.loss(sharp, init)
+            regression_loss = F.mse_loss(sharp, init) * 0.1
 
             # final loss
-            loss = denoiser_loss
+            loss = denoiser_loss + regression_loss
 
             if self.gpu_id == 0:
-                print('Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}'.format(self.step, loss.item(), denoiser_loss.item()))
+                print('Step: {:4d}, Loss: {:.4f}, D_loss: {:.4f}, G_loss: {:.4f}'.format(self.step, loss.item(), denoiser_loss.item(), regression_loss.item()))
 
             # Compute gradients
             loss.backward()
@@ -330,19 +331,22 @@ class Trainer():
             if self.wandb and self.gpu_id == 0:
                 wandb.log({'loss': loss}, step=self.step)
 
+            #if (self.sample) and (self.gpu_id == 0) and self.step == 1000:
+                #self.sample_()
+
     def run(self):
 
         for _ in range(self.epochs):
 
             # sample at step 0
-            if (self.sample) and (self.step == 0) and (self.gpu_id == 0):
+            #if (self.sample) and (self.step == 0) and (self.gpu_id == 0):
+            if (self.sample) and (self.gpu_id == 0):
                 self.sample_()
+                torch.save(self.denoiser.module.state_dict(), os.path.join(self.exp_path, f'ckpt_denoiser_{self.step}.pt'))
+                torch.save(self.initp.module.state_dict(), os.path.join(self.exp_path, f'ckpt_initp_{self.step}.pt'))
 
             # train
             self.train()
-
-            if (self.sample) and (((self.step - self.ckpt_step) % self.sampling_interval) == 0) and (self.gpu_id == 0):
-                self.sample_()
 
 def ddp_setup(rank, world_size, port):
     """
@@ -454,3 +458,4 @@ if __name__ == "__main__":
 
 
 #CUDA_VISIBLE_DEVICES=0 python trainer_reps.py --batch_size 16 --dataset_t SAYCAM_200K_deblur_crop --dataset_v val_saycam --sample --sample_size 1
+#CUDA_VISIBLE_DEVICES=2 python trainer_reps.py --batch_size 16 --dataset_t SAYCAM_200K_deblur_crop --dataset_v val_saycam --sample --sample_size 2
