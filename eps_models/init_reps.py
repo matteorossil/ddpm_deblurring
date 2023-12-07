@@ -225,9 +225,9 @@ class UNet(nn.Module):
     ## U-Net
     """
 
-    def __init__(self, image_channels: int = 3, n_channels: int = 64,
-                 ch_mults: Union[Tuple[int, ...], List[int]] = (1, 2, 2, 4),
-                 is_attn: Union[Tuple[bool, ...], List[int]] = (False, False, False, False),
+    def __init__(self, image_channels: int = 3, n_channels: int = 4,
+                 ch_mults: Union[Tuple[int, ...], List[int]] = (1, 2, 3, 1, 1, 1),
+                 is_attn: Union[Tuple[bool, ...], List[int]] = (False, False, False, False, False, False),
                  n_blocks: int = 1):
         """
         * `image_channels` is the number of channels in the image. $3$ for RGB.

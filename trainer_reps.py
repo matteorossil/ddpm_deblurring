@@ -5,6 +5,8 @@ from dataset import Data
 from metrics import psnr, ssim
 from eps_models.unet_conditioned import UNet as Denoiser #
 from eps_models.init_reps import UNet as Init
+from eps_models.init_conv import ConvNetConditioner as Init2
+from eps_models.init_mat import MyResNet as Init3
 from diffusion.ddpm_conditioned import DenoiseDiffusion #
 
 # Torch
@@ -155,18 +157,23 @@ class Trainer():
         self.world_size = world_size
 
         self.denoiser = Denoiser(
-            image_channels=self.image_channels+1, #self.image_channels*2,
+            image_channels=self.image_channels*2, #self.image_channels+1,
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention
         ).to(self.gpu_id)
 
+        
+        #self.initp = Init(3, 4, (1, 2, 3, 1, 1, 1), (False, False, False, False, False, False), 1).to(self.gpu_id)
+        self.initp = Init3().to(self.gpu_id)
+        """
         self.initp = Init(
             image_channels=self.image_channels,
             n_channels=self.n_channels,
             ch_mults=self.channel_multipliers,
             is_attn=self.is_attention
         ).to(self.gpu_id)
+        """
 
         self.denoiser = DDP(self.denoiser, device_ids=[self.gpu_id])
         self.initp = DDP(self.initp, device_ids=[self.gpu_id])
@@ -236,11 +243,11 @@ class Trainer():
             sharp = next(iter(dataloader))
             
             sharp = sharp[0].to(self.gpu_id)
-
-            print(sharp.shape)
+            #print(sharp.shape)
 
             # compute initial predictor
             init = self.diffusion.predictor(sharp)
+            #init = torch.cat((init, torch.zeros(sharp.shape[0], 2, sharp.shape[2], sharp.shape[3], device=self.gpu_id)), dim=1)
 
             # Sample X from Gaussian Noise
             X = torch.randn([self.n_samples, self.image_channels, sharp.shape[2], sharp.shape[3]], device=self.gpu_id)
@@ -288,8 +295,8 @@ class Trainer():
 
             # get initial prediction
             init = self.diffusion.predictor(sharp)
+            #init = torch.cat((init, torch.zeros(sharp.shape[0], 2, sharp.shape[2], sharp.shape[3], device=self.gpu_id)), dim=1)
             #save_image(init, os.path.join(self.exp_path, f'init_step{self.step}.png'))
-
 
             # Make the gradients zero
             self.optimizer.zero_grad()
