@@ -1,1 +1,1 @@
-## Train Diffusion Model for Image Deblurring
+## Training a Diffusion Model for Image Deblurring
